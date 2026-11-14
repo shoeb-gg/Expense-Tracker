@@ -223,7 +223,6 @@ class TypingBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final ready = addState == AddButtonState.ready;
     return Container(
       height: 56,
       padding: const EdgeInsets.fromLTRB(18, 0, 8, 0),
@@ -247,36 +246,139 @@ class TypingBar extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           photoButton,
-          if (addState != AddButtonState.hidden) ...[
-            const SizedBox(width: 10),
-            SizedBox(
-              height: 40,
-              child: Pressable(
-                onTap: onAdd,
-                semanticLabel: ready ? 'Add' : 'Add, choose a category first',
-                color: ready ? c.accent : c.surface2,
-                borderRadius: BorderRadius.circular(20),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  child: Center(
-                    widthFactor: 1,
-                    child: ExcludeSemantics(
-                      child: Text(
-                        'Add',
-                        style: boardText(
-                          14.5,
-                          20,
-                          FontWeight.w800,
-                          color: ready ? c.onAccent : c.text3,
-                        ),
-                      ),
-                    ),
-                  ),
+          _AddSlot(state: addState, onAdd: onAdd),
+        ],
+      ),
+    );
+  }
+}
+
+/// The Add button's place at the end of the typing bar. It does not jump
+/// in: over 180 ms its slot widens (the field narrows and the camera slides
+/// left) while the button grows from the bar's end and fades in; clearing
+/// the bar plays it backwards. Hidden, it takes no room (the empty bar's
+/// layout); shown, it is the 10 px gap and the 40 px pill.
+class _AddSlot extends StatefulWidget {
+  const _AddSlot({required this.state, required this.onAdd});
+
+  final AddButtonState state;
+  final VoidCallback onAdd;
+
+  @override
+  State<_AddSlot> createState() => _AddSlotState();
+}
+
+class _AddSlotState extends State<_AddSlot> with SingleTickerProviderStateMixin {
+  static const Duration _duration = Duration(milliseconds: 180);
+
+  late final AnimationController _shown = AnimationController(
+    vsync: this,
+    duration: _duration,
+    value: _visible ? 1 : 0,
+  );
+  late final Animation<double> _curve = CurvedAnimation(
+    parent: _shown,
+    curve: Curves.easeOutCubic,
+    reverseCurve: Curves.easeInCubic,
+  );
+
+  /// What the button shows; kept while it animates out.
+  late AddButtonState _drawn = widget.state;
+
+  bool get _visible => widget.state != AddButtonState.hidden;
+
+  @override
+  void didUpdateWidget(_AddSlot old) {
+    super.didUpdateWidget(old);
+    if (_visible) {
+      _drawn = widget.state;
+      _shown.forward();
+    } else {
+      _shown.reverse();
+    }
+  }
+
+  @override
+  void dispose() {
+    _shown.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _curve,
+      builder: (context, child) {
+        if (_shown.isDismissed) return const SizedBox.shrink();
+        final t = _curve.value;
+        // The slot is t of the gap + pill wide; the pill is drawn t of its
+        // size from its right end, so it always fits the slot exactly (no
+        // clipping, nothing over the camera) and grows from the bar's end.
+        return SizedBox(
+          height: 40,
+          child: Align(
+            alignment: Alignment.centerRight,
+            widthFactor: t,
+            child: Opacity(
+              opacity: t,
+              child: Transform.scale(
+                scale: t,
+                alignment: Alignment.centerRight,
+                child: child,
+              ),
+            ),
+          ),
+        );
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(width: 10),
+          _AddButton(
+            ready: _drawn == AddButtonState.ready,
+            onTap: _visible ? widget.onAdd : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The 40 px "Add" pill of the typing bar: accent when ready, grey while
+/// it still needs an amount or a category.
+class _AddButton extends StatelessWidget {
+  const _AddButton({required this.ready, required this.onTap});
+
+  final bool ready;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return SizedBox(
+      height: 40,
+      child: Pressable(
+        onTap: onTap,
+        semanticLabel: ready ? 'Add' : 'Add, choose a category first',
+        color: ready ? c.accent : c.surface2,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Center(
+            widthFactor: 1,
+            child: ExcludeSemantics(
+              child: Text(
+                'Add',
+                style: boardText(
+                  14.5,
+                  20,
+                  FontWeight.w800,
+                  color: ready ? c.onAccent : c.text3,
                 ),
               ),
             ),
-          ],
-        ],
+          ),
+        ),
       ),
     );
   }

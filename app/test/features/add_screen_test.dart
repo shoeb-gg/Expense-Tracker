@@ -151,6 +151,45 @@ void main() {
     await closeApp(tester, db);
   });
 
+  testWidgets('typing bar: Add grows in and the camera slides over', (tester) async {
+    final db = await emptyDb(tester);
+    await pumpApp(tester, db: db, location: Routes.add());
+    final camera = find.bySemanticsLabel('Take a receipt photo');
+    final add = find.widgetWithText(Pressable, 'Add');
+    final start = tester.getRect(camera).left;
+    expect(add, findsNothing);
+
+    // The first letter: Add grows in over a few frames instead of the
+    // camera jumping.
+    await tester.enterText(find.byType(EditableText).last, 'c');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    final mid = tester.getRect(camera).left;
+    expect(mid, lessThan(start));
+    await settle(tester);
+    final end = tester.getRect(camera).left;
+    expect(mid, greaterThan(end));
+    // Settled, it is the decided layout: the 40 px Add pill at the end of
+    // the bar, 10 px after the camera, at full size.
+    final pill = tester.getRect(add);
+    expect(pill.height, 40);
+    expect(pill.center.dy, tester.getRect(camera).center.dy);
+    expect(pill.left - tester.getRect(camera).right, 10);
+    expect(pill.right, start + 40);
+
+    // Clearing the bar takes Add out the same way.
+    await tester.enterText(find.byType(EditableText).last, '');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    final back = tester.getRect(camera).left;
+    expect(back, greaterThan(end));
+    expect(back, lessThan(start));
+    await settle(tester);
+    expect(tester.getRect(camera).left, start);
+    expect(add, findsNothing);
+    await closeApp(tester, db);
+  });
+
   testWidgets('type to add: a new word, picked by hand, is learned', (tester) async {
     final db = await emptyDb(tester);
     await pumpApp(tester, db: db);
