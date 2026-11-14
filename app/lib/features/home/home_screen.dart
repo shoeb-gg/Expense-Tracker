@@ -12,6 +12,7 @@ import '../../router.dart';
 import '../../state/providers.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/kit.dart';
+import '../expense/delete_expense.dart';
 import 'hero_card.dart';
 import 'home_list.dart';
 import 'home_state.dart';
@@ -116,17 +117,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       case QuickAction.details:
         unawaited(context.push(Routes.expense(expense.id)));
       case QuickAction.delete:
-        final title = HomeExpenseRow.titleOf(expense, category);
-        final ok = await showAppDialog(
-          context,
-          title: 'Delete this expense?',
-          boldLine: '$title · ${fmt.format(expense.amount)}',
-          quietLine: "This can't be undone.",
-          actionLabel: 'Delete',
-          destructive: true,
-        );
-        if (!ok || !mounted) return;
-        await ref.read(expensesRepoProvider).delete(expense.id);
+        await deleteExpenseWithUndo(context, ref, expense);
     }
   }
 

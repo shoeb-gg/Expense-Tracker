@@ -256,7 +256,7 @@ void main() {
       await closeApp(tester, db);
     });
 
-    testWidgets('Delete in the menu asks first, then removes the expense', (
+    testWidgets('Delete in the menu asks first, removes it, and can undo', (
       tester,
     ) async {
       final db = await sampleDatabase(tester);
@@ -265,8 +265,10 @@ void main() {
       await settle(tester);
       await tester.tap(find.text('Delete'));
       await settle(tester);
+      // The same dialog as Details: no "can't be undone", there is Undo.
       expect(find.text('Delete this expense?'), findsOneWidget);
       expect(find.text('Doctor visit · 1,180'), findsOneWidget);
+      expect(find.text("This can't be undone."), findsNothing);
       await tester.tap(find.text('Cancel'));
       await settle(tester);
       expect(find.text('Doctor visit'), findsOneWidget);
@@ -279,6 +281,30 @@ void main() {
       await settle(tester);
       expect(find.text('Doctor visit'), findsNothing);
       expect(find.text('33,375'), findsOneWidget);
+      expect(find.text('Expense deleted'), findsOneWidget);
+
+      await tester.tap(find.text('Undo'));
+      await settle(tester);
+      expect(find.text('Expense deleted'), findsNothing);
+      expect(find.text('Doctor visit'), findsOneWidget);
+      expect(find.text('34,555'), findsOneWidget);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('the Undo toast goes away by itself', (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db);
+      await tester.longPress(find.text('Doctor visit'));
+      await settle(tester);
+      await tester.tap(find.text('Delete'));
+      await settle(tester);
+      await tester.tap(find.text('Delete'));
+      await settle(tester);
+      expect(find.text('Expense deleted'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 7));
+      await settle(tester);
+      expect(find.text('Expense deleted'), findsNothing);
+      expect(find.text('Doctor visit'), findsNothing);
       await closeApp(tester, db);
     });
   });

@@ -12,6 +12,7 @@ import '../../theme/text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/kit.dart';
 import '../add/add_styles.dart';
+import 'delete_expense.dart';
 import 'receipt.dart';
 
 /// Expense details (`/expense/:id`): the category and amount on an accent
@@ -101,7 +102,7 @@ class _ExpenseDetailsScreenState extends ConsumerState<ExpenseDetailsScreen> {
                       label: 'Delete',
                       icon: Symbols.delete_rounded,
                       tone: ButtonTone.danger,
-                      onPressed: () => _delete(expense, category, fmt),
+                      onPressed: () => _delete(expense),
                     ),
                   ),
                 ],
@@ -113,25 +114,15 @@ class _ExpenseDetailsScreenState extends ConsumerState<ExpenseDetailsScreen> {
     );
   }
 
-  Future<void> _delete(Expense expense, ExpenseCategory? category, AmountFormat fmt) async {
-    final name = expense.note.isNotEmpty ? expense.note : (category?.name ?? '');
-    final ok = await showAppDialog(
+  Future<void> _delete(Expense expense) async {
+    await deleteExpenseWithUndo(
       context,
-      title: 'Delete this expense?',
-      boldLine: '$name · ${fmt.format(expense.amount)}',
-      actionLabel: 'Delete',
-      destructive: true,
+      ref,
+      expense,
+      onConfirmed: () => setState(() => _deleting = true),
     );
-    if (!ok || !mounted) return;
-    final repo = ref.read(expensesRepoProvider);
-    setState(() => _deleting = true);
-    final deleted = await repo.delete(expense.id);
-    if (!mounted) return;
-    if (deleted != null) {
-      // The photo file stays on the phone until Clear cache or the next
-      // start, so Undo brings the photo back too.
-      showToast(context, 'Expense deleted', onUndo: () => repo.restore(deleted));
-    }
+    // Close once confirmed (also when the expense was already gone).
+    if (!_deleting || !mounted) return;
     if (context.canPop()) {
       context.pop();
     } else {
