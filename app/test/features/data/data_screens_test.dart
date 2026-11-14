@@ -12,6 +12,7 @@ import 'package:spill_the_bills/data/pockets_repo.dart';
 import 'package:spill_the_bills/features/data/data_providers.dart';
 import 'package:spill_the_bills/features/data/export_screen.dart';
 import 'package:spill_the_bills/features/data/import_table.dart';
+import 'package:spill_the_bills/features/home/home_screen.dart';
 import 'package:spill_the_bills/router.dart';
 
 import '../../support/board.dart';
@@ -172,6 +173,41 @@ void main() {
       await tester.runAsync(() => CategoriesRepo(db).findByName('Pets')),
       isNull,
     );
+    await closeApp(tester, db);
+  });
+
+  testWidgets('import: the real Home shows the added expenses; Undo removes '
+      'them', (tester) async {
+    final db = await sampleDatabase(tester);
+    const csv =
+        'Date,Amount,Category,Title\n'
+        '2026-10-18,1000,Groceries,Imported shop\n'
+        '2026-10-10,445,Snacks,\n';
+    await pumpApp(
+      tester,
+      db: db,
+      location: Routes.importStart,
+      overrides: fakes(bytes: Uint8List.fromList(utf8.encode(csv))),
+    );
+    await tester.tap(find.text('Choose a file').last);
+    await settle(tester);
+    await tester.tap(find.text('Next'));
+    await settleUntil(tester, find.text('Import 2 expenses'));
+    await tester.tap(find.text('Import 2 expenses'));
+    await settleUntil(tester, find.text('2 expenses added'));
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.text('Spent in October'), findsOneWidget);
+    expect(find.text('36,000'), findsOneWidget); // 34,555 + 1,445
+    expect(find.text('Imported shop'), findsOneWidget);
+
+    await tester.tap(find.text('Undo'));
+    await settleFor(tester);
+    expect(find.text('2 expenses added'), findsNothing);
+    expect(find.text('34,555'), findsOneWidget);
+    expect(find.text('Imported shop'), findsNothing);
+    expect(tester.takeException(), isNull);
     await closeApp(tester, db);
   });
 
