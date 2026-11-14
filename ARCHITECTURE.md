@@ -1,6 +1,6 @@
 # Architecture
 
-Decisions for the Expense Tracker app. Scope lives in BUILD_LIST.md.
+Decisions for the Expense Tracker app. The app is called "Spill the Bills". Scope lives in BUILD_LIST.md.
 
 ## Platform
 - Android first, iPhone later. Must be cross-platform.

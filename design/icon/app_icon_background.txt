@@ -1,0 +1,7 @@
+Spill the Bills app icon background
+
+Gradient, linear, top to bottom (vertical, 0 to 100% of the icon height):
+  top    (0%)   #5BD9CD
+  bottom (100%) #45C7BB
+
+Closest single flat colour: #4FD1C5 (the brand turquoise; the midpoint of the gradient is #50D0C4)

@@ -417,6 +417,14 @@
       "w": 360,
       "x": 4400,
       "y": -5320
+    },
+    "NewIcons.dc.html": {
+      "h": 960,
+      "is_interactive": true,
+      "title": "App icon",
+      "w": 360,
+      "x": 0,
+      "y": -6727
     }
   },
   "createdOnFiles": {
@@ -433,7 +441,8 @@
     "row1",
     "row2",
     "rowP",
-    "rowK"
+    "rowK",
+    "rowI"
   ],
   "notes": {
     "row0": {
@@ -483,6 +492,14 @@
       "w": 240,
       "x": 0,
       "y": -5620
+    },
+    "rowI": {
+      "kind": "title1",
+      "maxW": 360,
+      "text": "App icon",
+      "w": 240,
+      "x": 0,
+      "y": -7027
     }
   },
   "order": [
@@ -537,7 +554,8 @@
     "PocketAdd.dc.html",
     "PocketEdit.dc.html",
     "PocketDelete.dc.html",
-    "PocketSettings.dc.html"
+    "PocketSettings.dc.html",
+    "NewIcons.dc.html"
   ],
   "pages": [],
   "title": "Expense Tracker Mockup"
