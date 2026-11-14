@@ -220,6 +220,7 @@ class _DayPickerDialogState extends ConsumerState<DayPickerDialog> {
             const SizedBox(height: 16),
             _NavRow(
               label: navLabel,
+              tabular: _view != _View.days,
               caret: caret,
               toggleHint: toggleHint,
               prevHint: prevHint,
@@ -419,9 +420,14 @@ class _NavRow extends StatelessWidget {
     required this.onToggle,
     required this.onPrev,
     required this.onNext,
+    this.tabular = true,
   });
 
   final String label;
+
+  /// Tabular figures (the years of PopMonth); the date pop-up's month name
+  /// ("October 2026") is drawn with proportional figures like its board.
+  final bool tabular;
   final IconData caret;
   final String toggleHint;
   final String prevHint;
@@ -433,9 +439,13 @@ class _NavRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    // The board's `justify-content: space-between`: the label keeps the
+    // width it needs (up to all the room left of the arrows) and the arrows
+    // always end at the right content edge.
     return SizedBox(
       height: 40,
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Flexible(
             child: Semantics(
@@ -457,9 +467,11 @@ class _NavRow extends StatelessWidget {
                           maxLines: 1,
                           softWrap: false,
                           overflow: TextOverflow.ellipsis,
-                          style: AppText.tabular(
-                            AppText.cardTitle.copyWith(color: c.text),
-                          ),
+                          style: tabular
+                              ? AppText.tabular(
+                                  AppText.cardTitle.copyWith(color: c.text),
+                                )
+                              : AppText.cardTitle.copyWith(color: c.text),
                         ),
                       ),
                       const SizedBox(width: 2),
@@ -470,10 +482,24 @@ class _NavRow extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          const Spacer(),
-          _Arrow(icon: Symbols.chevron_left_rounded, hint: prevHint, onTap: onPrev),
-          _Arrow(icon: Symbols.chevron_right_rounded, hint: nextHint, onTap: onNext),
+          Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _Arrow(
+                  icon: Symbols.chevron_left_rounded,
+                  hint: prevHint,
+                  onTap: onPrev,
+                ),
+                _Arrow(
+                  icon: Symbols.chevron_right_rounded,
+                  hint: nextHint,
+                  onTap: onNext,
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
