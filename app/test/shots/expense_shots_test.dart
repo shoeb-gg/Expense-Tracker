@@ -1,6 +1,7 @@
 @Tags(['shots'])
 library;
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:spill_the_bills/data/expenses_repo.dart';
@@ -26,7 +27,8 @@ void main() {
     await pushRoute(tester, Routes.expense(doctorVisitId));
     await settleImages(tester);
     expect(find.text('Sunday, October 18, 2026'), findsOneWidget);
-    expect(find.text('See all Health in October'), findsOneWidget);
+    // "in October" is held together by a no-break space.
+    expect(find.text('See all Health in October'), findsOneWidget);
     await takeShot(tester, 'expense_details');
 
     await tapText(tester, 'Delete');
@@ -44,6 +46,24 @@ void main() {
     });
     await pumpApp(tester, db: db, location: Routes.expense(1));
     expect(find.text('Title'), findsNothing);
+    // The long month link breaks before "in January 2025", never leaving
+    // "2025" alone on the second line.
+    final link = find.textContaining('See all House Rent');
+    final paragraph = tester.renderObject<RenderParagraph>(link);
+    final text = paragraph.text.toPlainText();
+    double top(String word) {
+      // The word after a space or a no-break space.
+      final i = text.indexOf(RegExp('[  ]$word')) + 1;
+      return paragraph
+          .getBoxesForSelection(
+            TextSelection(baseOffset: i, extentOffset: i + word.length),
+          )
+          .first
+          .top;
+    }
+    expect(top('in'), greaterThan(top('House')));
+    expect(top('January'), top('in'));
+    expect(top('2025'), top('in'));
     await takeShot(tester, 'expense_details_plain');
     await closeApp(tester, db);
   });

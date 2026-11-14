@@ -37,7 +37,8 @@ void main() {
     expect(find.text('Sunday, October 18, 2026'), findsOneWidget);
     expect(find.textContaining('Added Oct 18, 2026 at '), findsOneWidget);
     expect(find.text('Receipt, tap to view'), findsOneWidget);
-    expect(find.text('See all Health in October'), findsOneWidget);
+    // "in October" is held together by a no-break space.
+    expect(find.text('See all Health in October'), findsOneWidget);
 
     await tap(tester, find.text('Receipt, tap to view'));
     expect(find.byType(PhotoScreen), findsOneWidget);

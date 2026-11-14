@@ -325,6 +325,9 @@ class _MonthLink extends ConsumerWidget {
     final month = sameYear(expense.day, today) ? monthName(ym.month) : monthYear(ym.year, ym.month);
     final current = sameMonth(expense.day, today);
     final sub = totals.hasValue ? '${expenseCount(count, fmt)}${current ? ' so far' : ''}' : '';
+    // "in January 2025" is held together with no-break spaces, so a link
+    // too long for one line breaks before "in" and never strands "2025".
+    final where = 'in $month'.replaceAll(' ', ' ');
     return Pressable(
       color: c.surface,
       borderRadius: BorderRadius.circular(20),
@@ -347,7 +350,7 @@ class _MonthLink extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'See all $categoryName in $month',
+                      'See all $categoryName $where',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: AppText.rowTitle,
