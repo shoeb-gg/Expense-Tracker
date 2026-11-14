@@ -63,6 +63,9 @@ dev_dependencies:
   drift_dev: ">=2.28.0 <2.32.0"
   build_runner: ^2.15.1
   flutter_launcher_icons: ^0.14.4
+  # Already in the lock file through drift (2.9.4); listed so tests can point
+  # package:sqlite3/open.dart at test/native/sqlite3.dll.
+  sqlite3: ^2.9.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

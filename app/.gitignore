@@ -43,3 +43,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Test-only native SQLite library (downloaded by tool/get_sqlite_dll.ps1)
+/test/native/
+
+# Screenshot PNGs written by the shot tests (they also land in /build/shots/)
+/test/**/goldens/
+/test/**/failures/

@@ -1,0 +1,3 @@
+tags:
+  shots:
+    description: Screenshot tests that write PNGs to build/shots/.
