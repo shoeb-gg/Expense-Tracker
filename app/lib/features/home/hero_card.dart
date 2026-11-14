@@ -12,8 +12,10 @@ import '../../widgets/kit.dart';
 /// Home's turquoise card (PocketHome board): the month chip on the left and
 /// the month's total on the right, 92 px tall, radius 24.
 ///
-/// [caption] sits over [value] ("Spent in October" over "34,555"). Tapping
-/// the chip calls [onMonthTap]; tapping the rest calls [onValueTap].
+/// [caption] sits over [value] ("Spent in October" over "34,555"). With a
+/// [unit] the value is a count, not money: "33 expenses", the word in a
+/// smaller type on the number's baseline (monthly total off). Tapping the
+/// chip calls [onMonthTap]; tapping the rest calls [onValueTap].
 class HeroCard extends StatelessWidget {
   const HeroCard({
     super.key,
@@ -22,15 +24,27 @@ class HeroCard extends StatelessWidget {
     required this.value,
     required this.onMonthTap,
     required this.onValueTap,
+    this.unit,
     this.valueSemanticLabel,
   });
 
   final YearMonth month;
   final String caption;
   final String value;
+
+  /// Word after a count ("expenses"), or null for an amount.
+  final String? unit;
   final VoidCallback onMonthTap;
   final VoidCallback onValueTap;
   final String? valueSemanticLabel;
+
+  /// The [unit] word: 18 px w700 (the number is 32 px w800).
+  static final TextStyle _unitStyle = AppText.heroNumber.copyWith(
+    fontSize: 18,
+    fontWeight: FontWeight.w700,
+    letterSpacing: -0.2,
+    height: 1,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -86,13 +100,34 @@ class HeroCard extends StatelessWidget {
                                   child: FittedBox(
                                     fit: BoxFit.scaleDown,
                                     alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      value,
-                                      maxLines: 1,
-                                      style: AppText.heroNumber.copyWith(
-                                        color: c.onAccent,
-                                      ),
-                                    ),
+                                    child: unit == null || value.isEmpty
+                                        ? Text(
+                                            value,
+                                            maxLines: 1,
+                                            style: AppText.heroNumber.copyWith(
+                                              color: c.onAccent,
+                                            ),
+                                          )
+                                        : Text.rich(
+                                            TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                  text: value,
+                                                  style: AppText.heroNumber
+                                                      .copyWith(
+                                                        color: c.onAccent,
+                                                      ),
+                                                ),
+                                                TextSpan(
+                                                  text: ' $unit',
+                                                  style: _unitStyle.copyWith(
+                                                    color: c.onAccent,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            maxLines: 1,
+                                          ),
                                   ),
                                 ),
                               ],

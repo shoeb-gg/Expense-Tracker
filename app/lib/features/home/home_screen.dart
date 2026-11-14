@@ -159,6 +159,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final monthWord = monthName(month.month);
     final String caption;
     final String value;
+    String? unit;
     if (showTotal) {
       caption = 'Spent in $monthWord';
       value = expenses == null
@@ -167,9 +168,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ? maskedAmount
           : fmt.format(totalOf(expenses));
     } else {
-      caption = 'Expenses in $monthWord';
+      // A count, so it must not read as money: "In October / 33 expenses"
+      // with the word in a smaller type.
+      caption = 'In $monthWord';
       value = expenses == null ? '' : fmt.count(expenses.length);
+      unit = expenses?.length == 1 ? 'expense' : 'expenses';
     }
+    final spoken = unit == null ? value : '$value $unit';
 
     return Scaffold(
       backgroundColor: c.bg,
@@ -228,9 +233,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           month: month,
                           caption: caption,
                           value: value,
+                          unit: unit,
                           valueSemanticLabel: showTotal && hidden
                               ? '$caption: hidden. See all-time spending'
-                              : '$caption: $value. See all-time spending',
+                              : '$caption: $spoken. See all-time spending',
                           onMonthTap: () {
                             if (SwipeArea.swipedRecently(inner)) return;
                             unawaited(_pickMonth(month));

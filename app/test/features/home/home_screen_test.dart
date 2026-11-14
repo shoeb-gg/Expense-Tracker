@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/core/days.dart';
 import 'package:spill_the_bills/data/db.dart';
+import 'package:spill_the_bills/features/home/hero_card.dart';
 import 'package:spill_the_bills/features/home/home_list.dart';
 import 'package:spill_the_bills/features/home/home_screen.dart';
 import 'package:spill_the_bills/features/home/home_state.dart';
@@ -194,8 +195,25 @@ void main() {
         settings: const AppSettings(showMonthlyTotal: false),
       );
       expect(find.text('34,555'), findsNothing);
-      expect(find.text('Expenses in October'), findsOneWidget);
-      expect(find.text('33'), findsOneWidget);
+      // A count, not an amount: "33 expenses", the word smaller than the
+      // number, in the same 92 px card.
+      expect(find.text('In October'), findsOneWidget);
+      final count = find.text('33 expenses');
+      expect(count, findsOneWidget);
+      final spans = (tester.widget<Text>(count).textSpan! as TextSpan)
+          .children!
+          .cast<TextSpan>();
+      expect(spans.map((s) => s.text).join(), '33 expenses');
+      expect(spans.first.text, '33');
+      expect(
+        spans.last.style!.fontSize!,
+        lessThan(spans.first.style!.fontSize!),
+      );
+      expect(tester.getSize(find.byType(HeroCard)).height, 92);
+      expect(
+        find.bySemanticsLabel('In October: 33 expenses. See all-time spending'),
+        findsOneWidget,
+      );
       expect(find.bySemanticsLabel('Hide total'), findsNothing);
       await closeApp(tester, db);
     });
