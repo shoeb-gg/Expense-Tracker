@@ -1,0 +1,51 @@
+<!--@POP {"host":"NewCharts","title":"Charts, custom range","height":780,"icons":"calendar_month"}-->
+  <div data-pop="dialog" style="position: absolute; left: 0; top: 0; width: 360px; height: 780px; z-index: 50; background: rgba(4, 10, 11, 0.88); display: flex; align-items: center; justify-content: center">
+    <div role="dialog" aria-label="Custom range" style="width: 312px; box-sizing: border-box; padding: 20px; border-radius: 24px; background: {{t.surface2}}; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column">
+      <span style="font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">Custom range</span>
+      <span aria-live="polite" style="margin-top: 2px; font-size: 13.5px; line-height: 20px; font-weight: 500; color: {{t.text2}}; font-variant-numeric: tabular-nums">{{pop.sub}}</span>
+      <div role="group" aria-label="Quick choices, ending today" style="margin-top: 16px; height: 40px; box-sizing: border-box; padding: 4px; border-radius: 14px; background: {{t.surface}}; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px">
+        <sc-for list="{{pop.presets}}" as="b" hint-placeholder-count="3">
+          <button type="button" aria-pressed="{{b.on}}" aria-label="{{b.aria}}" onClick="{{b.pick}}" style="height: 32px; border: 0; border-radius: 10px; padding: 0; background: {{b.bg}}; color: {{b.fg}}; font-size: 13.5px; line-height: 20px; font-weight: {{b.fw}}; white-space: nowrap; font-variant-numeric: tabular-nums; cursor: pointer; transition: background 0.15s">{{b.label}}</button>
+        </sc-for>
+      </div>
+      <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px">
+        <sc-for list="{{pop.rows}}" as="r" hint-placeholder-count="2">
+          <button type="button" aria-label="{{r.aria}}" style="height: 56px; border: 0; border-radius: 16px; padding: 0 14px 0 16px; background: {{t.tile}}; color: {{t.text}}; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; cursor: pointer">
+            <span style="font-size: 13.5px; line-height: 20px; font-weight: 600; color: {{t.text2}}">{{r.label}}</span>
+            <span style="display: flex; align-items: center; gap: 8px; font-size: 15px; line-height: 20px; font-weight: 700; font-variant-numeric: tabular-nums">
+              {{r.value}}
+              <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; color: {{t.accent}}">calendar_month</span>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+        <a href="NewCharts.dc.html" style="height: 48px; border-radius: 16px; background: {{t.tile}}; color: {{t.text}}; font-size: 15px; line-height: 20px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center">Cancel</a>
+        <a href="NewCharts.dc.html" style="height: 48px; border-radius: 16px; background: {{t.accent}}; color: {{t.onAccent}}; font-size: 15px; line-height: 20px; font-weight: 800; text-decoration: none; display: flex; align-items: center; justify-content: center">Confirm</a>
+      </div>
+    </div>
+  </div>
+<!--@LOGIC-->
+  // Custom range pop-up. It opens on the last range used (the last 30 days the first time).
+  // The line under the title always says how long the chosen range is.
+  popVals(t) {
+    const k = this.popKit(t);
+    const st = this.state || {};
+    const T = k.TODAY;
+    const from = st.popFrom != null ? st.popFrom : T - 29;
+    const to = st.popTo != null ? st.popTo : T;
+    const days = to - from + 1;
+    const short = (n) => { const d = k.dt(n); return k.MS[d.getUTCMonth()] + ' ' + d.getUTCDate(); };
+    const show = (n) => (n === T ? 'Today, ' + short(n) : k.full(n));
+    return {
+      sub: days === 1 ? 'Charts will show this 1 day.' : 'Charts will show these ' + days + ' days.',
+      presets: [7, 30, 90].map((n) => {
+        const on = to === T && from === T - n + 1;
+        return { label: n + ' days', aria: 'Last ' + n + ' days', on, bg: on ? t.accent : 'transparent', fg: on ? t.onAccent : t.text2, fw: on ? '800' : '600', pick: () => this.setState({ popFrom: T - n + 1, popTo: T }) };
+      }),
+      rows: [
+        { label: 'From', value: show(from), aria: 'From ' + k.full(from) + '. Tap to change' },
+        { label: 'To', value: show(to), aria: 'To ' + k.full(to) + '. Tap to change' }
+      ]
+    };
+  }

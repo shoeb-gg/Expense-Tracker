@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Export</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!--@HELMET arrow_back,calendar_month,check-->
+<div style="width: 360px; height: 780px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; color: {{t.text}}; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <header style="height: 60px; flex-shrink: 0; padding: 0 16px; display: grid; grid-template-columns: 88px minmax(0, 1fr) 88px; align-items: center">
+    <a href="NewSettings.dc.html" aria-label="Back to settings" style="justify-self: start; width: 40px; height: 40px; border-radius: 20px; background: {{t.surface}}; color: {{t.text}}; display: flex; align-items: center; justify-content: center; text-decoration: none">
+      <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">arrow_back</span>
+    </a>
+    <h1 style="margin: 0; text-align: center; font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">Export</h1>
+    <span aria-hidden="true"></span>
+  </header>
+
+  <main style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 2px 16px 24px; display: flex; flex-direction: column; gap: 12px">
+    <section aria-label="Which expenses" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center">
+        <div style="flex: 1; min-width: 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
+          <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">Which expenses</h2>
+          <span aria-live="polite" style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}; font-variant-numeric: tabular-nums">{{countText}}</span>
+        </div>
+      </div>
+      <div style="padding: 16px; display: flex; flex-direction: column; gap: 8px">
+        <div role="group" aria-label="Quick choices" style="margin-bottom: 4px; height: 40px; box-sizing: border-box; padding: 4px; border-radius: 14px; background: {{t.bg}}; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px">
+          <sc-for list="{{ranges}}" as="b" hint-placeholder-count="3">
+            <button type="button" aria-pressed="{{b.on}}" onClick="{{b.pick}}" style="height: 32px; border: 0; border-radius: 10px; padding: 0; background: {{b.bg}}; color: {{b.fg}}; font-size: 13.5px; line-height: 20px; font-weight: {{b.fw}}; white-space: nowrap; cursor: pointer; transition: background 0.15s">{{b.label}}</button>
+          </sc-for>
+        </div>
+        <sc-for list="{{rows}}" as="r" hint-placeholder-count="2">
+          <button type="button" aria-label="{{r.aria}}" style="height: 56px; border: 0; border-radius: 16px; padding: 0 14px 0 16px; background: {{t.tile}}; color: {{t.text}}; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; cursor: pointer">
+            <span style="font-size: 13.5px; line-height: 20px; font-weight: 600; color: {{t.text2}}">{{r.label}}</span>
+            <span style="display: flex; align-items: center; gap: 8px; font-size: 15px; line-height: 20px; font-weight: 700; font-variant-numeric: tabular-nums">
+              {{r.value}}
+              <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; color: {{t.accent}}">calendar_month</span>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+
+    <section aria-label="File type" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center">
+        <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">File type</h2>
+      </div>
+      <div role="radiogroup" aria-label="File type" style="padding: 16px; display: flex; flex-direction: column; gap: 8px">
+        <sc-for list="{{kinds}}" as="o" hint-placeholder-count="2">
+          <button type="button" role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="height: 64px; border: 0; border-radius: 16px; padding: 0 16px; background: {{o.bg}}; box-shadow: {{o.ring}}; color: {{t.text}}; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; transition: background 0.15s">
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 15px; line-height: 20px; font-weight: {{o.fw}}">{{o.label}}</span>
+              <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{o.sub}}</span>
+            </span>
+            <span aria-hidden="true" style="width: 24px; height: 24px; flex-shrink: 0; border-radius: 12px; background: {{o.dotBg}}; box-shadow: {{o.dotRing}}; color: {{t.onAccent}}; display: flex; align-items: center; justify-content: center">
+              <sc-if value="{{o.on}}" hint-placeholder-val="{{ false }}">
+                <span class="ms" style="font-size: 18px; width: 18px; height: 18px">check</span>
+              </sc-if>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+      <span style="margin: -4px 16px 16px; text-align: center; font-size: 13px; line-height: 20px; font-weight: 500; color: {{t.text3}}">One row per expense. Photos are left out.</span>
+    </section>
+  </main>
+
+  <div style="flex-shrink: 0; padding: 12px 16px 14px; background: {{t.nav}}; box-shadow: inset 0 1px 0 {{t.line}}; display: flex; flex-direction: column; gap: 8px">
+    <a href="NewSettings.dc.html" style="height: 52px; border-radius: 18px; background: {{t.accent}}; color: {{t.onAccent}}; font-size: 15.5px; line-height: 20px; font-weight: 800; text-decoration: none; display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums">{{cta}}</a>
+    <span style="text-align: center; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Next, you choose where to save or share it.</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mood":{"editor":"enum","options":["coral","aqua","iris"],"default":"aqua"},"$preview":{"width":360,"height":780}}'>
+class Component extends DCLogic {
+  /*@THEME*/
+
+  /*@KIT*/
+
+  renderVals() {
+    const st = this.state || {};
+    const t = this.theme(this.props.mood ?? 'aqua');
+    const K = this.kit();
+    const T = K.TODAY;
+    const td = K.dt(T);
+    const list = (n) => { const b = K.byDay; const r = typeof b === 'function' ? b(n) : (b instanceof Map ? b.get(n) : (b ? b[n] : null)); return r || []; };
+    // "Everything" starts at the first day that has an expense.
+    let firstDay = T;
+    for (let n = K.dn(2024, 0, 1); n <= T; n++) { if (K.daySum(n) > 0) { firstDay = n; break; } }
+    const RANGES = { month: [K.dn(td.getUTCFullYear(), td.getUTCMonth(), 1), T], year: [K.dn(td.getUTCFullYear(), 0, 1), T], all: [firstDay, T] };
+    const range = st.range || 'month';
+    const from = RANGES[range][0];
+    const to = RANGES[range][1];
+    let count = 0;
+    for (let n = from; n <= to; n++) count += list(n).length;
+    const full = (n) => { const d = K.dt(n); return K.MS[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear(); };
+    const kind = st.kind || 'xlsx';
+    const dotLine = t.mix(t.text3, t.tile, 0.5);
+    const words = count === 1 ? '1 expense' : K.fmt(count) + ' expenses';
+    return {
+      t,
+      countText: words,
+      ranges: [['month', 'This month'], ['year', 'This year'], ['all', 'Everything']].map(([key, label]) => {
+        const on = key === range;
+        return { label, on, bg: on ? t.accent : 'transparent', fg: on ? t.onAccent : t.text2, fw: on ? '800' : '600', pick: () => this.setState({ range: key }) };
+      }),
+      rows: [
+        { label: 'From', value: full(from), aria: 'From ' + full(from) + '. Tap to change' },
+        { label: 'To', value: full(to), aria: 'To ' + full(to) + '. Tap to change' }
+      ],
+      kinds: [['xlsx', 'Excel (.xlsx)', 'Opens in Excel and Google Sheets'], ['csv', 'CSV (.csv)', 'Plain text, opens in almost any app']].map(([key, label, sub]) => {
+        const on = key === kind;
+        return { label, sub, on, bg: on ? t.accentSoft : t.tile, ring: on ? 'inset 0 0 0 2px ' + t.accent : 'none', fw: on ? '800' : '600', dotBg: on ? t.accent : 'transparent', dotRing: on ? 'none' : 'inset 0 0 0 2px ' + dotLine, pick: () => this.setState({ kind: key }) };
+      }),
+      cta: 'Export ' + words
+    };
+  }
+}
+</script>
+</body>
+</html>

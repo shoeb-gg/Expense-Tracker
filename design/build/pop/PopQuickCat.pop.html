@@ -1,0 +1,54 @@
+<!--@POP {"host":"NewAddQuickNew","title":"Type to add, choose a category","icons":"add"}-->
+  <sc-if value="{{pop.open}}" hint-placeholder-val="{{ true }}">
+    <div data-pop="sheet" style="position: absolute; left: 0; top: 0; width: 360px; height: 780px; z-index: 50; background: rgba(4, 10, 11, 0.88); display: flex; align-items: flex-end">
+      <div role="dialog" aria-label="Choose a category" style="width: 360px; box-sizing: border-box; padding: 10px 16px 16px; border-radius: 28px 28px 0 0; background: {{t.surface2}}; box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45); display: flex; flex-direction: column">
+        <span aria-hidden="true" style="align-self: center; width: 40px; height: 4px; border-radius: 2px; background: {{pop.grab}}"></span>
+        <span style="margin: 14px 16px 0; font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">Choose a category</span>
+        <span style="margin: 2px 16px 0; font-size: 13.5px; line-height: 20px; font-weight: 500; color: {{t.text2}}">{{pop.sub}}</span>
+        <div role="group" aria-label="Categories" style="margin: 16px -1.33px 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+          <sc-for list="{{pop.cats}}" as="c" hint-placeholder-count="15">
+            <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="height: 84px; border: 0; background: transparent; color: {{c.labelColor}}; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px; padding: 0; cursor: pointer">
+              <span style="width: 48px; height: 48px; flex-shrink: 0; border-radius: 15px; background: {{t.tile}}; box-shadow: {{c.ring}}; display: flex; align-items: center; justify-content: center">
+                <span class="em" aria-hidden="true" style="font-size: 24px">{{c.emoji}}</span>
+              </span>
+              <span style="max-width: 100%; font-size: 11.5px; line-height: 14px; font-weight: {{c.fw}}; text-align: center; hyphens: auto; overflow-wrap: break-word">{{c.name}}</span>
+            </button>
+          </sc-for>
+          <a href="NewCategoryAdd.dc.html" style="height: 84px; color: {{t.text2}}; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 6px">
+            <span style="width: 48px; height: 48px; box-sizing: border-box; border-radius: 15px; border: 1.5px dashed {{t.text3}}; display: flex; align-items: center; justify-content: center">
+              <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">add</span>
+            </span>
+            <span style="font-size: 11.5px; line-height: 14px; font-weight: 600">New</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+<!--@LOGIC-->
+  // Category chooser for type to add: the same grid, in the same order, as the Add expense screen.
+  // Picking one closes the sheet and fills the preview underneath.
+  popVals(t) {
+    const k = this.popKit(t);
+    const K = this.kit();
+    const st = Object.assign(this.defaults(), this.state || {});
+    const q = this.parseQuick(K, st.typed);
+    const word = q && q.note ? q.note.toLowerCase() : '';
+    const cur = st.picked || (q && q.cat ? q.cat.id : null);
+    return {
+      grab: k.grab,
+      open: !st.popDone,
+      sub: word ? 'The app will remember it for “' + word + '”.' : 'The app will remember your choice.',
+      cats: K.CATS.map((c) => {
+        const on = c.id === cur;
+        return {
+          name: c.name,
+          emoji: c.emoji,
+          on,
+          ring: on ? '0 0 0 3px ' + t.surface2 + ', 0 0 0 5px ' + t.accent : 'none',
+          labelColor: on ? t.accent : t.text,
+          fw: on ? '800' : '600',
+          pick: () => this.setState({ picked: c.id, popDone: true })
+        };
+      })
+    };
+  }

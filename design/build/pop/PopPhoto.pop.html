@@ -1,0 +1,39 @@
+<!--@POP {"host":"NewEdit","title":"Edit expense, receipt photo","icons":"delete,image,photo_camera,visibility"}-->
+  <div data-pop="sheet" style="position: absolute; left: 0; top: 0; width: 360px; height: 780px; z-index: 50; background: rgba(4, 10, 11, 0.88); display: flex; align-items: flex-end">
+    <div role="dialog" aria-label="Receipt photo" style="width: 360px; box-sizing: border-box; padding: 10px 16px 24px; border-radius: 28px 28px 0 0; background: {{t.surface2}}; box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45); display: flex; flex-direction: column">
+      <span aria-hidden="true" style="align-self: center; width: 40px; height: 4px; border-radius: 2px; background: {{pop.grab}}"></span>
+      <div style="margin: 14px 16px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+        <span style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">Receipt photo</span>
+          <span style="font-size: 13.5px; line-height: 20px; font-weight: 500; color: {{t.text2}}">Attached to this expense.</span>
+        </span>
+        <a href="NewPhoto.dc.html" aria-label="View photo" style="position: relative; width: 44px; height: 44px; flex-shrink: 0; border-radius: 12px; overflow: hidden; background: linear-gradient(135deg, #6A5846 0%, #2A221B 100%); display: block">
+          <span aria-hidden="true" style="position: absolute; left: 12px; top: 6px; width: 20px; height: 34px; border-radius: 2px; background-color: #F4F0E6; background-image: repeating-linear-gradient(180deg, transparent 0 5px, #A8A397 5px 6.5px); background-size: 12px 26px; background-position: 4px 2px; background-repeat: no-repeat; transform: rotate(-6deg); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4)"></span>
+        </a>
+      </div>
+      <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px">
+        <a href="NewPhoto.dc.html" style="height: 56px; box-sizing: border-box; border-radius: 16px; padding: 0 16px; background: {{t.tile}}; color: {{t.text}}; text-decoration: none; display: flex; align-items: center; gap: 12px; font-size: 15px; line-height: 20px; font-weight: 600">
+          <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px; color: {{t.accent}}">visibility</span>
+          View photo
+        </a>
+        <button type="button" style="height: 56px; border: 0; border-radius: 16px; padding: 0 16px; background: {{t.tile}}; color: {{t.text}}; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; font-size: 15px; line-height: 20px; font-weight: 600">
+          <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px; color: {{t.accent}}">photo_camera</span>
+          Take a new photo
+        </button>
+        <button type="button" style="height: 56px; border: 0; border-radius: 16px; padding: 0 16px; background: {{t.tile}}; color: {{t.text}}; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; font-size: 15px; line-height: 20px; font-weight: 600">
+          <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px; color: {{t.accent}}">image</span>
+          Choose from gallery
+        </button>
+        <button type="button" style="margin-top: 8px; height: 56px; border: 0; border-radius: 16px; padding: 0 16px; background: {{t.tile}}; color: {{pop.bad}}; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; font-size: 15px; line-height: 20px; font-weight: 700">
+          <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">delete</span>
+          Remove photo
+        </button>
+      </div>
+    </div>
+  </div>
+<!--@LOGIC-->
+  // Receipt photo options, opened from the little receipt picture on Edit expense.
+  popVals(t) {
+    const k = this.popKit(t);
+    return { grab: k.grab, bad: k.bad };
+  }

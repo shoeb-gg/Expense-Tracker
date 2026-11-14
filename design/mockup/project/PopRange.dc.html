@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Charts, custom range</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,0..1,0&amp;icon_names=add,bar_chart,calendar_month,chevron_right,donut_small,home,trending_down,trending_flat,trending_up,tune&amp;display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&amp;display=swap">
+<style>
+html,body{margin:0;overflow:hidden}
+.em{font-family:'Noto Color Emoji','Apple Color Emoji','Segoe UI Emoji',sans-serif;line-height:1;display:inline-block;flex-shrink:0}
+button,input{font-family:inherit}
+a{color:inherit}
+main::-webkit-scrollbar{display:none}
+.ms{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;line-height:1;display:inline-block;flex-shrink:0;overflow:hidden;white-space:nowrap;letter-spacing:normal;text-transform:none;direction:ltr;font-feature-settings:'liga';-webkit-font-smoothing:antialiased}
+</style>
+</helmet>
+<div style="width: 360px; height: 780px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; color: {{t.text}}; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <header style="flex-shrink: 0; padding: 0 16px; box-shadow: inset 0 -1px 0 {{t.line}}">
+    <div style="height: 64px; display: flex; align-items: center">
+      <h1 style="margin: 0; font-size: 21px; line-height: 28px; font-weight: 800; letter-spacing: -0.3px">Charts</h1>
+    </div>
+    <div role="group" aria-label="Time range" style="height: 40px; box-sizing: border-box; padding: 4px; border-radius: 14px; background: {{t.surface}}; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px">
+      <sc-for list="{{periodBtns}}" as="b" hint-placeholder-count="4">
+        <button type="button" aria-pressed="{{b.on}}" onClick="{{b.pick}}" style="height: 32px; border: 0; border-radius: 10px; padding: 0; background: {{b.bg}}; color: {{b.fg}}; font-size: 13.5px; line-height: 20px; font-weight: {{b.fw}}; cursor: pointer; transition: background 0.15s">{{b.label}}</button>
+      </sc-for>
+    </div>
+    <div role="group" aria-label="Period" style="margin: 8px -12px 0; height: 44px; display: flex">
+      <sc-for list="{{tabBtns}}" as="b" hint-placeholder-count="3">
+        <button type="button" aria-pressed="{{b.on}}" onClick="{{b.pick}}" style="position: relative; height: 44px; border: 0; padding: 0 12px; background: transparent; color: {{b.fg}}; font-size: 14px; line-height: 20px; cursor: pointer; display: grid; align-items: center; justify-items: start">
+          <span style="grid-area: 1 / 1; font-weight: {{b.fw}}">{{b.label}}</span>
+          <span aria-hidden="true" style="grid-area: 1 / 1; font-weight: 800; visibility: hidden">{{b.label}}</span>
+          <span aria-hidden="true" style="position: absolute; left: 12px; right: 12px; bottom: 0; height: 3px; border-radius: 3px 3px 0 0; background: {{b.line}}"></span>
+        </button>
+      </sc-for>
+    </div>
+  </header>
+
+  <main style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 12px 16px 28px; display: flex; flex-direction: column; gap: 12px">
+    <section aria-label="Summary" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; padding: 16px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px">
+      <div style="align-self: stretch; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 2px; align-items: baseline">
+        <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Total spent</span>
+        <span style="justify-self: end; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{avgLabel}}</span>
+        <span style="font-size: 32px; line-height: 40px; font-weight: 800; letter-spacing: -0.6px">{{totalText}}</span>
+        <span style="justify-self: end; font-size: 18px; line-height: 24px; font-weight: 700">{{avgText}}</span>
+      </div>
+      <sc-if value="{{hasDelta}}" hint-placeholder-val="{{ true }}">
+        <span style="height: 28px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px 0 8px; border-radius: 14px; background: {{deltaBg}}; color: {{deltaFg}}; font-size: 12.5px; line-height: 16px; font-weight: 700">
+          <span class="ms" aria-hidden="true" style="font-size: 18px; width: 18px; height: 18px">{{deltaIcon}}</span>
+          {{deltaText}}
+        </span>
+      </sc-if>
+      <sc-if value="{{noDelta}}" hint-placeholder-val="{{ false }}">
+        <span style="height: 28px; display: inline-flex; align-items: center; padding: 0 12px; border-radius: 14px; background: {{t.surface2}}; color: {{t.text2}}; font-size: 12.5px; line-height: 16px; font-weight: 600">Nothing earlier to compare with</span>
+      </sc-if>
+    </section>
+
+    <div role="group" aria-label="Chart type" style="flex-shrink: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <sc-for list="{{viewBtns}}" as="b" hint-placeholder-count="3">
+        <button type="button" aria-pressed="{{b.on}}" onClick="{{b.pick}}" style="height: 36px; border: 0; border-radius: 18px; padding: 0; background: {{b.bg}}; color: {{b.fg}}; font-size: 13.5px; line-height: 20px; font-weight: 700; cursor: pointer; transition: background 0.15s">{{b.label}}</button>
+      </sc-for>
+    </div>
+
+    <section aria-label="Chart" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 12px">
+      <sc-if value="{{isRing}}" hint-placeholder-val="{{ true }}">
+        <div role="img" aria-label="{{ringAria}}" style="position: relative; width: 272px; height: 272px; flex-shrink: 0">
+          <sc-for list="{{slices}}" as="s" hint-placeholder-count="6">
+            <div style="position: absolute; left: 0; top: 0; width: 272px; height: 272px; pointer-events: none; opacity: {{s.op}}; transform: scale({{s.scale}}); transition: opacity 0.2s, transform 0.2s">
+              <svg viewBox="0 0 272 272" width="272" height="272" aria-hidden="true" style="position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none"><path d="{{s.d}}" fill="{{s.fill}}" onClick="{{s.pick}}" style="pointer-events: auto; cursor: pointer"></path></svg>
+              <sc-if value="{{s.showEmoji}}" hint-placeholder-val="{{ true }}">
+                <span onClick="{{s.pick}}" style="position: absolute; left: {{s.tx}}; top: {{s.ty}}; width: 30px; height: 30px; border-radius: 10px; background: {{t.tile}}; display: flex; align-items: center; justify-content: center; pointer-events: auto; cursor: pointer">
+                  <span class="em" aria-hidden="true" style="font-size: 17px">{{s.tag}}</span>
+                </span>
+              </sc-if>
+              <sc-if value="{{s.showText}}" hint-placeholder-val="{{ false }}">
+                <span onClick="{{s.pick}}" aria-hidden="true" style="position: absolute; left: {{s.tx}}; top: {{s.ty}}; width: 30px; height: 30px; border-radius: 10px; background: {{t.tile}}; color: {{t.text}}; font-size: {{s.tagSize}}; line-height: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; pointer-events: auto; cursor: pointer">{{s.tag}}</span>
+              </sc-if>
+            </div>
+          </sc-for>
+          <div style="position: absolute; left: 74px; top: 74px; width: 124px; height: 124px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; pointer-events: none">
+            <span style="max-width: 100px; font-size: 12.5px; line-height: 16px; font-weight: 600; color: {{t.text2}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{centerTitle}}</span>
+            <span style="margin-top: 2px; font-size: 24px; line-height: 30px; font-weight: 800; letter-spacing: -0.4px">{{centerValue}}</span>
+            <span style="margin-top: 2px; font-size: 12px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{centerSub}}</span>
+            <sc-if value="{{showDetails}}" hint-placeholder-val="{{ false }}">
+              <a href="NewCategory.dc.html" style="margin-top: 6px; height: 24px; padding: 0 6px 0 10px; border-radius: 12px; background: {{t.accentSoft}}; color: {{t.accent}}; font-size: 12px; line-height: 16px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; pointer-events: auto">Details<span class="ms" aria-hidden="true" style="font-size: 16px; width: 16px; height: 16px">chevron_right</span></a>
+            </sc-if>
+          </div>
+        </div>
+        <sc-if value="{{isDays}}" hint-placeholder-val="{{ false }}">
+          <div style="align-self: stretch; margin: 0 -8px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 8px">
+            <sc-for list="{{dayLegend}}" as="l" hint-placeholder-count="6">
+              <button type="button" aria-pressed="{{l.on}}" onClick="{{l.pick}}" style="height: 44px; border: 0; border-radius: 12px; padding: 0 8px; background: {{l.bg}}; color: {{t.text}}; display: flex; align-items: center; gap: 8px; text-align: left; cursor: pointer; transition: background 0.15s">
+                <span aria-hidden="true" style="width: 28px; height: 28px; flex-shrink: 0; border-radius: 9px; background: {{t.tile}}; font-size: {{l.tagSize}}; line-height: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center">{{l.tag}}</span>
+                <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                  <span style="font-size: 12.5px; line-height: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{l.label}}</span>
+                  <span style="font-size: 12px; line-height: 16px; font-weight: 500; color: {{t.text3}}; font-variant-numeric: tabular-nums">{{l.amt}}</span>
+                </span>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+      </sc-if>
+      <sc-if value="{{isTrend}}" hint-placeholder-val="{{ false }}">
+        <div style="align-self: stretch; display: flex; flex-direction: column; gap: 2px">
+          <h3 style="margin: 0; font-size: 14px; line-height: 20px; font-weight: 800">{{trendTitle}}</h3>
+          <span style="font-size: 12px; line-height: 16px; font-weight: 500; color: {{t.text3}}; font-variant-numeric: tabular-nums">{{avgLegend}}</span>
+        </div>
+        <div role="group" aria-label="{{trendAria}}" onMouseLeave="{{unpeek}}" style="position: relative; width: 296px; height: 222px; flex-shrink: 0">
+          <svg viewBox="0 0 296 222" width="296" height="222" aria-hidden="true" style="position: absolute; left: 0; top: 0; overflow: visible"><path d="{{gridPath}}" stroke="{{t.line}}" stroke-width="1" fill="none"></path><path d="{{avgPath}}" stroke="{{t.text2}}" stroke-width="1.5" stroke-dasharray="5 4" fill="none"></path></svg>
+          <sc-for list="{{yTicks}}" as="k" hint-placeholder-count="5">
+            <span style="position: absolute; left: 0; top: {{k.top}}; width: 28px; text-align: right; white-space: nowrap; font-size: 10.5px; line-height: 14px; font-weight: 500; color: {{t.text3}}; font-variant-numeric: tabular-nums">{{k.label}}</span>
+          </sc-for>
+          <sc-for list="{{bars}}" as="b" hint-placeholder-count="18">
+            <span style="position: absolute; left: {{b.left}}; top: {{b.top}}; width: {{b.w}}; height: {{b.h}}; border-radius: {{b.r}}; background: {{b.fill}}; box-shadow: {{b.ring}}; transition: background 0.15s"></span>
+          </sc-for>
+          
+          <sc-for list="{{xTicks}}" as="k" hint-placeholder-count="5">
+            <span style="position: absolute; left: {{k.left}}; top: 202px; width: 40px; text-align: center; font-size: 10.5px; line-height: 14px; font-weight: 500; color: {{t.text3}}; font-variant-numeric: tabular-nums; white-space: nowrap">{{k.label}}</span>
+          </sc-for>
+          <sc-if value="{{showPeak}}" hint-placeholder-val="{{ true }}">
+            <span style="position: absolute; left: {{peakLeft}}; top: {{peakTop}}; width: 120px; text-align: {{peakAlign}}; font-size: 11.5px; line-height: 14px; font-weight: 700; white-space: nowrap; pointer-events: none"><span style="display: inline-block; margin: 0 -4px; padding: 0 4px; border-radius: 4px; background: {{t.surface}}">{{peakText}}</span></span>
+          </sc-if>
+          <sc-if value="{{showLater}}" hint-placeholder-val="{{ true }}">
+            <span style="position: absolute; left: {{laterLeft}}; top: {{laterTop}}; width: {{laterW}}; text-align: center; font-size: 10.5px; line-height: 14px; font-weight: 500; color: {{t.text3}}; white-space: nowrap; pointer-events: none"><span style="display: inline-block; margin: 0 -4px; padding: 0 4px; border-radius: 4px; background: {{t.surface}}">Still to come</span></span>
+          </sc-if>
+          <sc-if value="{{showSoFar}}" hint-placeholder-val="{{ false }}">
+            <span style="position: absolute; left: {{soFarLeft}}; top: {{soFarTop}}; width: 40px; text-align: {{soFarAlign}}; font-size: 10.5px; line-height: 14px; font-weight: 500; color: {{t.text3}}; white-space: nowrap; pointer-events: none">so far</span>
+          </sc-if>
+          <sc-if value="{{showTip}}" hint-placeholder-val="{{ false }}">
+            <span style="position: absolute; left: {{tipLeft}}; top: {{tipTop}}; width: 120px; height: 44px; box-sizing: border-box; border-radius: 12px; background: {{t.tip}}; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35); display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none">
+              <span style="font-size: 11px; line-height: 14px; font-weight: 600; color: {{t.text2}}; white-space: nowrap">{{tipLabel}}</span>
+              <span style="font-size: 14px; line-height: 18px; font-weight: 800; font-variant-numeric: tabular-nums">{{tipValue}}</span>
+            </span>
+          </sc-if>
+          <sc-for list="{{slots}}" as="s" hint-placeholder-count="18">
+            <button type="button" aria-label="{{s.aria}}" aria-pressed="{{s.on}}" onClick="{{s.pick}}" onMouseEnter="{{s.enter}}" style="position: absolute; left: {{s.left}}; top: 0; width: {{s.w}}; height: 198px; border: 0; padding: 0; background: transparent; cursor: pointer"></button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <p style="margin: 0; font-size: 12px; line-height: 16px; font-weight: 500; color: {{t.text3}}; text-align: center">{{hint}}</p>
+    </section>
+
+    <section aria-label="Spending by category" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center">
+        <div style="flex: 1; min-width: 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
+          <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">By category</h2>
+          <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{countText}}</span>
+        </div>
+      </div>
+      <div style="padding: 4px 0">
+        <sc-for list="{{rank}}" as="r" hint-placeholder-count="11">
+          <button type="button" aria-pressed="{{r.on}}" onClick="{{r.pick}}" style="width: 100%; border: 0; padding: 0 0 0 16px; background: {{r.bg}}; color: {{t.text}}; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; transition: background 0.15s">
+            <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{t.tile}}; display: flex; align-items: center; justify-content: center">
+              <span class="em" aria-hidden="true" style="font-size: 22px">{{r.emoji}}</span>
+            </span>
+            <span style="flex: 1; min-width: 0; height: 68px; margin-right: 16px; box-shadow: {{r.divider}}; display: flex; flex-direction: column; justify-content: center; gap: 8px">
+              <span style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px">
+                <span style="min-width: 0; font-size: 15px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.name}}</span>
+                <span style="flex-shrink: 0; font-size: 15px; line-height: 20px; font-weight: 700; font-variant-numeric: tabular-nums">{{r.amt}}</span>
+              </span>
+              <span style="display: flex; align-items: center; gap: 8px">
+                <span style="flex: 1; min-width: 0; height: 6px; border-radius: 3px; background: {{t.track}}; display: flex">
+                  <span style="width: {{r.w}}; min-width: 6px; height: 6px; border-radius: 3px; background: {{r.color}}"></span>
+                </span>
+                <span style="width: 44px; flex-shrink: 0; text-align: right; font-size: 12.5px; line-height: 16px; font-weight: 600; color: {{t.text2}}; font-variant-numeric: tabular-nums">{{r.pct}}</span>
+              </span>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+  </main>
+
+  <nav aria-label="Main" style="height: 72px; flex-shrink: 0; position: relative; background: {{t.nav}}; box-shadow: inset 0 1px 0 {{t.line}}; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center">
+    <a href="MoodAqua.dc.html" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{t.text2}}; text-decoration: none; font-size: 11.5px; line-height: 14px; font-weight: 600">
+      <span style="width: 48px; height: 28px; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px">home</span>
+      </span>
+      Home
+    </a>
+    <a href="NewCharts.dc.html" aria-current="page" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{t.accent}}; text-decoration: none; font-size: 11.5px; line-height: 14px; font-weight: 700">
+      <span style="width: 48px; height: 28px; border-radius: 14px; background: {{t.accentSoft}}; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px; font-variation-settings: 'FILL' 1">donut_small</span>
+      </span>
+      Charts
+    </a>
+    <a href="NewAdd.dc.html" aria-label="Add expense" style="height: 72px; display: flex; align-items: flex-start; justify-content: center; text-decoration: none">
+      <span style="margin-top: -16px; width: 58px; height: 58px; border-radius: 29px; background: {{t.accent}}; color: {{t.onAccent}}; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 22px -2px {{t.accentGlow}}, 0 2px 6px rgba(0, 0, 0, 0.35)">
+        <span class="ms" aria-hidden="true" style="font-size: 30px; width: 30px; height: 30px">add</span>
+      </span>
+    </a>
+    <a href="NewReports.dc.html" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{t.text2}}; text-decoration: none; font-size: 11.5px; line-height: 14px; font-weight: 600">
+      <span style="width: 48px; height: 28px; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px">bar_chart</span>
+      </span>
+      Reports
+    </a>
+    <a href="NewSettings.dc.html" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{t.text2}}; text-decoration: none; font-size: 11.5px; line-height: 14px; font-weight: 600">
+      <span style="width: 48px; height: 28px; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px">tune</span>
+      </span>
+      Settings
+    </a>
+  </nav>
+  <div data-pop="dialog" style="position: absolute; left: 0; top: 0; width: 360px; height: 780px; z-index: 50; background: rgba(4, 10, 11, 0.88); display: flex; align-items: center; justify-content: center">
+    <div role="dialog" aria-label="Custom range" style="width: 312px; box-sizing: border-box; padding: 20px; border-radius: 24px; background: {{t.surface2}}; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column">
+      <span style="font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">Custom range</span>
+      <span aria-live="polite" style="margin-top: 2px; font-size: 13.5px; line-height: 20px; font-weight: 500; color: {{t.text2}}; font-variant-numeric: tabular-nums">{{pop.sub}}</span>
+      <div role="group" aria-label="Quick choices, ending today" style="margin-top: 16px; height: 40px; box-sizing: border-box; padding: 4px; border-radius: 14px; background: {{t.surface}}; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px">
+        <sc-for list="{{pop.presets}}" as="b" hint-placeholder-count="3">
+          <button type="button" aria-pressed="{{b.on}}" aria-label="{{b.aria}}" onClick="{{b.pick}}" style="height: 32px; border: 0; border-radius: 10px; padding: 0; background: {{b.bg}}; color: {{b.fg}}; font-size: 13.5px; line-height: 20px; font-weight: {{b.fw}}; white-space: nowrap; font-variant-numeric: tabular-nums; cursor: pointer; transition: background 0.15s">{{b.label}}</button>
+        </sc-for>
+      </div>
+      <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px">
+        <sc-for list="{{pop.rows}}" as="r" hint-placeholder-count="2">
+          <button type="button" aria-label="{{r.aria}}" style="height: 56px; border: 0; border-radius: 16px; padding: 0 14px 0 16px; background: {{t.tile}}; color: {{t.text}}; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; cursor: pointer">
+            <span style="font-size: 13.5px; line-height: 20px; font-weight: 600; color: {{t.text2}}">{{r.label}}</span>
+            <span style="display: flex; align-items: center; gap: 8px; font-size: 15px; line-height: 20px; font-weight: 700; font-variant-numeric: tabular-nums">
+              {{r.value}}
+              <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; color: {{t.accent}}">calendar_month</span>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+        <a href="NewCharts.dc.html" style="height: 48px; border-radius: 16px; background: {{t.tile}}; color: {{t.text}}; font-size: 15px; line-height: 20px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center">Cancel</a>
+        <a href="NewCharts.dc.html" style="height: 48px; border-radius: 16px; background: {{t.accent}}; color: {{t.onAccent}}; font-size: 15px; line-height: 20px; font-weight: 800; text-decoration: none; display: flex; align-items: center; justify-content: center">Confirm</a>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mood":{"editor":"enum","options":["coral","aqua","iris"],"default":"aqua"},"$preview":{"width":360,"height":780}}'>
+class Component extends DCLogic {
+  theme(mood) {
+    const MOODS = {
+      coral: { bg: '#0F1320', nav: '#151A2A', surface: '#1A2033', line: '#2B3350', text: '#FFFFFF', text2: '#D3D8E8', text3: '#A2ABC4', accent: '#FF7A5F', onAccent: '#2A0F0A', ink: '#171B2B' },
+      aqua: { bg: '#0B1517', nav: '#101D20', surface: '#152528', line: '#24383C', text: '#FFFFFF', text2: '#CBDADC', text3: '#9BB0B3', accent: '#4FD1C5', onAccent: '#04231F', ink: '#0F1E21' },
+      iris: { bg: '#100F1C', nav: '#171527', surface: '#1D1B30', line: '#33304D', text: '#FFFFFF', text2: '#D4D1EC', text3: '#A9A6CA', accent: '#A898FF', onAccent: '#150F33', ink: '#17132B' }
+    };
+    const t = Object.assign({}, MOODS[mood] || MOODS.coral);
+    // mix(a, b, w): w parts of colour a, the rest colour b.
+    const mix = (a, b, w) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(a.slice(i, i + 2), 16) * w + parseInt(b.slice(i, i + 2), 16) * (1 - w)).toString(16).padStart(2, '0')).join('');
+    t.accentSoft = t.accent + '2E';
+    t.surface2 = { coral: '#232A42', aqua: '#1C3034', iris: '#27243E' }[mood] || '#232A42';
+    t.tile = '#' + [1, 3, 5].map((i) => Math.round(parseInt(t.surface.slice(i, i + 2), 16) * 0.87 + 33).toString(16).padStart(2, '0')).join('');
+    t.accentGlow = t.accent + '59';
+    t.wash = t.accent + '29';
+    // Chart colours that follow the theme. Category colours do not: they are fixed per category.
+    t.other = mix(t.text3, t.surface, 0.5);
+    t.barSoft = mix(t.accent, t.surface, 0.6);
+    t.barDim = mix(t.accent, t.surface, 0.36);
+    t.ramp = [1, 0.86, 0.72, 0.58, 0.44].map((w) => mix(t.accent, t.surface, w));
+    t.tip = mix('#FFFFFF', t.surface2, 0.1);
+    t.stub = mix(t.text3, t.surface, 0.28);
+    t.track = mix(t.bg, t.surface, 0.5);
+    // Shared by the other boards: text on accent, the calendar heat ramp, a dim text tone, and the mixer itself.
+    t.onAccentDim = t.onAccent + 'D9';
+    t.heat = [0.4, 0.56, 0.74, 0.94].map((w) => mix(t.accent, t.bg, w));
+    t.dim = mix(t.text3, t.bg, 0.55);
+    t.good = '#5BD49B';
+    t.bad = '#FF8C9A';
+    t.mix = mix;
+    return t;
+  }
+
+  kit() {
+    if (this._kit) return this._kit;
+    const DAY = 86400000;
+    const dn = (y, m, d) => Date.UTC(y, m, d) / DAY;
+    const dt = (n) => new Date(n * DAY);
+    const TODAY = dn(2026, 9, 18);
+    const MS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const ML = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const WD = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const WS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const fmt = (v) => Math.round(v).toLocaleString('en-US');
+    // Chart colours come from a palette checked for colour-blind separation. They are assigned so that
+    // categories which rank next to each other in the sample data never share or nearly share a colour.
+    const CATS = [
+      { id: 'groceries', name: 'Groceries', color: '#41AE61', emoji: '🥦' },
+      { id: 'snacks', name: 'Snacks', color: '#9085E9', emoji: '🍗' },
+      { id: 'transport', name: 'Transportation', color: '#D55181', emoji: '🚍' },
+      { id: 'shopping', name: 'Shopping', color: '#D55181', emoji: '🛍️' },
+      { id: 'rent', name: 'House Rent', color: '#3987E5', emoji: '🏠' },
+      { id: 'electric', name: 'Electric Bill', color: '#C98500', emoji: '⚡' },
+      { id: 'internet', name: 'Internet Bill', color: '#0096AF', emoji: '🌐' },
+      { id: 'phone', name: 'Phone', color: '#0096AF', emoji: '☎️' },
+      { id: 'gas', name: 'Gas', color: '#D95926', emoji: '🔥' },
+      { id: 'health', name: 'Health', color: '#0096AF', emoji: '💊' },
+      { id: 'gym', name: 'Gym', color: '#D95926', emoji: '💪' },
+      { id: 'selfcare', name: 'Self Care', color: '#E66767', emoji: '🧴' },
+      { id: 'subs', name: 'Online Subscriptions', color: '#3987E5', emoji: '▶️' },
+      { id: 'gifts', name: 'Gifts', color: '#E66767', emoji: '🎁' },
+      { id: 'misc', name: 'Miscellaneous', color: '#9085E9', emoji: '🧩' }
+    ];
+    const CAT = {};
+    CATS.forEach((c) => { CAT[c.id] = c; });
+    let a = 20261018;
+    const rnd = () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const pick = (arr) => arr[Math.floor(rnd() * arr.length)];
+    const NOTES = {
+      groceries: ['Weekly bazaar', 'Vegetables & fish', 'Supermarket run', 'Rice & lentils', ''],
+      snacks: ['Coffee', 'Tea & biscuits', 'Ice cream', 'Bakery', 'Chips & soda', ''],
+      transport: ['Ride to office', 'Ride home', 'Bus fare', ''],
+      shopping: ['New shoes', 'T-shirts', 'Kitchen stuff', ''],
+      selfcare: ['Haircut', 'Skincare', ''],
+      health: ['Pharmacy', 'Doctor visit', ''],
+      gifts: ['Birthday gift', 'Wedding gift'],
+      misc: ['Laundry', 'Stationery', '']
+    };
+    const T = [];
+    let id = 1;
+    const add = (catId, amount, y, m, d, note) => T.push({ id: id++, catId, amount, y, m, d, n: dn(y, m, d), note: note || '', h: 8 + Math.floor(rnd() * 14), mi: Math.floor(rnd() * 60) });
+    for (let n = dn(2025, 0, 1); n <= TODAY; n++) {
+      const t = dt(n);
+      const y = t.getUTCFullYear(), m = t.getUTCMonth(), d = t.getUTCDate(), dow = t.getUTCDay();
+      if (d === 1) add('rent', 15000, y, m, d, ML[m] + ' rent');
+      if (d === 3) add('gym', 1000, y, m, d, 'Membership');
+      if (d === 5) add('internet', 1500, y, m, d, 'Broadband');
+      if (d === 8) add('subs', 685, y, m, d, 'Streaming');
+      if (d === 12) add('electric', Math.round((2300 + rnd() * 1400) / 10) * 10, y, m, d, ML[m] + ' bill');
+      if (d === 20) add('gas', 1150, y, m, d, 'Cooking gas');
+      if (d === 2 || d === 16) add('phone', 500, y, m, d, 'Mobile recharge');
+      if (rnd() < 0.72) add('snacks', Math.round((60 + rnd() * 380) / 5) * 5, y, m, d, pick(NOTES.snacks));
+      if ((dow === 2 || dow === 5) && rnd() < 0.85) add('groceries', Math.round((450 + rnd() * 1800) / 10) * 10, y, m, d, pick(NOTES.groceries));
+      if (dow >= 1 && dow <= 5 && rnd() < 0.7) add('transport', Math.round((40 + rnd() * 300) / 10) * 10, y, m, d, pick(NOTES.transport));
+      if (rnd() < 0.05) add('shopping', Math.round((800 + rnd() * 3700) / 50) * 50, y, m, d, pick(NOTES.shopping));
+      if (rnd() < 0.035) add('selfcare', Math.round((300 + rnd() * 900) / 50) * 50, y, m, d, pick(NOTES.selfcare));
+      if (rnd() < 0.03) add('health', Math.round((200 + rnd() * 2300) / 10) * 10, y, m, d, pick(NOTES.health));
+      if (rnd() < 0.015) add('gifts', Math.round((500 + rnd() * 2500) / 100) * 100, y, m, d, pick(NOTES.gifts));
+      if (rnd() < 0.07) add('misc', Math.round((50 + rnd() * 550) / 10) * 10, y, m, d, pick(NOTES.misc));
+    }
+    const byDay = {};
+    T.forEach((x) => { (byDay[x.n] = byDay[x.n] || []).push(x); });
+    const daySum = (n) => (byDay[n] || []).reduce((s, x) => s + x.amount, 0);
+    const sum = (s, e) => { let tot = 0; for (let n = s; n <= e; n++) tot += daySum(n); return tot; };
+    const byCat = (s, e) => {
+      const o = {};
+      for (let n = s; n <= e; n++) (byDay[n] || []).forEach((x) => { o[x.catId] = (o[x.catId] || 0) + x.amount; });
+      return Object.keys(o).map((k) => ({ cat: CAT[k], amount: o[k] })).sort((p, q) => q.amount - p.amount);
+    };
+    this._kit = { dn, dt, TODAY, MS, ML, WD, WS, fmt, CAT, byDay, daySum, sum, byCat };
+    return this._kit;
+  }
+
+  // The period tabs under each time range. Sample data is pinned to Oct 18, 2026; weeks start on Monday.
+  periods(K) {
+    if (this._periods) return this._periods;
+    const T = K.TODAY, dn = K.dn;
+    const md = (n) => { const d = K.dt(n); return K.MS[d.getUTCMonth()] + ' ' + d.getUTCDate(); };
+    const wk = (s, label) => ({ kind: 'week', unit: 'day', s, e: s + 6, label: label || md(s) + ' – ' + md(s + 6) });
+    const mo = (y, m, label) => ({ kind: 'month', unit: 'day', y, m, s: dn(y, m, 1), e: dn(y, m + 1, 0), label: label || K.MS[m] + ' ' + y });
+    const yr = (y, label) => ({ kind: 'year', unit: 'month', y, s: dn(y, 0, 1), e: dn(y, 11, 31), label: label || String(y) });
+    const monday = T - ((K.dt(T).getUTCDay() + 6) % 7);
+    this._periods = {
+      week: [wk(monday - 14), wk(monday - 7, 'Last week'), wk(monday, 'This week')],
+      month: [mo(2026, 7), mo(2026, 8, 'Last month'), mo(2026, 9, 'This month')],
+      year: [yr(2025), yr(2026, 'This year')],
+      custom: [{ kind: 'custom', unit: 'day', s: T - 29, e: T, label: md(T - 29) + ' – ' + md(T) }]
+    };
+    return this._periods;
+  }
+
+  // Spending in the matching earlier period, for the "more / less than" pill.
+  compare(K, p, eEff) {
+    const len = eEff - p.s;
+    if (p.kind === 'week') return { prev: K.sum(p.s - 7, p.s - 7 + len), label: 'the week before' };
+    if (p.kind === 'custom') return { prev: K.sum(p.s - 30, p.s - 1), label: 'the 30 days before' };
+    if (p.kind === 'month') {
+      const s = K.dn(p.y, p.m - 1, 1), e = K.dn(p.y, p.m, 0);
+      if (eEff < p.e) return { prev: K.sum(s, Math.min(e, s + len)), label: K.MS[K.dt(s).getUTCMonth()] + ' 1–' + (len + 1) };
+      return { prev: K.sum(s, e), label: K.ML[K.dt(s).getUTCMonth()] };
+    }
+    if (eEff < p.e) { const d = K.dt(eEff); return { prev: K.sum(K.dn(p.y - 1, 0, 1), K.dn(p.y - 1, d.getUTCMonth(), d.getUTCDate())), label: 'the same period in ' + (p.y - 1) }; }
+    return { prev: K.sum(K.dn(p.y - 1, 0, 1), K.dn(p.y - 1, 11, 31)), label: String(p.y - 1) };
+  }
+
+  // Ring slices: rounded segments with a 3px gap, plus a small label tile just outside each slice.
+  ring(items, selKey) {
+    const tot = items.reduce((s, it) => s + it.value, 0) || 1;
+    const cx = 136, cy = 136, R = 96, r = 70, RT = 121, CR = 5;
+    const P = (rad, ang) => (cx + rad * Math.sin(ang)).toFixed(2) + ' ' + (cy - rad * Math.cos(ang)).toFixed(2);
+    const gapA = 3 / ((R + r) / 2);
+    const need = 36 / RT;
+    let acc = 0, lastMid = null, firstMid = null;
+    return items.map((it) => {
+      const span = (it.value / tot) * Math.PI * 2;
+      const a0 = acc, a1 = acc + span;
+      acc = a1;
+      const gap = items.length > 1 ? Math.min(gapA, span * 0.3) : 0;
+      const s0 = a0 + gap / 2, s1 = a1 - gap / 2;
+      const arc = s1 - s0;
+      let d;
+      if (arc > Math.PI * 2 - 0.001) {
+        d = 'M' + P(R, 0) + ' A' + R + ' ' + R + ' 0 1 1 ' + P(R, Math.PI) + ' A' + R + ' ' + R + ' 0 1 1 ' + P(R, 0) + ' Z M' + P(r, 0) + ' A' + r + ' ' + r + ' 0 1 0 ' + P(r, Math.PI) + ' A' + r + ' ' + r + ' 0 1 0 ' + P(r, 0) + ' Z';
+      } else {
+        const c = Math.max(0.01, Math.min(CR, arc * r * 0.3));
+        const dO = Math.asin(c / (R - c)), dI = Math.asin(c / (r + c));
+        const ro = (R - c) * Math.cos(dO), ri = (r + c) * Math.cos(dI);
+        const lgO = arc - 2 * dO > Math.PI ? 1 : 0, lgI = arc - 2 * dI > Math.PI ? 1 : 0;
+        const k = c.toFixed(2);
+        d = 'M' + P(R, s0 + dO) + ' A' + R + ' ' + R + ' 0 ' + lgO + ' 1 ' + P(R, s1 - dO)
+          + ' A' + k + ' ' + k + ' 0 0 1 ' + P(ro, s1) + ' L' + P(ri, s1)
+          + ' A' + k + ' ' + k + ' 0 0 1 ' + P(r, s1 - dI)
+          + ' A' + r + ' ' + r + ' 0 ' + lgI + ' 0 ' + P(r, s0 + dI)
+          + ' A' + k + ' ' + k + ' 0 0 1 ' + P(ri, s0) + ' L' + P(ro, s0)
+          + ' A' + k + ' ' + k + ' 0 0 1 ' + P(R, s0 + dO) + ' Z';
+      }
+      // A label tile is shown only where it cannot touch its neighbours.
+      const mid = (a0 + a1) / 2;
+      let showTile = false;
+      if ((lastMid === null || mid - lastMid >= need) && (firstMid === null || firstMid + Math.PI * 2 - mid >= need)) {
+        showTile = true;
+        lastMid = mid;
+        if (firstMid === null) firstMid = mid;
+      }
+      const on = selKey === it.key;
+      return Object.assign({}, it, {
+        d, on,
+        op: selKey && !on ? 0.4 : 1,
+        scale: on ? 1.06 : 1,
+        showEmoji: showTile && !!it.isEmoji,
+        showText: showTile && !it.isEmoji,
+        tagSize: (String(it.tag).length >= 4 ? 9.5 : String(it.tag).length === 3 ? 10.5 : 11.5) + 'px',
+        tx: (cx + RT * Math.sin(mid) - 15).toFixed(1) + 'px',
+        ty: (cy - RT * Math.cos(mid) - 15).toFixed(1) + 'px'
+      });
+    });
+  }
+
+  renderVals() {
+    const v = this.popHostVals();
+    v.pop = this.popVals(v.t, v);
+    return v;
+  }
+
+  popKit(t) {
+    const mix = (a, b, w) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(a.slice(i, i + 2), 16) * w + parseInt(b.slice(i, i + 2), 16) * (1 - w)).toString(16).padStart(2, '0')).join('');
+    const dn = (y, m, d) => Math.round(Date.UTC(y, m, d) / 86400000);
+    const dt = (n) => new Date(n * 86400000);
+    const MS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const ML = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const WS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const WD = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const full = (n) => { const d = dt(n); return MS[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear(); };
+    const soft = t.accent + '2E';
+    const stub = mix(t.text3, t.surface2, 0.45);
+    // One choice in a list: the current one is tinted, ringed and ticked.
+    const opt = (on) => ({ on, bg: on ? soft : t.tile, ring: on ? 'inset 0 0 0 2px ' + t.accent : 'none', fw: on ? '800' : '600', dotBg: on ? t.accent : 'transparent', dotRing: on ? 'none' : 'inset 0 0 0 2px ' + stub });
+    return {
+      mix, dn, dt, MS, ML, WS, WD, full, opt, soft, stub,
+      TODAY: dn(2026, 9, 18),
+      bad: '#FF8C9A',
+      onBad: '#2A0B12',
+      dim: mix(t.text3, t.surface2, 0.5),
+      grab: mix(t.text3, t.surface2, 0.4),
+      off: mix(t.tile, t.surface2, 0.5)
+    };
+  }
+
+  // Swiping pulls the neighbouring page into view. Dragging the finger left-to-right or top-to-bottom reveals what is
+  // on the left or above (the previous one); dragging right-to-left or bottom-to-top reveals the next one.
+  popSwipe(back, forward) {
+    return {
+      down: (e) => { this._sw = { x: e.clientX, y: e.clientY }; },
+      up: (e) => {
+        const s = this._sw;
+        this._sw = null;
+        if (!s) return;
+        const dx = e.clientX - s.x;
+        const dy = e.clientY - s.y;
+        const far = Math.abs(dx) > Math.abs(dy) ? dx : dy;
+        if (Math.abs(far) < 24) return;
+        this._swiped = Date.now();
+        if (far > 0) back(); else forward();
+      }
+    };
+  }
+
+  // A tap that ends a swipe is not a tap.
+  popTap(fn) {
+    return () => { if (Date.now() - (this._swiped || 0) > 350) fn(); };
+  }
+
+  // Custom range pop-up. It opens on the last range used (the last 30 days the first time).
+  // The line under the title always says how long the chosen range is.
+  popVals(t) {
+    const k = this.popKit(t);
+    const st = this.state || {};
+    const T = k.TODAY;
+    const from = st.popFrom != null ? st.popFrom : T - 29;
+    const to = st.popTo != null ? st.popTo : T;
+    const days = to - from + 1;
+    const short = (n) => { const d = k.dt(n); return k.MS[d.getUTCMonth()] + ' ' + d.getUTCDate(); };
+    const show = (n) => (n === T ? 'Today, ' + short(n) : k.full(n));
+    return {
+      sub: days === 1 ? 'Charts will show this 1 day.' : 'Charts will show these ' + days + ' days.',
+      presets: [7, 30, 90].map((n) => {
+        const on = to === T && from === T - n + 1;
+        return { label: n + ' days', aria: 'Last ' + n + ' days', on, bg: on ? t.accent : 'transparent', fg: on ? t.onAccent : t.text2, fw: on ? '800' : '600', pick: () => this.setState({ popFrom: T - n + 1, popTo: T }) };
+      }),
+      rows: [
+        { label: 'From', value: show(from), aria: 'From ' + k.full(from) + '. Tap to change' },
+        { label: 'To', value: show(to), aria: 'To ' + k.full(to) + '. Tap to change' }
+      ]
+    };
+  }
+
+  popHostVals() {
+    const K = this.kit();
+    const st = this.state || {};
+    const set = (o) => this.setState(o);
+    const t = this.theme(this.props.mood ?? 'aqua');
+    const period = st.period || 'month';
+    const view = st.view || 'cat';
+    const sel = st.sel || null;
+    const tabSel = st.tabs || {};
+    const tabs = this.periods(K)[period];
+    const ti = tabSel[period] != null ? Math.min(tabSel[period], tabs.length - 1) : tabs.length - 1;
+    const cur = tabs[ti];
+    const eEff = Math.min(cur.e, K.TODAY);
+    const cats = K.byCat(cur.s, eEff);
+    const total = cats.reduce((s, c) => s + c.amount, 0);
+    const byMonth = cur.unit === 'month';
+
+    // Summary
+    // Average: per day, or per full month in a year view (a month in progress is left out, exactly as on Reports).
+    let avg = total / Math.max(1, eEff - cur.s + 1);
+    if (byMonth) {
+      const fullMonths = eEff < cur.e ? K.dt(eEff).getUTCMonth() : 12;
+      const fullEnd = eEff < cur.e ? K.dn(cur.y, fullMonths, 0) : eEff;
+      avg = fullMonths > 0 ? K.sum(cur.s, fullEnd) / fullMonths : total;
+    }
+    const cmp = this.compare(K, cur, eEff);
+    const hasDelta = cmp.prev > 0;
+    const pct = hasDelta ? ((total - cmp.prev) / cmp.prev) * 100 : 0;
+    const pctAbs = Math.round(Math.abs(pct));
+    const flat = pctAbs === 0;
+    const less = pct < 0;
+
+    // Controls
+    const periodBtns = [['week', 'Week'], ['month', 'Month'], ['year', 'Year'], ['custom', 'Custom']].map(([key, label]) => {
+      const on = key === period;
+      return { label, on, bg: on ? t.accent : 'transparent', fg: on ? t.onAccent : t.text2, fw: on ? '800' : '600', pick: () => set({ period: key, sel: null, hover: null }) };
+    });
+    const tabBtns = tabs.map((p, i) => {
+      const on = i === ti;
+      return { label: p.label, on, fg: on ? t.text : t.text3, fw: on ? '800' : '600', line: on ? t.accent : 'transparent', pick: () => set({ tabs: Object.assign({}, tabSel, { [period]: i }), sel: null, hover: null }) };
+    });
+    const viewBtns = [['cat', 'Categories'], ['day', 'Top days'], ['trend', 'Over time']].map(([key, label]) => {
+      const on = key === view;
+      return { label, on, bg: on ? t.accentSoft : t.surface, fg: on ? t.accent : t.text2, pick: () => set({ view: key, sel: null, hover: null }) };
+    });
+
+    // Ring: the five biggest categories (or days) plus one grey slice for everything else.
+    const top = cats.slice(0, 5);
+    const rest = cats.slice(5);
+    const restSum = rest.reduce((s, c) => s + c.amount, 0);
+    const selCat = view === 'cat' && sel ? cats.find((c) => c.cat.id === sel) : null;
+    const selIsOther = view === 'cat' && sel === 'other';
+    const ringSel = selIsOther ? 'other' : (selCat ? (top.indexOf(selCat) >= 0 ? selCat.cat.id : 'other') : null);
+    const share = (v, digits) => ((v / (total || 1)) * 100).toFixed(digits) + '% of total';
+    let slices = [];
+    let centerTitle = 'Total', centerValue = K.fmt(total), centerSub = cats.length + (cats.length === 1 ? ' category' : ' categories'), showDetails = false;
+    let ringAria = '';
+    let dayLegend = [];
+    if (view === 'cat') {
+      const items = top.map((c) => ({ key: c.cat.id, value: c.amount, fill: c.cat.color, tag: c.cat.emoji, isEmoji: true, name: c.cat.name }));
+      if (restSum > 0) items.push({ key: 'other', value: restSum, fill: t.other, tag: '+' + rest.length, isEmoji: false, name: 'Other' });
+      slices = this.ring(items, ringSel).map((s) => Object.assign(s, { pick: () => set({ sel: sel === s.key ? null : s.key }) }));
+      ringAria = 'Ring chart of spending by category. ' + items.map((it) => it.name + ' ' + Math.round((it.value / (total || 1)) * 100) + '%').join(', ');
+      if (selCat) {
+        centerTitle = selCat.cat.name;
+        centerValue = K.fmt(selCat.amount);
+        centerSub = share(selCat.amount, 1);
+        showDetails = true;
+      } else if (selIsOther) {
+        centerTitle = 'Other';
+        centerValue = K.fmt(restSum);
+        centerSub = rest.length + (rest.length === 1 ? ' category' : ' categories');
+      }
+    } else if (view === 'day') {
+      const days = [];
+      for (let n = cur.s; n <= eEff; n++) { const v = K.daySum(n); if (v > 0) days.push({ n, v }); }
+      days.sort((p, q) => q.v - p.v);
+      const topD = days.slice(0, 5);
+      const otherD = days.slice(5);
+      const otherSum = otherD.reduce((s, d) => s + d.v, 0);
+      const dayName = (n) => { const d = K.dt(n); return K.WS[d.getUTCDay()] + ', ' + K.MS[d.getUTCMonth()] + ' ' + d.getUTCDate(); };
+      const items = topD.map((d, i) => ({ key: 'd' + d.n, value: d.v, fill: t.ramp[i], tag: String(i + 1), isEmoji: false, name: dayName(d.n) }));
+      if (otherSum > 0) items.push({ key: 'dother', value: otherSum, fill: t.other, tag: '+' + otherD.length, isEmoji: false, name: otherD.length === 1 ? '1 other day' : otherD.length + ' other days' });
+      const selDay = items.find((it) => it.key === sel) || null;
+      slices = this.ring(items, selDay ? selDay.key : null).map((s) => Object.assign(s, { pick: () => set({ sel: sel === s.key ? null : s.key }) }));
+      dayLegend = slices.map((s) => ({ label: s.name, amt: K.fmt(s.value), tag: s.tag, tagSize: s.tagSize, on: s.on, bg: s.on ? t.wash : 'transparent', pick: s.pick }));
+      ringAria = 'Ring chart of the biggest spending days. ' + items.map((it) => it.name + ' ' + K.fmt(it.value)).join(', ');
+      const topSum = topD.reduce((s, d) => s + d.v, 0);
+      if (selDay) {
+        centerTitle = selDay.name;
+        centerValue = K.fmt(selDay.value);
+        centerSub = share(selDay.value, 1);
+      } else {
+        centerTitle = 'Top ' + topD.length + ' days';
+        centerValue = K.fmt(topSum);
+        centerSub = share(topSum, 1);
+      }
+    }
+
+    // Over time: one column per day (or per month in a year).
+    const pts = [];
+    if (byMonth) {
+      const now = K.dt(K.TODAY);
+      const tickParity = cur.y === now.getUTCFullYear() ? now.getUTCMonth() % 2 : 0;
+      for (let m = 0; m < 12; m++) {
+        const s = K.dn(cur.y, m, 1), e = K.dn(cur.y, m + 1, 0);
+        pts.push({ v: s <= K.TODAY ? K.sum(s, Math.min(e, K.TODAY)) : null, partial: e > K.TODAY && s <= K.TODAY, tick: m % 2 === tickParity ? K.MS[m] : '', long: e > K.TODAY && s <= K.TODAY ? K.MS[m] + ' ' + cur.y + ', so far' : K.ML[m] + ' ' + cur.y });
+      }
+    } else {
+      let tickMonth = -1;
+      for (let n = cur.s; n <= cur.e; n++) {
+        const d = K.dt(n);
+        const i = n - cur.s;
+        let tick = '';
+        if (cur.kind === 'week') tick = K.WS[d.getUTCDay()];
+        else if (i % 7 === 0) {
+          // Custom ranges cross months, so the month is named where it starts or changes.
+          tick = cur.kind === 'month' || d.getUTCMonth() === tickMonth ? String(d.getUTCDate()) : K.MS[d.getUTCMonth()] + ' ' + d.getUTCDate();
+          tickMonth = d.getUTCMonth();
+        }
+        pts.push({ v: n <= K.TODAY ? K.daySum(n) : null, tick, long: K.WS[d.getUTCDay()] + ', ' + K.MS[d.getUTCMonth()] + ' ' + d.getUTCDate() });
+      }
+    }
+    const W = 296, padL = 34, padT = 24, ph = 170;
+    const inset = 4;
+    const pw = W - padL - inset * 2;
+    const n = pts.length;
+    const pitch = pw / n;
+    const bw = Math.max(4, Math.min(22, Math.round(pitch * 0.7)));
+    const vals = pts.filter((p) => p.v !== null).map((p) => p.v);
+    const maxV = Math.max(1, ...vals);
+    const rough = maxV / 4;
+    const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+    const f = rough / mag;
+    const step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * mag;
+    let topV = Math.ceil(maxV / step) * step;
+    if (maxV > topV * 0.86) topV += step;
+    const X = (i) => padL + inset + pitch * (i + 0.5);
+    const Y = (v) => padT + ph - (v / topV) * ph;
+    let lastIdx = 0, peakIdx = 0;
+    pts.forEach((p, i) => { if (p.v === null) return; lastIdx = i; if (p.v > (pts[peakIdx].v || 0)) peakIdx = i; });
+    // A column can be pinned by a tap (st.hover) or peeked at with the mouse (st.peek); the mouse wins while it is over the chart.
+    const usable = (v) => (v != null && v <= lastIdx && pts[v] && pts[v].v !== null ? v : null);
+    const pinned = usable(st.hover);
+    const hover = usable(st.peek) !== null ? usable(st.peek) : pinned;
+    const hi = hover !== null ? hover : peakIdx;
+    const radius = bw >= 8 ? 4 : bw / 2;
+    const bars = [];
+    pts.forEach((p, i) => {
+      const left = (X(i) - bw / 2).toFixed(1) + 'px';
+      if (p.v === null) { bars.push({ left, top: (padT + ph - 3) + 'px', w: bw + 'px', h: '3px', r: '1.5px', fill: t.stub, ring: 'none' }); return; }
+      if (!p.v) return;
+      const h = Math.max(2, (p.v / topV) * ph);
+      const tone = i === hi ? t.accent : (hover !== null ? t.barDim : t.barSoft);
+      bars.push({ left, top: (padT + ph - h).toFixed(1) + 'px', w: bw + 'px', h: h.toFixed(1) + 'px', r: radius + 'px ' + radius + 'px 0 0', fill: p.partial ? 'transparent' : tone, ring: p.partial ? 'inset 0 0 0 1.5px ' + tone : 'none' });
+    });
+    // The average line uses the same average as the summary card, so the two numbers always agree.
+    const avgV = avg;
+    const compact = topV >= 10000;
+    const yTicks = [];
+    let gridPath = '';
+    for (let v = 0; v <= topV + 0.001; v += step) {
+      const y = Y(v);
+      gridPath += 'M' + padL + ' ' + (Math.round(y) + 0.5) + ' H' + W + ' ';
+      yTicks.push({ top: (y - 7).toFixed(1) + 'px', label: v === 0 ? '0' : (compact ? (v / 1000) + 'K' : K.fmt(v)) });
+    }
+    const xTicks = pts.map((p, i) => ({ label: p.tick, left: (X(i) - 20).toFixed(1) + 'px' })).filter((k) => k.label);
+    const peakV = pts[peakIdx].v || 0;
+    const peakX = X(peakIdx), peakY = Y(peakV);
+    // The peak label sits above its column, flush with the column edge when it is near either side.
+    let peakLeft = peakX - 60, peakAlign = 'center';
+    if (peakX - 44 < padL) { peakLeft = peakX - bw / 2; peakAlign = 'left'; }
+    else if (peakX + 44 > W) { peakLeft = peakX + bw / 2 - 120; peakAlign = 'right'; }
+    const hx = hover !== null ? X(hover) : 0;
+    const hy = hover !== null ? Y(pts[hover].v) : 0;
+    // The tooltip sits above the column, or beside it when the column is too tall to leave room.
+    let tipLeft = Math.max(padL, Math.min(W - 120, hx - 60)), tipTop = hy - 52;
+    if (tipTop < 0) {
+      tipTop = 0;
+      tipLeft = hx + bw / 2 + 8;
+      if (tipLeft + 120 > W) tipLeft = hx - bw / 2 - 8 - 120;
+    }
+    // Tapping a column pins its amount; tapping it again clears it.
+    const slots = [];
+    pts.forEach((p, i) => {
+      if (p.v === null) return;
+      slots.push({ left: (X(i) - pitch / 2).toFixed(1) + 'px', w: pitch.toFixed(1) + 'px', on: i === hover, aria: p.long + ': ' + K.fmt(p.v), pick: () => this.setState({ hover: i === pinned ? null : i, peek: null }), enter: () => { if ((this.state || {}).peek !== i) this.setState({ peek: i }); } });
+    });
+
+    // Words for what the faint marks and the hollow column mean.
+    const firstFuture = pts.findIndex((p) => p.v === null);
+    const laterLeft = firstFuture >= 0 ? X(firstFuture) - bw / 2 : 0;
+    const laterW = firstFuture >= 0 ? X(n - 1) + bw / 2 - laterLeft : 0;
+    // The note sits just above the faint marks, unless the average line is at that height; then it moves above the line.
+    const avgY = Y(avgV);
+    let laterTop = padT + ph - 21;
+    if (Math.abs(avgY - (laterTop + 7)) < 12) laterTop = avgY - 22;
+    const partIdx = pts.findIndex((p) => p.partial);
+    const showSoFar = partIdx >= 0 && hover !== partIdx && !(hover === null && partIdx === peakIdx);
+    const soFarBeside = partIdx >= 0 && partIdx < n - 1;
+
+    // Ranked list. Bars compare the categories with each other: the biggest one fills the row.
+    // They use the ring's colours: the five biggest keep their own colour, the rest share the slate of the "+N" slice.
+    const maxAmt = cats.length ? cats[0].amount : 1;
+    const rank = cats.map((c, i) => {
+      const on = view === 'cat' && sel === c.cat.id;
+      const pc = ((c.amount / (total || 1)) * 100).toFixed(1) + '%';
+      return {
+        name: c.cat.name,
+        emoji: c.cat.emoji,
+        color: i < 5 ? c.cat.color : t.other,
+        amt: K.fmt(c.amount),
+        pct: pc,
+        w: ((c.amount / maxAmt) * 100).toFixed(1) + '%',
+        on,
+        bg: on ? t.wash : 'transparent',
+        divider: i < cats.length - 1 ? 'inset 0 -1px 0 ' + t.line : 'none',
+        pick: () => set({ view: 'cat', sel: on ? null : c.cat.id, hover: null })
+      };
+    });
+
+    const unitWord = byMonth ? 'month' : 'day';
+    return {
+      t,
+      periodBtns, tabBtns, viewBtns,
+      totalText: K.fmt(total),
+      avgLabel: byMonth ? 'Monthly average' : 'Daily average',
+      avgText: K.fmt(avg),
+      hasDelta,
+      noDelta: !hasDelta,
+      deltaText: flat ? 'About the same as ' + cmp.label : pctAbs + '% ' + (less ? 'less' : 'more') + ' than ' + cmp.label,
+      deltaIcon: flat ? 'trending_flat' : (less ? 'trending_down' : 'trending_up'),
+      deltaFg: flat ? t.text2 : (less ? '#5BD49B' : '#FF9A8F'),
+      deltaBg: t.surface2,
+      isRing: view !== 'trend',
+      isDays: view === 'day',
+      isTrend: view === 'trend',
+      slices, ringAria, centerTitle, centerValue, centerSub, showDetails, dayLegend,
+      hint: view !== 'trend' && sel ? 'Tap it again to go back to the total.' : view === 'cat' ? 'Tap a slice or a category below to see its share.' : (view === 'day' ? 'The five days you spent the most in this period.' : 'Tap a column to see that ' + unitWord + '.'),
+      trendTitle: byMonth ? 'Monthly spending' : 'Daily spending',
+      avgLegend: 'Dashed line = average ' + K.fmt(avgV),
+      trendAria: 'Column chart of ' + (byMonth ? 'monthly' : 'daily') + ' spending. Peak ' + K.fmt(peakV) + ' on ' + pts[peakIdx].long + '. Average ' + K.fmt(avgV) + '.',
+      gridPath, yTicks, xTicks, bars,
+      avgPath: 'M' + padL + ' ' + (Math.round(Y(avgV)) + 0.5) + ' H' + (firstFuture >= 0 ? (X(firstFuture) - pitch / 2).toFixed(1) : W),
+      showPeak: hover === null && vals.length > 0,
+      peakText: 'Peak ' + K.fmt(peakV),
+      peakLeft: peakLeft.toFixed(1) + 'px',
+      peakTop: (peakY - 18).toFixed(1) + 'px',
+      peakAlign,
+      showTip: hover !== null,
+      tipLeft: tipLeft.toFixed(1) + 'px',
+      tipTop: tipTop.toFixed(1) + 'px',
+      tipLabel: hover !== null ? pts[hover].long : '',
+      tipValue: hover !== null ? K.fmt(pts[hover].v) : '',
+      showLater: firstFuture >= 0 && laterW >= 70,
+      laterLeft: laterLeft.toFixed(1) + 'px',
+      laterW: laterW.toFixed(1) + 'px',
+      laterTop: laterTop.toFixed(1) + 'px',
+      showSoFar,
+      soFarLeft: (partIdx < 0 ? 0 : soFarBeside ? X(partIdx) + bw / 2 + 4 : X(partIdx) - 20).toFixed(1) + 'px',
+      soFarTop: (partIdx < 0 ? 0 : soFarBeside ? Y(pts[partIdx].v) - 2 : Y(pts[partIdx].v) - 17).toFixed(1) + 'px',
+      soFarAlign: soFarBeside ? 'left' : 'center',
+      slots,
+      unpeek: () => { if ((this.state || {}).peek != null) this.setState({ peek: null }); },
+      countText: cats.length + (cats.length === 1 ? ' category' : ' categories'),
+      rank
+    };
+  }
+}
+</script>
+</body>
+</html>

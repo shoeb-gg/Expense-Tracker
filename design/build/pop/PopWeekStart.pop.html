@@ -1,0 +1,31 @@
+<!--@POP {"host":"NewSettings","title":"Settings, first day of the week","height":780,"scroll":432,"icons":"check"}-->
+  <div data-pop="sheet" style="position: absolute; left: 0; top: 0; width: 360px; height: 780px; z-index: 50; background: rgba(4, 10, 11, 0.88); display: flex; align-items: flex-end">
+    <div role="dialog" aria-label="First day of the week" style="width: 360px; box-sizing: border-box; padding: 10px 16px 24px; border-radius: 28px 28px 0 0; background: {{t.surface2}}; box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45); display: flex; flex-direction: column">
+      <span aria-hidden="true" style="align-self: center; width: 40px; height: 4px; border-radius: 2px; background: {{pop.grab}}"></span>
+      <span style="margin: 14px 16px 0; font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">First day of the week</span>
+      <span style="margin: 2px 16px 0; font-size: 13.5px; line-height: 20px; font-weight: 500; color: {{t.text2}}">Used by the calendar and the weekly chart.</span>
+      <div role="radiogroup" aria-label="First day of the week" style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px">
+        <sc-for list="{{pop.opts}}" as="o" hint-placeholder-count="3">
+          <button type="button" role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="height: 56px; border: 0; border-radius: 16px; padding: 0 16px; background: {{o.bg}}; box-shadow: {{o.ring}}; color: {{t.text}}; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; cursor: pointer; transition: background 0.15s">
+            <span style="font-size: 15px; line-height: 20px; font-weight: {{o.fw}}">{{o.label}}</span>
+            <span aria-hidden="true" style="width: 24px; height: 24px; flex-shrink: 0; border-radius: 12px; background: {{o.dotBg}}; box-shadow: {{o.dotRing}}; color: {{t.onAccent}}; display: flex; align-items: center; justify-content: center">
+              <sc-if value="{{o.on}}" hint-placeholder-val="{{ false }}">
+                <span class="ms" style="font-size: 18px; width: 18px; height: 18px">check</span>
+              </sc-if>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+<!--@LOGIC-->
+  // First day of the week. Same order as Money Tracker's sheet. A tap chooses and closes.
+  popVals(t) {
+    const k = this.popKit(t);
+    const st = this.state || {};
+    const cur = st.popPick || 'Sunday';
+    return {
+      grab: k.grab,
+      opts: ['Monday', 'Saturday', 'Sunday'].map((label) => Object.assign(k.opt(label === cur), { label, pick: () => this.setState({ popPick: label }) }))
+    };
+  }

@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Reports</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,0..1,0&amp;icon_names=add,bar_chart,donut_small,home,trending_down,trending_flat,trending_up,tune&amp;display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&amp;display=swap">
+<style>
+html,body{margin:0;overflow:hidden}
+.em{font-family:'Noto Color Emoji','Apple Color Emoji','Segoe UI Emoji',sans-serif;line-height:1;display:inline-block;flex-shrink:0}
+button,input{font-family:inherit}
+a{color:inherit}
+main::-webkit-scrollbar{display:none}
+.ms{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;line-height:1;display:inline-block;flex-shrink:0;overflow:hidden;white-space:nowrap;letter-spacing:normal;text-transform:none;direction:ltr;font-feature-settings:'liga';-webkit-font-smoothing:antialiased}
+</style>
+</helmet>
+<div style="width: 360px; height: 1474px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; color: {{t.text}}; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <header style="flex-shrink: 0; padding: 0 16px">
+    <div style="height: 64px; display: flex; align-items: center">
+      <h1 style="margin: 0; font-size: 21px; line-height: 28px; font-weight: 800; letter-spacing: -0.3px">Reports</h1>
+    </div>
+  </header>
+
+  <main style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 0 16px 28px; display: flex; flex-direction: column; gap: 12px">
+    <section aria-label="Monthly statistics" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center">
+        <div style="flex: 1; min-width: 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
+          <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">Monthly statistics</h2>
+          <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{mLabel}}</span>
+        </div>
+      </div>
+      <div style="padding: 16px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 8px; row-gap: 2px">
+        <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Spent so far</span>
+        <span style="justify-self: center; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Daily average</span>
+        <span style="justify-self: end; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{mCmpLabel}}</span>
+        <span style="font-size: 18px; line-height: 24px; font-weight: 800">{{mSpent}}</span>
+        <span style="justify-self: center; font-size: 18px; line-height: 24px; font-weight: 800">{{mAvg}}</span>
+        <span style="justify-self: end; font-size: 18px; line-height: 24px; font-weight: 800; white-space: nowrap; color: {{mCmpFg}}">{{mCmpText}}</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px; padding-left: 16px">
+        <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{t.tile}}; display: flex; align-items: center; justify-content: center">
+          <span class="em" aria-hidden="true" style="font-size: 22px">{{topEmoji}}</span>
+        </span>
+        <span style="flex: 1; min-width: 0; height: 68px; margin-right: 16px; box-shadow: inset 0 1px 0 {{t.line}}; display: flex; align-items: center; gap: 12px">
+          <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Biggest category</span>
+            <span style="font-size: 15px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{topName}}</span>
+          </span>
+          <span style="font-size: 15px; line-height: 20px; font-weight: 700; font-variant-numeric: tabular-nums">{{topAmt}}</span>
+        </span>
+      </div>
+    </section>
+
+    <section aria-label="Year at a glance" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 56px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+        <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">Year at a glance</h2>
+        <div role="group" aria-label="Year" style="height: 36px; box-sizing: border-box; padding: 3px; border-radius: 12px; background: {{t.surface}}; display: grid; grid-template-columns: repeat(2, 60px); gap: 2px">
+          <sc-for list="{{yearBtns}}" as="b" hint-placeholder-count="2">
+            <button type="button" aria-pressed="{{b.on}}" onClick="{{b.pick}}" style="height: 30px; border: 0; border-radius: 9px; padding: 0; background: {{b.bg}}; color: {{b.fg}}; font-size: 13px; line-height: 16px; font-weight: {{b.fw}}; font-variant-numeric: tabular-nums; cursor: pointer; transition: background 0.15s">{{b.label}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px">
+        <div aria-live="polite" style="height: 46px; display: flex; align-items: center; justify-content: space-between; gap: 8px">
+          <span style="display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{selLabel}}</span>
+            <span style="font-size: 22px; line-height: 28px; font-weight: 800; letter-spacing: -0.3px">{{selValue}}</span>
+          </span>
+          <sc-if value="{{selHasDelta}}" hint-placeholder-val="{{ false }}">
+            <span style="height: 28px; flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px 0 8px; border-radius: 14px; background: {{t.surface2}}; color: {{selDeltaFg}}; font-size: 12.5px; line-height: 16px; font-weight: 700; white-space: nowrap">
+              <span class="ms" aria-hidden="true" style="font-size: 18px; width: 18px; height: 18px">{{selDeltaIcon}}</span>
+              {{selDeltaText}}
+            </span>
+          </sc-if>
+        </div>
+        <div role="img" aria-label="{{chartAria}}" style="position: relative; width: 296px; height: 186px; flex-shrink: 0">
+          <svg viewBox="0 0 296 186" width="296" height="186" aria-hidden="true" style="position: absolute; left: 0; top: 0; overflow: visible"><path d="{{gridPath}}" stroke="{{t.line}}" stroke-width="1" fill="none"></path><path d="{{avgPath}}" stroke="{{t.text2}}" stroke-width="1.5" stroke-dasharray="5 4" fill="none"></path></svg>
+          <sc-for list="{{yTicks}}" as="k" hint-placeholder-count="4">
+            <span style="position: absolute; left: 0; top: {{k.top}}; width: 28px; text-align: right; white-space: nowrap; font-size: 10.5px; line-height: 14px; font-weight: 500; color: {{t.text3}}; font-variant-numeric: tabular-nums">{{k.label}}</span>
+          </sc-for>
+          <sc-for list="{{bars}}" as="b" hint-placeholder-count="12">
+            <button type="button" aria-label="{{b.aria}}" aria-pressed="{{b.on}}" disabled="{{b.future}}" onClick="{{b.pick}}" style="position: absolute; left: {{b.slotLeft}}; top: 0; width: {{b.slotW}}; height: 186px; border: 0; padding: 0; background: transparent; cursor: {{b.cursor}}">
+              <span style="position: absolute; left: {{b.barLeft}}; bottom: 26px; width: 14px; height: {{b.h}}; border-radius: {{b.r}}; background: {{b.fill}}; box-shadow: {{b.ring}}; transition: background 0.15s"></span>
+              <span style="position: absolute; left: 0; right: 0; bottom: 3px; display: flex; justify-content: center"><span style="min-width: 16px; height: 16px; border-radius: 6px; background: {{b.labelBg}}; color: {{b.labelFg}}; font-size: 10.5px; line-height: 16px; font-weight: {{b.fw}}; text-align: center">{{b.label}}</span></span>
+            </button>
+          </sc-for>
+        </div>
+        <div style="min-height: 36px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; line-height: 16px; font-weight: 500; color: {{t.text3}}">
+          <span style="font-variant-numeric: tabular-nums">{{avgText}}</span>
+          <sc-if value="{{hasPartial}}" hint-placeholder-val="{{ true }}">
+            <span>Hollow column = month in progress</span>
+          </sc-if>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="All time" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; padding: 16px; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 2px; align-items: baseline">
+      <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">All time</span>
+      <span style="justify-self: end; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Average month</span>
+      <span style="font-size: 22px; line-height: 28px; font-weight: 800; letter-spacing: -0.3px">{{allTotal}}</span>
+      <span style="justify-self: end; font-size: 22px; line-height: 28px; font-weight: 800; letter-spacing: -0.3px">{{allAvg}}</span>
+      <span style="font-size: 12px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{allSince}}</span>
+      <span style="justify-self: end; font-size: 12px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Full months only</span>
+    </section>
+
+    <section aria-label="Month by month" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center">
+        <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">Month by month</h2>
+      </div>
+      <div role="table" aria-label="Spending per month" style="padding-bottom: 4px">
+        <div role="row" style="height: 36px; margin: 0 16px; box-shadow: inset 0 -1px 0 {{t.line}}; display: grid; grid-template-columns: minmax(0, 1fr) 88px 80px; align-items: center; font-size: 12px; line-height: 16px; font-weight: 600; color: {{t.text3}}">
+          <span>Month</span>
+          <span style="text-align: right">Spent</span>
+          <span style="text-align: right">vs previous</span>
+        </div>
+        <sc-for list="{{rows}}" as="r" hint-placeholder-count="10">
+          <button type="button" role="row" aria-pressed="{{r.on}}" onClick="{{r.pick}}" style="width: 100%; border: 0; padding: 0 16px; background: {{r.bg}}; color: {{t.text}}; display: block; text-align: left; cursor: pointer; transition: background 0.15s">
+            <span style="height: 52px; box-shadow: {{r.divider}}; display: grid; grid-template-columns: minmax(0, 1fr) 88px 80px; align-items: center">
+              <span style="display: flex; align-items: center; gap: 8px; font-size: 15px; line-height: 20px; font-weight: 600">
+                {{r.month}}
+                <sc-if value="{{r.partial}}" hint-placeholder-val="{{ false }}">
+                  <span style="height: 20px; padding: 0 8px; border-radius: 10px; background: {{t.bg}}; color: {{t.text2}}; font-size: 11.5px; line-height: 20px; font-weight: 600">so far</span>
+                </sc-if>
+              </span>
+              <span style="text-align: right; font-size: 15px; line-height: 20px; font-weight: 700; font-variant-numeric: tabular-nums">{{r.amt}}</span>
+              <span style="display: flex; align-items: center; justify-content: flex-end; gap: 2px; font-size: 13px; line-height: 16px; font-weight: 700; font-variant-numeric: tabular-nums; color: {{r.deltaFg}}">
+                <sc-if value="{{r.hasDelta}}" hint-placeholder-val="{{ true }}">
+                  <span class="ms" aria-hidden="true" style="font-size: 18px; width: 18px; height: 18px">{{r.deltaIcon}}</span>
+                </sc-if>
+                <span>{{r.delta}}</span>
+              </span>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+  </main>
+
+  <nav aria-label="Main" style="height: 72px; flex-shrink: 0; position: relative; background: {{t.nav}}; box-shadow: inset 0 1px 0 {{t.line}}; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center">
+    <a href="MoodAqua.dc.html" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{t.text2}}; text-decoration: none; font-size: 11.5px; line-height: 14px; font-weight: 600">
+      <span style="width: 48px; height: 28px; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px">home</span>
+      </span>
+      Home
+    </a>
+    <a href="NewCharts.dc.html" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{t.text2}}; text-decoration: none; font-size: 11.5px; line-height: 14px; font-weight: 600">
+      <span style="width: 48px; height: 28px; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px">donut_small</span>
+      </span>
+      Charts
+    </a>
+    <a href="NewAdd.dc.html" aria-label="Add expense" style="height: 72px; display: flex; align-items: flex-start; justify-content: center; text-decoration: none">
+      <span style="margin-top: -16px; width: 58px; height: 58px; border-radius: 29px; background: {{t.accent}}; color: {{t.onAccent}}; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 22px -2px {{t.accentGlow}}, 0 2px 6px rgba(0, 0, 0, 0.35)">
+        <span class="ms" aria-hidden="true" style="font-size: 30px; width: 30px; height: 30px">add</span>
+      </span>
+    </a>
+    <a href="NewReports.dc.html" aria-current="page" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{t.accent}}; text-decoration: none; font-size: 11.5px; line-height: 14px; font-weight: 700">
+      <span style="width: 48px; height: 28px; border-radius: 14px; background: {{t.accentSoft}}; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px; font-variation-settings: 'FILL' 1">bar_chart</span>
+      </span>
+      Reports
+    </a>
+    <a href="NewSettings.dc.html" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{t.text2}}; text-decoration: none; font-size: 11.5px; line-height: 14px; font-weight: 600">
+      <span style="width: 48px; height: 28px; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px">tune</span>
+      </span>
+      Settings
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mood":{"editor":"enum","options":["coral","aqua","iris"],"default":"aqua"},"$preview":{"width":360,"height":1474}}'>
+class Component extends DCLogic {
+  theme(mood) {
+    const MOODS = {
+      coral: { bg: '#0F1320', nav: '#151A2A', surface: '#1A2033', line: '#2B3350', text: '#FFFFFF', text2: '#D3D8E8', text3: '#A2ABC4', accent: '#FF7A5F', onAccent: '#2A0F0A', ink: '#171B2B' },
+      aqua: { bg: '#0B1517', nav: '#101D20', surface: '#152528', line: '#24383C', text: '#FFFFFF', text2: '#CBDADC', text3: '#9BB0B3', accent: '#4FD1C5', onAccent: '#04231F', ink: '#0F1E21' },
+      iris: { bg: '#100F1C', nav: '#171527', surface: '#1D1B30', line: '#33304D', text: '#FFFFFF', text2: '#D4D1EC', text3: '#A9A6CA', accent: '#A898FF', onAccent: '#150F33', ink: '#17132B' }
+    };
+    const t = Object.assign({}, MOODS[mood] || MOODS.coral);
+    // mix(a, b, w): w parts of colour a, the rest colour b.
+    const mix = (a, b, w) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(a.slice(i, i + 2), 16) * w + parseInt(b.slice(i, i + 2), 16) * (1 - w)).toString(16).padStart(2, '0')).join('');
+    t.accentSoft = t.accent + '2E';
+    t.surface2 = { coral: '#232A42', aqua: '#1C3034', iris: '#27243E' }[mood] || '#232A42';
+    t.tile = '#' + [1, 3, 5].map((i) => Math.round(parseInt(t.surface.slice(i, i + 2), 16) * 0.87 + 33).toString(16).padStart(2, '0')).join('');
+    t.accentGlow = t.accent + '59';
+    t.wash = t.accent + '29';
+    // Chart colours that follow the theme. Category colours do not: they are fixed per category.
+    t.other = mix(t.text3, t.surface, 0.5);
+    t.barSoft = mix(t.accent, t.surface, 0.6);
+    t.barDim = mix(t.accent, t.surface, 0.36);
+    t.ramp = [1, 0.86, 0.72, 0.58, 0.44].map((w) => mix(t.accent, t.surface, w));
+    t.tip = mix('#FFFFFF', t.surface2, 0.1);
+    t.stub = mix(t.text3, t.surface, 0.28);
+    t.track = mix(t.bg, t.surface, 0.5);
+    // Shared by the other boards: text on accent, the calendar heat ramp, a dim text tone, and the mixer itself.
+    t.onAccentDim = t.onAccent + 'D9';
+    t.heat = [0.4, 0.56, 0.74, 0.94].map((w) => mix(t.accent, t.bg, w));
+    t.dim = mix(t.text3, t.bg, 0.55);
+    t.good = '#5BD49B';
+    t.bad = '#FF8C9A';
+    t.mix = mix;
+    return t;
+  }
+
+  kit() {
+    if (this._kit) return this._kit;
+    const DAY = 86400000;
+    const dn = (y, m, d) => Date.UTC(y, m, d) / DAY;
+    const dt = (n) => new Date(n * DAY);
+    const TODAY = dn(2026, 9, 18);
+    const MS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const ML = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const WD = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const WS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const fmt = (v) => Math.round(v).toLocaleString('en-US');
+    // Chart colours come from a palette checked for colour-blind separation. They are assigned so that
+    // categories which rank next to each other in the sample data never share or nearly share a colour.
+    const CATS = [
+      { id: 'groceries', name: 'Groceries', color: '#41AE61', emoji: '🥦' },
+      { id: 'snacks', name: 'Snacks', color: '#9085E9', emoji: '🍗' },
+      { id: 'transport', name: 'Transportation', color: '#D55181', emoji: '🚍' },
+      { id: 'shopping', name: 'Shopping', color: '#D55181', emoji: '🛍️' },
+      { id: 'rent', name: 'House Rent', color: '#3987E5', emoji: '🏠' },
+      { id: 'electric', name: 'Electric Bill', color: '#C98500', emoji: '⚡' },
+      { id: 'internet', name: 'Internet Bill', color: '#0096AF', emoji: '🌐' },
+      { id: 'phone', name: 'Phone', color: '#0096AF', emoji: '☎️' },
+      { id: 'gas', name: 'Gas', color: '#D95926', emoji: '🔥' },
+      { id: 'health', name: 'Health', color: '#0096AF', emoji: '💊' },
+      { id: 'gym', name: 'Gym', color: '#D95926', emoji: '💪' },
+      { id: 'selfcare', name: 'Self Care', color: '#E66767', emoji: '🧴' },
+      { id: 'subs', name: 'Online Subscriptions', color: '#3987E5', emoji: '▶️' },
+      { id: 'gifts', name: 'Gifts', color: '#E66767', emoji: '🎁' },
+      { id: 'misc', name: 'Miscellaneous', color: '#9085E9', emoji: '🧩' }
+    ];
+    const CAT = {};
+    CATS.forEach((c) => { CAT[c.id] = c; });
+    let a = 20261018;
+    const rnd = () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const pick = (arr) => arr[Math.floor(rnd() * arr.length)];
+    const NOTES = {
+      groceries: ['Weekly bazaar', 'Vegetables & fish', 'Supermarket run', 'Rice & lentils', ''],
+      snacks: ['Coffee', 'Tea & biscuits', 'Ice cream', 'Bakery', 'Chips & soda', ''],
+      transport: ['Ride to office', 'Ride home', 'Bus fare', ''],
+      shopping: ['New shoes', 'T-shirts', 'Kitchen stuff', ''],
+      selfcare: ['Haircut', 'Skincare', ''],
+      health: ['Pharmacy', 'Doctor visit', ''],
+      gifts: ['Birthday gift', 'Wedding gift'],
+      misc: ['Laundry', 'Stationery', '']
+    };
+    const T = [];
+    let id = 1;
+    const add = (catId, amount, y, m, d, note) => T.push({ id: id++, catId, amount, y, m, d, n: dn(y, m, d), note: note || '', h: 8 + Math.floor(rnd() * 14), mi: Math.floor(rnd() * 60) });
+    for (let n = dn(2025, 0, 1); n <= TODAY; n++) {
+      const t = dt(n);
+      const y = t.getUTCFullYear(), m = t.getUTCMonth(), d = t.getUTCDate(), dow = t.getUTCDay();
+      if (d === 1) add('rent', 15000, y, m, d, ML[m] + ' rent');
+      if (d === 3) add('gym', 1000, y, m, d, 'Membership');
+      if (d === 5) add('internet', 1500, y, m, d, 'Broadband');
+      if (d === 8) add('subs', 685, y, m, d, 'Streaming');
+      if (d === 12) add('electric', Math.round((2300 + rnd() * 1400) / 10) * 10, y, m, d, ML[m] + ' bill');
+      if (d === 20) add('gas', 1150, y, m, d, 'Cooking gas');
+      if (d === 2 || d === 16) add('phone', 500, y, m, d, 'Mobile recharge');
+      if (rnd() < 0.72) add('snacks', Math.round((60 + rnd() * 380) / 5) * 5, y, m, d, pick(NOTES.snacks));
+      if ((dow === 2 || dow === 5) && rnd() < 0.85) add('groceries', Math.round((450 + rnd() * 1800) / 10) * 10, y, m, d, pick(NOTES.groceries));
+      if (dow >= 1 && dow <= 5 && rnd() < 0.7) add('transport', Math.round((40 + rnd() * 300) / 10) * 10, y, m, d, pick(NOTES.transport));
+      if (rnd() < 0.05) add('shopping', Math.round((800 + rnd() * 3700) / 50) * 50, y, m, d, pick(NOTES.shopping));
+      if (rnd() < 0.035) add('selfcare', Math.round((300 + rnd() * 900) / 50) * 50, y, m, d, pick(NOTES.selfcare));
+      if (rnd() < 0.03) add('health', Math.round((200 + rnd() * 2300) / 10) * 10, y, m, d, pick(NOTES.health));
+      if (rnd() < 0.015) add('gifts', Math.round((500 + rnd() * 2500) / 100) * 100, y, m, d, pick(NOTES.gifts));
+      if (rnd() < 0.07) add('misc', Math.round((50 + rnd() * 550) / 10) * 10, y, m, d, pick(NOTES.misc));
+    }
+    const byDay = {};
+    T.forEach((x) => { (byDay[x.n] = byDay[x.n] || []).push(x); });
+    const daySum = (n) => (byDay[n] || []).reduce((s, x) => s + x.amount, 0);
+    const sum = (s, e) => { let tot = 0; for (let n = s; n <= e; n++) tot += daySum(n); return tot; };
+    const byCat = (s, e) => {
+      const o = {};
+      for (let n = s; n <= e; n++) (byDay[n] || []).forEach((x) => { o[x.catId] = (o[x.catId] || 0) + x.amount; });
+      return Object.keys(o).map((k) => ({ cat: CAT[k], amount: o[k] })).sort((p, q) => q.amount - p.amount);
+    };
+    this._kit = { dn, dt, TODAY, MS, ML, WD, WS, fmt, CAT, byDay, daySum, sum, byCat };
+    return this._kit;
+  }
+
+  renderVals() {
+    const K = this.kit();
+    const st = this.state || {};
+    const t = this.theme(this.props.mood ?? 'aqua');
+    const now = K.dt(K.TODAY);
+    const curY = now.getUTCFullYear(), curM = now.getUTCMonth();
+    // Rounded change against an earlier amount: icon, colour and words. Spending less is good.
+    const delta = (v, prev) => {
+      const pct = ((v - prev) / prev) * 100;
+      const abs = Math.round(Math.abs(pct));
+      const flat = abs === 0;
+      return { abs, flat, less: pct < 0, icon: flat ? 'trending_flat' : (pct < 0 ? 'trending_down' : 'trending_up'), fg: flat ? t.text2 : (pct < 0 ? t.good : t.bad) };
+    };
+
+    // Monthly statistics: the current month so far, against the same days of the month before.
+    const mS = K.dn(curY, curM, 1);
+    const mSpent = K.sum(mS, K.TODAY);
+    const mDays = K.TODAY - mS + 1;
+    const pS = K.dn(curY, curM - 1, 1);
+    const prevSame = K.sum(pS, pS + mDays - 1);
+    const mCmp = prevSame ? delta(mSpent, prevSame) : null;
+    const top = K.byCat(mS, K.TODAY)[0];
+
+    // Year at a glance
+    const year = st.year || curY;
+    const months = [];
+    for (let m = 0; m < 12; m++) {
+      const s = K.dn(year, m, 1), e = K.dn(year, m + 1, 0);
+      const future = s > K.TODAY;
+      const partial = !future && e > K.TODAY;
+      months.push({ m, future, partial, v: future ? null : K.sum(s, Math.min(e, K.TODAY)) });
+    }
+    const defaultSel = year === curY ? curM : 11;
+    const selM = st.month != null && !months[st.month].future ? st.month : defaultSel;
+    const prevOf = (m) => (m > 0 ? months[m - 1].v : (year > 2025 ? K.sum(K.dn(year - 1, 11, 1), K.dn(year - 1, 11, 31)) : null));
+
+    const W = 296, padL = 34, padT = 20, ph = 140, inset = 4;
+    const pw = W - padL - inset * 2;
+    const vals = months.filter((x) => x.v !== null).map((x) => x.v);
+    const maxV = Math.max(1, ...vals);
+    const rough = maxV / 3;
+    const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+    const f = rough / mag;
+    const step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * mag;
+    const topV = Math.ceil(maxV / step) * step;
+    const Y = (v) => padT + ph - (v / topV) * ph;
+    const compact = topV >= 10000;
+    let gridPath = '';
+    const yTicks = [];
+    for (let v = 0; v <= topV + 0.001; v += step) {
+      const y = Y(v);
+      gridPath += 'M' + padL + ' ' + (Math.round(y) + 0.5) + ' H' + W + ' ';
+      yTicks.push({ top: (y - 7).toFixed(1) + 'px', label: v === 0 ? '0' : (compact ? (v / 1000) + 'K' : K.fmt(v)) });
+    }
+    const slotW = pw / 12;
+    const bars = months.map((x) => {
+      const on = x.m === selM;
+      const tone = on ? t.accent : t.barSoft;
+      const h = x.future ? 3 : (x.v ? Math.max(2, (x.v / topV) * ph) : 0);
+      return {
+        slotLeft: (padL + inset + x.m * slotW).toFixed(1) + 'px',
+        slotW: slotW.toFixed(1) + 'px',
+        barLeft: ((slotW - 14) / 2).toFixed(1) + 'px',
+        h: h.toFixed(1) + 'px',
+        r: x.future ? '1.5px' : '4px 4px 0 0',
+        fill: x.future ? t.stub : (x.partial ? 'transparent' : tone),
+        ring: x.partial ? 'inset 0 0 0 1.5px ' + tone : 'none',
+        label: 'JFMAMJJASOND'[x.m],
+        labelBg: on ? t.accent : 'transparent',
+        labelFg: x.future ? t.dim : (on ? t.onAccent : t.text3),
+        fw: on ? '800' : '600',
+        on,
+        future: x.future,
+        cursor: x.future ? 'default' : 'pointer',
+        aria: K.ML[x.m] + ' ' + year + (x.future ? ', no data yet' : ': ' + K.fmt(x.v) + (x.partial ? ' so far' : '')),
+        pick: () => this.setState({ month: x.m })
+      };
+    });
+    // The average covers full months only, so its line stops where the month in progress begins.
+    const full = months.filter((x) => x.v !== null && !x.partial);
+    const avgV = full.length ? full.reduce((s, x) => s + x.v, 0) / full.length : 0;
+    const avgEnd = full.length < 12 ? padL + inset + full.length * slotW : W;
+    const sel = months[selM];
+    const pv = prevOf(selM);
+    const selHasDelta = !sel.partial && pv !== null && pv > 0;
+    const sd = selHasDelta ? delta(sel.v, pv) : null;
+    const prevName = selM > 0 ? K.ML[selM - 1] : 'December';
+
+    // All time
+    const startAll = K.dn(2025, 0, 1);
+    const allTotal = K.sum(startAll, K.TODAY);
+    const fullMonths = [];
+    for (let y = 2025; y <= curY; y++) for (let m = 0; m < 12; m++) { const e = K.dn(y, m + 1, 0); if (e <= K.TODAY) fullMonths.push(K.sum(K.dn(y, m, 1), e)); }
+    const allAvg = fullMonths.length ? fullMonths.reduce((s, v) => s + v, 0) / fullMonths.length : 0;
+
+    // Month by month, latest first
+    const shown = months.filter((x) => !x.future).slice().reverse();
+    const rows = shown.map((x, i) => {
+      const p = prevOf(x.m);
+      const has = !x.partial && p !== null && p > 0;
+      const d = has ? delta(x.v, p) : null;
+      const on = x.m === selM;
+      return {
+        month: K.ML[x.m],
+        partial: x.partial,
+        amt: K.fmt(x.v),
+        hasDelta: has,
+        delta: has ? d.abs + '%' : '—',
+        deltaIcon: has ? d.icon : '',
+        deltaFg: has ? d.fg : t.text3,
+        on,
+        bg: on ? t.wash : 'transparent',
+        divider: i < shown.length - 1 ? 'inset 0 -1px 0 ' + t.line : 'none',
+        pick: () => this.setState({ month: x.m })
+      };
+    });
+
+    return {
+      t,
+      mLabel: K.ML[curM] + ' ' + curY,
+      mSpent: K.fmt(mSpent),
+      mAvg: K.fmt(mSpent / mDays),
+      mCmpLabel: 'vs ' + K.MS[K.dt(pS).getUTCMonth()] + ' 1–' + mDays,
+      mCmpText: mCmp ? (mCmp.flat ? 'Same' : mCmp.abs + '% ' + (mCmp.less ? 'less' : 'more')) : '\u2014',
+      mCmpIcon: mCmp ? mCmp.icon : 'trending_flat',
+      mCmpFg: mCmp ? mCmp.fg : t.text3,
+      topName: top.cat.name,
+      topAmt: K.fmt(top.amount),
+      topEmoji: top.cat.emoji,
+      yearBtns: [2025, 2026].map((y) => ({ label: String(y), on: y === year, bg: y === year ? t.accent : 'transparent', fg: y === year ? t.onAccent : t.text2, fw: y === year ? '800' : '600', pick: () => this.setState({ year: y, month: null }) })),
+      selLabel: K.ML[selM] + ' ' + year + (sel.partial ? ' (so far)' : ''),
+      selValue: K.fmt(sel.v),
+      selHasDelta,
+      selDeltaText: sd ? (sd.flat ? 'Same as ' + prevName : sd.abs + '% ' + (sd.less ? 'less' : 'more') + ' than ' + prevName) : '',
+      selDeltaIcon: sd ? sd.icon : '',
+      selDeltaFg: sd ? sd.fg : t.text2,
+      chartAria: 'Column chart of monthly spending in ' + year + '. ' + months.filter((x) => x.v !== null).map((x) => K.MS[x.m] + ' ' + K.fmt(x.v)).join(', ') + '. Average full month ' + K.fmt(avgV) + '.',
+      gridPath,
+      yTicks,
+      bars,
+      avgPath: avgV ? 'M' + padL + ' ' + (Math.round(Y(avgV)) + 0.5) + ' H' + avgEnd.toFixed(1) : '',
+      avgText: 'Dashed line = ' + year + ' monthly average ' + K.fmt(avgV),
+      hasPartial: months.some((x) => x.partial),
+      allTotal: K.fmt(allTotal),
+      allSince: 'Since January 2025',
+      allAvg: K.fmt(allAvg),
+      rows
+    };
+  }
+}
+</script>
+</body>
+</html>

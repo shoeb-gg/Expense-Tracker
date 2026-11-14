@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Import, step 2</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!--@HELMET arrow_back,description,expand_more-->
+<div style="width: 360px; height: 780px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; color: {{t.text}}; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <header style="height: 60px; flex-shrink: 0; padding: 0 16px; display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; align-items: center">
+    <a href="NewImport.dc.html" aria-label="Back to step 1" style="justify-self: start; width: 40px; height: 40px; border-radius: 20px; background: {{t.surface}}; color: {{t.text}}; display: flex; align-items: center; justify-content: center; text-decoration: none">
+      <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">arrow_back</span>
+    </a>
+    <div style="display: flex; flex-direction: column; align-items: center">
+      <h1 style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 800; letter-spacing: -0.2px; white-space: nowrap">Check the columns</h1>
+      <span style="font-size: 12.5px; line-height: 16px; font-weight: 600; color: {{t.text3}}">Step 2 of 3</span>
+    </div>
+    <span aria-hidden="true"></span>
+  </header>
+
+  <main style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 2px 16px 24px; display: flex; flex-direction: column; gap: 12px">
+    <section aria-label="Chosen file" style="flex-shrink: 0; height: 68px; border-radius: 20px; background: {{t.surface}}; padding: 0 16px; display: flex; align-items: center; gap: 12px">
+      <span aria-hidden="true" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{t.tile}}; color: {{t.text2}}; display: flex; align-items: center; justify-content: center">
+        <span class="ms" style="font-size: 24px; width: 24px; height: 24px">description</span>
+      </span>
+      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 15px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">expenses-2025.csv</span>
+        <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">312 rows</span>
+      </span>
+      <a href="NewImport.dc.html" style="flex-shrink: 0; height: 32px; padding: 0 12px; border-radius: 16px; background: {{t.tile}}; font-size: 13px; line-height: 32px; font-weight: 700; color: {{t.text}}; text-decoration: none">Change</a>
+    </section>
+
+    <section aria-label="Match the columns" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center">
+        <div style="flex: 1; min-width: 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
+          <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">Your columns</h2>
+          <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">4 of 4 found</span>
+        </div>
+      </div>
+      <div aria-hidden="true" style="margin: 0 16px; padding-top: 12px; display: flex; justify-content: space-between; font-size: 12px; line-height: 16px; font-weight: 600; color: {{t.text3}}">
+        <span>In the app</span>
+        <span style="width: 124px">Column in your file</span>
+      </div>
+      <sc-for list="{{fields}}" as="f" hint-placeholder-count="4">
+        <div style="margin: 0 16px; height: 64px; box-shadow: {{f.line}}; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+          <span style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 15px; line-height: 20px; font-weight: 600">{{f.name}}</span>
+            <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}; white-space: nowrap; font-variant-numeric: tabular-nums">{{f.sample}}</span>
+          </span>
+          <button type="button" aria-label="{{f.aria}}" style="width: 124px; height: 40px; flex-shrink: 0; border: 0; border-radius: 12px; padding: 0 6px 0 12px; background: {{t.tile}}; color: {{t.text}}; font-size: 14px; line-height: 20px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; cursor: pointer">
+            <span style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{f.column}}</span>
+            <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; color: {{t.text3}}">expand_more</span>
+          </button>
+        </div>
+      </sc-for>
+    </section>
+
+    <section aria-label="How dates are written" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center">
+        <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">How dates are written</h2>
+      </div>
+      <div style="padding: 16px; display: flex; flex-direction: column; gap: 10px">
+        <div role="group" aria-label="Date order" style="height: 40px; box-sizing: border-box; padding: 4px; border-radius: 14px; background: {{t.bg}}; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px">
+          <sc-for list="{{orders}}" as="b" hint-placeholder-count="2">
+            <button type="button" aria-pressed="{{b.on}}" onClick="{{b.pick}}" style="height: 32px; border: 0; border-radius: 10px; padding: 0; background: {{b.bg}}; color: {{b.fg}}; font-size: 13.5px; line-height: 20px; font-weight: {{b.fw}}; cursor: pointer; transition: background 0.15s">{{b.label}}</button>
+          </sc-for>
+        </div>
+        <span aria-live="polite" style="text-align: center; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}; font-variant-numeric: tabular-nums">05/03/2025 is read as <span style="font-weight: 800; color: {{t.text}}">{{readAs}}</span></span>
+      </div>
+    </section>
+  </main>
+
+  <div style="flex-shrink: 0; padding: 12px 16px 14px; background: {{t.nav}}; box-shadow: inset 0 1px 0 {{t.line}}; display: flex; flex-direction: column; gap: 8px">
+    <a href="NewImportReview.dc.html" style="height: 52px; border-radius: 18px; background: {{t.accent}}; color: {{t.onAccent}}; font-size: 15.5px; line-height: 20px; font-weight: 800; text-decoration: none; display: flex; align-items: center; justify-content: center">Next</a>
+    <span style="text-align: center; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Nothing is added until the last step.</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mood":{"editor":"enum","options":["coral","aqua","iris"],"default":"aqua"},"$preview":{"width":360,"height":780}}'>
+class Component extends DCLogic {
+  /*@THEME*/
+
+  renderVals() {
+    const st = this.state || {};
+    const t = this.theme(this.props.mood ?? 'aqua');
+    const line = 'inset 0 -1px 0 ' + t.line;
+    const order = st.order || 'day';
+    const F = [['Date', 'e.g. 05/03/2025', 'Date'], ['Amount', 'e.g. 1,250.00', 'Amount'], ['Category', 'e.g. Groceries', 'Type'], ['Title', 'e.g. Weekly bazaar', 'Note']];
+    return {
+      t,
+      fields: F.map(([name, sample, column], i) => ({ name, sample, column, aria: name + ' comes from the column ' + column + '. Tap to change', line: i < F.length - 1 ? line : 'none' })),
+      orders: [['day', 'Day first'], ['month', 'Month first']].map(([key, label]) => {
+        const on = key === order;
+        return { label, on, bg: on ? t.accent : 'transparent', fg: on ? t.onAccent : t.text2, fw: on ? '800' : '600', pick: () => this.setState({ order: key }) };
+      }),
+      readAs: order === 'day' ? 'March 5, 2025' : 'May 3, 2025'
+    };
+  }
+}
+</script>
+</body>
+</html>

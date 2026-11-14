@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Receipt photo</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!--@HELMET close,zoom_in-->
+<div style="width: 360px; height: 780px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: #05090A; color: #FFFFFF; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <header style="height: 60px; flex-shrink: 0; padding: 0 16px; display: grid; grid-template-columns: 88px minmax(0, 1fr) 88px; align-items: center">
+    <a href="NewExpense.dc.html" aria-label="Close the photo" style="justify-self: start; width: 40px; height: 40px; border-radius: 20px; background: rgba(255, 255, 255, 0.12); color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none">
+      <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">close</span>
+    </a>
+    <h1 style="margin: 0; text-align: center; font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">Receipt</h1>
+    <span aria-hidden="true"></span>
+  </header>
+
+  <main style="flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center">
+    <div role="img" aria-label="Photo of a paper receipt for 1,180" style="position: relative; width: 360px; height: 540px; overflow: hidden; background: radial-gradient(120% 90% at 30% 15%, #6A5846 0%, #46392D 50%, #2A221B 100%)">
+      <div style="position: absolute; left: 60px; top: 42px; width: 240px; height: 456px; box-sizing: border-box; padding: 22px 20px 0; background: linear-gradient(180deg, #F8F5EE 0%, #EDE8DC 100%); color: #2B2925; transform: rotate(-2.5deg); box-shadow: 0 18px 30px rgba(0, 0, 0, 0.45); font-family: ui-monospace, 'Cascadia Mono', Consolas, 'Courier New', monospace; font-size: 12px; line-height: 20px; display: flex; flex-direction: column">
+        <span style="text-align: center; font-size: 14px; line-height: 20px; font-weight: 700; letter-spacing: 1px">CITY HEALTH CLINIC</span>
+        <span style="text-align: center; color: #6B675E">Receipt no. 004512</span>
+        <span style="text-align: center; color: #6B675E">18 Oct 2026  10:12</span>
+        <span aria-hidden="true" style="margin: 12px 0; border-top: 1.5px dashed #A8A397"></span>
+        <span style="display: flex; justify-content: space-between"><span>Consultation</span><span>800</span></span>
+        <span style="display: flex; justify-content: space-between"><span>Blood test</span><span>300</span></span>
+        <span style="display: flex; justify-content: space-between"><span>Medicine</span><span>80</span></span>
+        <span aria-hidden="true" style="margin: 12px 0; border-top: 1.5px dashed #A8A397"></span>
+        <span style="display: flex; justify-content: space-between; font-size: 15px; line-height: 24px; font-weight: 700"><span>TOTAL</span><span>1,180</span></span>
+        <span style="margin-top: 4px; color: #6B675E">Paid in cash</span>
+        <span aria-hidden="true" style="margin: 24px 0 0; height: 44px; background: repeating-linear-gradient(90deg, #2B2925 0 2px, transparent 2px 5px, #2B2925 5px 6px, transparent 6px 10px, #2B2925 10px 13px, transparent 13px 15px)"></span>
+        <span style="margin-top: 10px; text-align: center; color: #6B675E">Thank you</span>
+      </div>
+    </div>
+  </main>
+
+  <footer style="height: 58px; flex-shrink: 0; box-sizing: border-box; padding: 0 16px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px">
+    <span style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+      <span style="font-size: 15px; line-height: 20px; font-weight: 700">Doctor visit</span>
+      <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: rgba(255, 255, 255, 0.68); font-variant-numeric: tabular-nums">Oct 18, 2026 · 1,180</span>
+    </span>
+    <span style="flex-shrink: 0; height: 20px; color: rgba(255, 255, 255, 0.55); font-size: 12.5px; line-height: 20px; font-weight: 500; display: flex; align-items: center; gap: 4px">
+      <span class="ms" aria-hidden="true" style="font-size: 16px; width: 16px; height: 16px">zoom_in</span>
+      Pinch to zoom
+    </span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":360,"height":780}}'>
+class Component extends DCLogic {
+  // The photo viewer is always dark, whatever the colour theme.
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

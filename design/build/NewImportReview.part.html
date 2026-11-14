@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Import, step 3</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!--@HELMET add_circle,arrow_back,category,content_copy,error-->
+<div style="width: 360px; height: 900px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; color: {{t.text}}; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <header style="height: 60px; flex-shrink: 0; padding: 0 16px; display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; align-items: center">
+    <a href="NewImportMatch.dc.html" aria-label="Back to step 2" style="justify-self: start; width: 40px; height: 40px; border-radius: 20px; background: {{t.surface}}; color: {{t.text}}; display: flex; align-items: center; justify-content: center; text-decoration: none">
+      <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">arrow_back</span>
+    </a>
+    <div style="display: flex; flex-direction: column; align-items: center">
+      <h1 style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 800; letter-spacing: -0.2px; white-space: nowrap">Review and import</h1>
+      <span style="font-size: 12.5px; line-height: 16px; font-weight: 600; color: {{t.text3}}">Step 3 of 3</span>
+    </div>
+    <span aria-hidden="true"></span>
+  </header>
+
+  <main style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 2px 16px 24px; display: flex; flex-direction: column; gap: 12px">
+    <section aria-label="Ready to add" style="flex-shrink: 0; border-radius: 24px; background: {{t.accent}}; color: {{t.onAccent}}; padding: 16px; display: flex; flex-direction: column">
+      <span style="font-size: 13px; line-height: 16px; font-weight: 700; color: {{t.onAccentDim}}">Ready to add</span>
+      <div style="margin-top: 2px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; column-gap: 12px">
+        <span style="font-size: 30px; line-height: 38px; font-weight: 800; letter-spacing: -0.6px; font-variant-numeric: tabular-nums; white-space: nowrap">298 expenses</span>
+        <span style="padding-bottom: 5px; display: flex; flex-direction: column; align-items: flex-end">
+          <span style="font-size: 17px; line-height: 20px; font-weight: 800; font-variant-numeric: tabular-nums">412,560</span>
+          <span style="font-size: 12px; line-height: 14px; font-weight: 600; color: {{t.onAccentDim}}">in total</span>
+        </span>
+      </div>
+      <span style="margin-top: 2px; font-size: 12.5px; line-height: 16px; font-weight: 600; color: {{t.onAccentDim}}; font-variant-numeric: tabular-nums">Mar 2 to Dec 30, 2025</span>
+    </section>
+
+    <section aria-label="What happens to the 312 rows" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center">
+        <div style="flex: 1; min-width: 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
+          <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">What happens</h2>
+          <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">312 rows in the file</span>
+        </div>
+      </div>
+      <sc-for list="{{outcomes}}" as="o" hint-placeholder-count="4">
+        <div style="margin: 0 16px; height: 68px; display: flex; align-items: center; gap: 12px">
+          <span aria-hidden="true" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{t.tile}}; color: {{o.fg}}; display: flex; align-items: center; justify-content: center">
+            <span class="ms" style="font-size: 22px; width: 22px; height: 22px">{{o.icon}}</span>
+          </span>
+          <span style="flex: 1; min-width: 0; align-self: stretch; box-shadow: {{o.line}}; display: flex; flex-direction: column; justify-content: center; gap: 2px">
+            <span style="font-size: 15px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums">{{o.title}}</span>
+            <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{o.sub}}</span>
+          </span>
+        </div>
+      </sc-for>
+    </section>
+
+    <section aria-label="A first look" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center">
+        <div style="flex: 1; min-width: 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
+          <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">A first look</h2>
+          <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">3 of 298</span>
+        </div>
+      </div>
+      <sc-for list="{{peek}}" as="x" hint-placeholder-count="3">
+        <div style="height: 68px; padding: 0 16px; display: flex; align-items: center; gap: 12px">
+          <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{t.tile}}; display: flex; align-items: center; justify-content: center">
+            <span class="em" aria-hidden="true" style="font-size: 22px">{{x.emoji}}</span>
+          </span>
+          <span style="flex: 1; min-width: 0; align-self: stretch; box-shadow: {{x.line}}; display: flex; align-items: center; gap: 12px">
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 15px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{x.title}}</span>
+              <span style="display: flex; align-items: center; gap: 4px; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}; white-space: nowrap">
+                <span>{{x.cat}}</span>
+                <sc-if value="{{x.isNew}}" hint-placeholder-val="{{ false }}">
+                  <span style="height: 16px; padding: 0 6px; border-radius: 8px; background: {{t.surface2}}; color: {{t.accent}}; font-size: 11px; line-height: 16px; font-weight: 800">New</span>
+                </sc-if>
+                <span>{{x.when}}</span>
+              </span>
+            </span>
+            <span style="font-size: 15px; line-height: 20px; font-weight: 700; font-variant-numeric: tabular-nums">{{x.amount}}</span>
+          </span>
+        </div>
+      </sc-for>
+    </section>
+  </main>
+
+  <div style="flex-shrink: 0; padding: 12px 16px 14px; background: {{t.nav}}; box-shadow: inset 0 1px 0 {{t.line}}; display: flex; flex-direction: column; gap: 8px">
+    <a href="MoodAqua.dc.html" style="height: 52px; border-radius: 18px; background: {{t.accent}}; color: {{t.onAccent}}; font-size: 15.5px; line-height: 20px; font-weight: 800; text-decoration: none; display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums">Import 298 expenses</a>
+    <span style="text-align: center; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Adds to your expenses. Nothing is replaced.</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mood":{"editor":"enum","options":["coral","aqua","iris"],"default":"aqua"},"$preview":{"width":360,"height":900}}'>
+class Component extends DCLogic {
+  /*@THEME*/
+
+  renderVals() {
+    const t = this.theme(this.props.mood ?? 'aqua');
+    const line = 'inset 0 -1px 0 ' + t.line;
+    return {
+      t,
+      outcomes: [
+        { icon: 'add_circle', fg: t.good, title: '298 new expenses', sub: 'Will be added', line },
+        { icon: 'content_copy', fg: t.text2, title: '11 already in the app', sub: 'Skipped, so nothing is counted twice', line },
+        { icon: 'error', fg: t.bad, title: '3 rows can’t be read', sub: 'Rows 14, 87, 203 \u00B7 no date or amount', line },
+        { icon: 'category', fg: t.accent, title: '2 new categories', sub: 'Pets and Travel will be created', line: 'none' }
+      ],
+      peek: [
+        { emoji: '🥦', title: 'Weekly bazaar', cat: 'Groceries', isNew: false, when: '\u00B7 Mar 2, 2025', amount: '2,450', line },
+        { emoji: '🚍', title: 'Bus pass', cat: 'Transportation', isNew: false, when: '\u00B7 Mar 3, 2025', amount: '600', line },
+        { emoji: '🏷️', title: 'Cat food', cat: 'Pets', isNew: true, when: '\u00B7 Mar 3, 2025', amount: '890', line: 'none' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

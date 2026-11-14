@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Category drill-down</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,0..1,0&amp;icon_names=arrow_back,expand_more&amp;display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&amp;display=swap">
+<style>
+html,body{margin:0;overflow:hidden}
+.em{font-family:'Noto Color Emoji','Apple Color Emoji','Segoe UI Emoji',sans-serif;line-height:1;display:inline-block;flex-shrink:0}
+button,input{font-family:inherit}
+a{color:inherit}
+main::-webkit-scrollbar{display:none}
+.ms{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;line-height:1;display:inline-block;flex-shrink:0;overflow:hidden;white-space:nowrap;letter-spacing:normal;text-transform:none;direction:ltr;font-feature-settings:'liga';-webkit-font-smoothing:antialiased}
+</style>
+</helmet>
+<div style="width: 360px; height: 834px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; color: {{t.text}}; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <header style="height: 60px; flex-shrink: 0; padding: 0 16px; display: flex; align-items: center; gap: 12px">
+    <a href="NewCharts.dc.html" aria-label="Back to charts" style="flex-shrink: 0; width: 40px; height: 40px; border-radius: 20px; background: {{t.surface}}; color: {{t.text}}; display: flex; align-items: center; justify-content: center; text-decoration: none">
+      <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">arrow_back</span>
+    </a>
+    <h1 style="margin: 0; flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">
+      <span style="width: 28px; height: 28px; flex-shrink: 0; border-radius: 9px; background: {{t.tile}}; display: flex; align-items: center; justify-content: center">
+        <span class="em" aria-hidden="true" style="font-size: 15px">{{catEmoji}}</span>
+      </span>
+      <span style="min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{catName}}</span>
+    </h1>
+    <button type="button" aria-label="Choose month, October 2026" style="flex-shrink: 0; height: 40px; padding: 0 8px 0 14px; border: 0; border-radius: 20px; background: {{t.surface}}; color: {{t.text}}; font-size: 13px; line-height: 20px; font-weight: 700; white-space: nowrap; display: flex; align-items: center; gap: 2px; cursor: pointer">
+      Oct 2026
+      <span class="ms" aria-hidden="true" style="font-size: 18px; width: 18px; height: 18px; color: {{t.text3}}">expand_more</span>
+    </button>
+  </header>
+
+  <main style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 2px 16px 24px; display: flex; flex-direction: column; gap: 12px">
+    <section aria-label="Summary" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; padding: 16px; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; column-gap: 16px; row-gap: 2px; align-items: baseline">
+      <span style="min-width: 0; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{spentLabel}}</span>
+      <span style="justify-self: end; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Daily average</span>
+      <span style="justify-self: end; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Entries</span>
+      <span style="font-size: 32px; line-height: 40px; font-weight: 800; letter-spacing: -0.6px">{{total}}</span>
+      <span style="justify-self: end; font-size: 18px; line-height: 24px; font-weight: 700">{{avg}}</span>
+      <span style="justify-self: end; font-size: 18px; line-height: 24px; font-weight: 700">{{count}}</span>
+    </section>
+
+    <section aria-label="Daily spending chart" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <h2 style="margin: 0; font-size: 14px; line-height: 20px; font-weight: 800">Daily spending</h2>
+        <span style="font-size: 12px; line-height: 16px; font-weight: 500; color: {{t.text3}}; font-variant-numeric: tabular-nums">{{avgLegend}}</span>
+      </div>
+      <div role="group" aria-label="{{trendAria}}" onMouseLeave="{{unpeek}}" style="position: relative; width: 296px; height: 188px; flex-shrink: 0">
+        <svg viewBox="0 0 296 188" width="296" height="188" aria-hidden="true" style="position: absolute; left: 0; top: 0; overflow: visible"><path d="{{gridPath}}" stroke="{{t.line}}" stroke-width="1" fill="none"></path><path d="{{avgPath}}" stroke="{{t.text2}}" stroke-width="1.5" stroke-dasharray="5 4" fill="none"></path></svg>
+        <sc-for list="{{yTicks}}" as="k" hint-placeholder-count="4">
+          <span style="position: absolute; left: 0; top: {{k.top}}; width: 28px; text-align: right; white-space: nowrap; font-size: 10.5px; line-height: 14px; font-weight: 500; color: {{t.text3}}; font-variant-numeric: tabular-nums">{{k.label}}</span>
+        </sc-for>
+        <sc-for list="{{bars}}" as="b" hint-placeholder-count="18">
+          <span style="position: absolute; left: {{b.left}}; top: {{b.top}}; width: {{b.w}}; height: {{b.h}}; border-radius: {{b.r}}; background: {{b.fill}}; transition: background 0.15s"></span>
+        </sc-for>
+        <sc-for list="{{xTicks}}" as="k" hint-placeholder-count="5">
+          <span style="position: absolute; left: {{k.left}}; top: 168px; width: 40px; text-align: center; font-size: 10.5px; line-height: 14px; font-weight: 500; color: {{t.text3}}; font-variant-numeric: tabular-nums; white-space: nowrap">{{k.label}}</span>
+        </sc-for>
+        <sc-if value="{{showPeak}}" hint-placeholder-val="{{ true }}">
+          <span style="position: absolute; left: {{peakLeft}}; top: {{peakTop}}; width: 120px; text-align: {{peakAlign}}; font-size: 11.5px; line-height: 14px; font-weight: 700; white-space: nowrap; pointer-events: none"><span style="display: inline-block; margin: 0 -4px; padding: 0 4px; border-radius: 4px; background: {{t.surface}}">{{peakText}}</span></span>
+        </sc-if>
+        <sc-if value="{{showLater}}" hint-placeholder-val="{{ true }}">
+          <span style="position: absolute; left: {{laterLeft}}; top: {{laterTop}}; width: {{laterW}}; text-align: center; font-size: 10.5px; line-height: 14px; font-weight: 500; color: {{t.text3}}; white-space: nowrap; pointer-events: none"><span style="display: inline-block; margin: 0 -4px; padding: 0 4px; border-radius: 4px; background: {{t.surface}}">Still to come</span></span>
+        </sc-if>
+        <sc-if value="{{showTip}}" hint-placeholder-val="{{ false }}">
+          <span style="position: absolute; left: {{tipLeft}}; top: {{tipTop}}; width: 120px; height: 44px; box-sizing: border-box; border-radius: 12px; background: {{t.tip}}; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35); display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none">
+            <span style="font-size: 11px; line-height: 14px; font-weight: 600; color: {{t.text2}}; white-space: nowrap">{{tipLabel}}</span>
+            <span style="font-size: 14px; line-height: 18px; font-weight: 800; font-variant-numeric: tabular-nums">{{tipValue}}</span>
+          </span>
+        </sc-if>
+        <sc-for list="{{slots}}" as="s" hint-placeholder-count="18">
+          <button type="button" aria-label="{{s.aria}}" aria-pressed="{{s.on}}" onClick="{{s.pick}}" onMouseEnter="{{s.enter}}" style="position: absolute; left: {{s.left}}; top: 0; width: {{s.w}}; height: 164px; border: 0; padding: 0; background: transparent; cursor: pointer"></button>
+        </sc-for>
+      </div>
+      <p style="margin: 0; font-size: 12px; line-height: 16px; font-weight: 500; color: {{t.text3}}; text-align: center">Tap a column to see that day.</p>
+    </section>
+
+    <section aria-label="Expenses in this category" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 56px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+        <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">Expenses</h2>
+        <div role="group" aria-label="Sort by" style="height: 36px; box-sizing: border-box; padding: 3px; border-radius: 12px; background: {{t.surface}}; display: grid; grid-template-columns: repeat(2, 84px); gap: 2px">
+          <sc-for list="{{sortBtns}}" as="b" hint-placeholder-count="2">
+            <button type="button" aria-pressed="{{b.on}}" onClick="{{b.pick}}" style="height: 30px; border: 0; border-radius: 9px; padding: 0; background: {{b.bg}}; color: {{b.fg}}; font-size: 12.5px; line-height: 16px; font-weight: {{b.fw}}; white-space: nowrap; cursor: pointer; transition: background 0.15s">{{b.label}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="padding: 4px 0">
+        <sc-for list="{{rows}}" as="r" hint-placeholder-count="4">
+          <div style="display: flex; align-items: center; gap: 12px; padding-left: 16px">
+            <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{t.tile}}; display: flex; flex-direction: column; align-items: center; justify-content: center">
+              <span style="font-size: 16px; line-height: 18px; font-weight: 800; font-variant-numeric: tabular-nums">{{r.day}}</span>
+              <span style="font-size: 10.5px; line-height: 13px; font-weight: 600; color: {{t.text3}}">{{r.wd}}</span>
+            </span>
+            <span style="flex: 1; min-width: 0; height: 68px; margin-right: 16px; box-shadow: {{r.divider}}; display: flex; flex-direction: column; justify-content: center; gap: 8px">
+              <span style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px">
+                <span style="min-width: 0; font-size: 15px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.title}}</span>
+                <span style="flex-shrink: 0; font-size: 15px; line-height: 20px; font-weight: 700; font-variant-numeric: tabular-nums">{{r.amt}}</span>
+              </span>
+              <span style="display: flex; align-items: center; gap: 8px">
+                <span style="flex: 1; min-width: 0; height: 6px; border-radius: 3px; background: {{t.track}}; display: flex">
+                  <span style="width: {{r.w}}; min-width: 6px; height: 6px; border-radius: 3px; background: {{catColor}}"></span>
+                </span>
+                <span style="width: 44px; flex-shrink: 0; text-align: right; font-size: 12.5px; line-height: 16px; font-weight: 600; color: {{t.text2}}; font-variant-numeric: tabular-nums">{{r.pct}}</span>
+              </span>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mood":{"editor":"enum","options":["coral","aqua","iris"],"default":"aqua"},"$preview":{"width":360,"height":834}}'>
+class Component extends DCLogic {
+  theme(mood) {
+    const MOODS = {
+      coral: { bg: '#0F1320', nav: '#151A2A', surface: '#1A2033', line: '#2B3350', text: '#FFFFFF', text2: '#D3D8E8', text3: '#A2ABC4', accent: '#FF7A5F', onAccent: '#2A0F0A', ink: '#171B2B' },
+      aqua: { bg: '#0B1517', nav: '#101D20', surface: '#152528', line: '#24383C', text: '#FFFFFF', text2: '#CBDADC', text3: '#9BB0B3', accent: '#4FD1C5', onAccent: '#04231F', ink: '#0F1E21' },
+      iris: { bg: '#100F1C', nav: '#171527', surface: '#1D1B30', line: '#33304D', text: '#FFFFFF', text2: '#D4D1EC', text3: '#A9A6CA', accent: '#A898FF', onAccent: '#150F33', ink: '#17132B' }
+    };
+    const t = Object.assign({}, MOODS[mood] || MOODS.coral);
+    // mix(a, b, w): w parts of colour a, the rest colour b.
+    const mix = (a, b, w) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(a.slice(i, i + 2), 16) * w + parseInt(b.slice(i, i + 2), 16) * (1 - w)).toString(16).padStart(2, '0')).join('');
+    t.accentSoft = t.accent + '2E';
+    t.surface2 = { coral: '#232A42', aqua: '#1C3034', iris: '#27243E' }[mood] || '#232A42';
+    t.tile = '#' + [1, 3, 5].map((i) => Math.round(parseInt(t.surface.slice(i, i + 2), 16) * 0.87 + 33).toString(16).padStart(2, '0')).join('');
+    t.accentGlow = t.accent + '59';
+    t.wash = t.accent + '29';
+    // Chart colours that follow the theme. Category colours do not: they are fixed per category.
+    t.other = mix(t.text3, t.surface, 0.5);
+    t.barSoft = mix(t.accent, t.surface, 0.6);
+    t.barDim = mix(t.accent, t.surface, 0.36);
+    t.ramp = [1, 0.86, 0.72, 0.58, 0.44].map((w) => mix(t.accent, t.surface, w));
+    t.tip = mix('#FFFFFF', t.surface2, 0.1);
+    t.stub = mix(t.text3, t.surface, 0.28);
+    t.track = mix(t.bg, t.surface, 0.5);
+    // Shared by the other boards: text on accent, the calendar heat ramp, a dim text tone, and the mixer itself.
+    t.onAccentDim = t.onAccent + 'D9';
+    t.heat = [0.4, 0.56, 0.74, 0.94].map((w) => mix(t.accent, t.bg, w));
+    t.dim = mix(t.text3, t.bg, 0.55);
+    t.good = '#5BD49B';
+    t.bad = '#FF8C9A';
+    t.mix = mix;
+    return t;
+  }
+
+  kit() {
+    if (this._kit) return this._kit;
+    const DAY = 86400000;
+    const dn = (y, m, d) => Date.UTC(y, m, d) / DAY;
+    const dt = (n) => new Date(n * DAY);
+    const TODAY = dn(2026, 9, 18);
+    const MS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const ML = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const WD = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const WS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const fmt = (v) => Math.round(v).toLocaleString('en-US');
+    // Chart colours come from a palette checked for colour-blind separation. They are assigned so that
+    // categories which rank next to each other in the sample data never share or nearly share a colour.
+    const CATS = [
+      { id: 'groceries', name: 'Groceries', color: '#41AE61', emoji: '🥦' },
+      { id: 'snacks', name: 'Snacks', color: '#9085E9', emoji: '🍗' },
+      { id: 'transport', name: 'Transportation', color: '#D55181', emoji: '🚍' },
+      { id: 'shopping', name: 'Shopping', color: '#D55181', emoji: '🛍️' },
+      { id: 'rent', name: 'House Rent', color: '#3987E5', emoji: '🏠' },
+      { id: 'electric', name: 'Electric Bill', color: '#C98500', emoji: '⚡' },
+      { id: 'internet', name: 'Internet Bill', color: '#0096AF', emoji: '🌐' },
+      { id: 'phone', name: 'Phone', color: '#0096AF', emoji: '☎️' },
+      { id: 'gas', name: 'Gas', color: '#D95926', emoji: '🔥' },
+      { id: 'health', name: 'Health', color: '#0096AF', emoji: '💊' },
+      { id: 'gym', name: 'Gym', color: '#D95926', emoji: '💪' },
+      { id: 'selfcare', name: 'Self Care', color: '#E66767', emoji: '🧴' },
+      { id: 'subs', name: 'Online Subscriptions', color: '#3987E5', emoji: '▶️' },
+      { id: 'gifts', name: 'Gifts', color: '#E66767', emoji: '🎁' },
+      { id: 'misc', name: 'Miscellaneous', color: '#9085E9', emoji: '🧩' }
+    ];
+    const CAT = {};
+    CATS.forEach((c) => { CAT[c.id] = c; });
+    let a = 20261018;
+    const rnd = () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const pick = (arr) => arr[Math.floor(rnd() * arr.length)];
+    const NOTES = {
+      groceries: ['Weekly bazaar', 'Vegetables & fish', 'Supermarket run', 'Rice & lentils', ''],
+      snacks: ['Coffee', 'Tea & biscuits', 'Ice cream', 'Bakery', 'Chips & soda', ''],
+      transport: ['Ride to office', 'Ride home', 'Bus fare', ''],
+      shopping: ['New shoes', 'T-shirts', 'Kitchen stuff', ''],
+      selfcare: ['Haircut', 'Skincare', ''],
+      health: ['Pharmacy', 'Doctor visit', ''],
+      gifts: ['Birthday gift', 'Wedding gift'],
+      misc: ['Laundry', 'Stationery', '']
+    };
+    const T = [];
+    let id = 1;
+    const add = (catId, amount, y, m, d, note) => T.push({ id: id++, catId, amount, y, m, d, n: dn(y, m, d), note: note || '', h: 8 + Math.floor(rnd() * 14), mi: Math.floor(rnd() * 60) });
+    for (let n = dn(2025, 0, 1); n <= TODAY; n++) {
+      const t = dt(n);
+      const y = t.getUTCFullYear(), m = t.getUTCMonth(), d = t.getUTCDate(), dow = t.getUTCDay();
+      if (d === 1) add('rent', 15000, y, m, d, ML[m] + ' rent');
+      if (d === 3) add('gym', 1000, y, m, d, 'Membership');
+      if (d === 5) add('internet', 1500, y, m, d, 'Broadband');
+      if (d === 8) add('subs', 685, y, m, d, 'Streaming');
+      if (d === 12) add('electric', Math.round((2300 + rnd() * 1400) / 10) * 10, y, m, d, ML[m] + ' bill');
+      if (d === 20) add('gas', 1150, y, m, d, 'Cooking gas');
+      if (d === 2 || d === 16) add('phone', 500, y, m, d, 'Mobile recharge');
+      if (rnd() < 0.72) add('snacks', Math.round((60 + rnd() * 380) / 5) * 5, y, m, d, pick(NOTES.snacks));
+      if ((dow === 2 || dow === 5) && rnd() < 0.85) add('groceries', Math.round((450 + rnd() * 1800) / 10) * 10, y, m, d, pick(NOTES.groceries));
+      if (dow >= 1 && dow <= 5 && rnd() < 0.7) add('transport', Math.round((40 + rnd() * 300) / 10) * 10, y, m, d, pick(NOTES.transport));
+      if (rnd() < 0.05) add('shopping', Math.round((800 + rnd() * 3700) / 50) * 50, y, m, d, pick(NOTES.shopping));
+      if (rnd() < 0.035) add('selfcare', Math.round((300 + rnd() * 900) / 50) * 50, y, m, d, pick(NOTES.selfcare));
+      if (rnd() < 0.03) add('health', Math.round((200 + rnd() * 2300) / 10) * 10, y, m, d, pick(NOTES.health));
+      if (rnd() < 0.015) add('gifts', Math.round((500 + rnd() * 2500) / 100) * 100, y, m, d, pick(NOTES.gifts));
+      if (rnd() < 0.07) add('misc', Math.round((50 + rnd() * 550) / 10) * 10, y, m, d, pick(NOTES.misc));
+    }
+    const byDay = {};
+    T.forEach((x) => { (byDay[x.n] = byDay[x.n] || []).push(x); });
+    const daySum = (n) => (byDay[n] || []).reduce((s, x) => s + x.amount, 0);
+    const sum = (s, e) => { let tot = 0; for (let n = s; n <= e; n++) tot += daySum(n); return tot; };
+    const byCat = (s, e) => {
+      const o = {};
+      for (let n = s; n <= e; n++) (byDay[n] || []).forEach((x) => { o[x.catId] = (o[x.catId] || 0) + x.amount; });
+      return Object.keys(o).map((k) => ({ cat: CAT[k], amount: o[k] })).sort((p, q) => q.amount - p.amount);
+    };
+    this._kit = { dn, dt, TODAY, MS, ML, WD, WS, fmt, CAT, byDay, daySum, sum, byCat };
+    return this._kit;
+  }
+
+  renderVals() {
+    const K = this.kit();
+    const st = this.state || {};
+    const t = this.theme(this.props.mood ?? 'aqua');
+    // The sample shows one category for the current month; in the app this screen opens for whichever category was tapped.
+    const c = K.CAT.groceries;
+    const s = K.dn(2026, 9, 1), e = K.dn(2026, 9, 31), eEff = Math.min(e, K.TODAY);
+    const items = [];
+    for (let n = s; n <= eEff; n++) (K.byDay[n] || []).forEach((x) => { if (x.catId === c.id) items.push(x); });
+    const total = items.reduce((acc, x) => acc + x.amount, 0);
+    const days = eEff - s + 1;
+    const avgV = total / days;
+    const perDay = {};
+    items.forEach((x) => { perDay[x.n] = (perDay[x.n] || 0) + x.amount; });
+
+    // One column per day, in the category's own colour.
+    const pts = [];
+    for (let n = s; n <= e; n++) {
+      const d = K.dt(n);
+      const i = n - s;
+      pts.push({ v: n <= K.TODAY ? (perDay[n] || 0) : null, tick: i % 7 === 0 ? String(d.getUTCDate()) : '', long: K.WS[d.getUTCDay()] + ', ' + K.MS[d.getUTCMonth()] + ' ' + d.getUTCDate() });
+    }
+    const W = 296, padL = 34, padT = 12, ph = 148, inset = 4;
+    const pw = W - padL - inset * 2;
+    const n = pts.length;
+    const pitch = pw / n;
+    const bw = Math.max(4, Math.min(22, Math.round(pitch * 0.7)));
+    const vals = pts.filter((p) => p.v !== null).map((p) => p.v);
+    const maxV = Math.max(1, ...vals);
+    const rough = maxV / 4;
+    const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+    const f = rough / mag;
+    const step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * mag;
+    let topV = Math.ceil(maxV / step) * step;
+    if (maxV > topV * 0.86) topV += step;
+    const X = (i) => padL + inset + pitch * (i + 0.5);
+    const Y = (v) => padT + ph - (v / topV) * ph;
+    let lastIdx = 0, peakIdx = 0;
+    pts.forEach((p, i) => { if (p.v === null) return; lastIdx = i; if (p.v > (pts[peakIdx].v || 0)) peakIdx = i; });
+    // A column can be pinned by a tap (st.hover) or peeked at with the mouse (st.peek); the mouse wins while it is over the chart.
+    const usable = (v) => (v != null && v <= lastIdx && pts[v] && pts[v].v !== null ? v : null);
+    const pinned = usable(st.hover);
+    const hover = usable(st.peek) !== null ? usable(st.peek) : pinned;
+    const hi = hover !== null ? hover : peakIdx;
+    const soft = t.mix(c.color, t.surface, hover !== null ? 0.5 : 0.8);
+    const radius = bw >= 8 ? 4 : bw / 2;
+    const bars = [];
+    pts.forEach((p, i) => {
+      const left = (X(i) - bw / 2).toFixed(1) + 'px';
+      if (p.v === null) { bars.push({ left, top: (padT + ph - 3) + 'px', w: bw + 'px', h: '3px', r: '1.5px', fill: t.stub }); return; }
+      if (!p.v) return;
+      const h = Math.max(2, (p.v / topV) * ph);
+      bars.push({ left, top: (padT + ph - h).toFixed(1) + 'px', w: bw + 'px', h: h.toFixed(1) + 'px', r: radius + 'px ' + radius + 'px 0 0', fill: i === hi ? c.color : soft });
+    });
+    const compact = topV >= 10000;
+    const yTicks = [];
+    let gridPath = '';
+    for (let v = 0; v <= topV + 0.001; v += step) {
+      const y = Y(v);
+      gridPath += 'M' + padL + ' ' + (Math.round(y) + 0.5) + ' H' + W + ' ';
+      yTicks.push({ top: (y - 7).toFixed(1) + 'px', label: v === 0 ? '0' : (compact ? (v / 1000) + 'K' : K.fmt(v)) });
+    }
+    const xTicks = pts.map((p, i) => ({ label: p.tick, left: (X(i) - 20).toFixed(1) + 'px' })).filter((k) => k.label);
+    const peakV = pts[peakIdx].v || 0;
+    const peakX = X(peakIdx), peakY = Y(peakV);
+    let peakLeft = peakX - 60, peakAlign = 'center';
+    if (peakX - 44 < padL) { peakLeft = peakX - bw / 2; peakAlign = 'left'; }
+    else if (peakX + 44 > W) { peakLeft = peakX + bw / 2 - 120; peakAlign = 'right'; }
+    const hx = hover !== null ? X(hover) : 0;
+    const hy = hover !== null ? Y(pts[hover].v) : 0;
+    let tipLeft = Math.max(padL, Math.min(W - 120, hx - 60)), tipTop = hy - 52;
+    if (tipTop < 0) {
+      tipTop = 0;
+      tipLeft = hx + bw / 2 + 8;
+      if (tipLeft + 120 > W) tipLeft = hx - bw / 2 - 8 - 120;
+    }
+    // Tapping a column pins its amount; tapping it again clears it.
+    const slots = [];
+    pts.forEach((p, i) => {
+      if (p.v === null) return;
+      slots.push({ left: (X(i) - pitch / 2).toFixed(1) + 'px', w: pitch.toFixed(1) + 'px', on: i === hover, aria: p.long + ': ' + K.fmt(p.v), pick: () => this.setState({ hover: i === pinned ? null : i, peek: null }), enter: () => { if ((this.state || {}).peek !== i) this.setState({ peek: i }); } });
+    });
+    const firstFuture = pts.findIndex((p) => p.v === null);
+    const laterLeft = firstFuture >= 0 ? X(firstFuture) - bw / 2 : 0;
+    const laterW = firstFuture >= 0 ? X(n - 1) + bw / 2 - laterLeft : 0;
+    // The note sits just above the faint marks, unless the average line is at that height; then it moves above the line.
+    const avgY = Y(avgV);
+    let laterTop = padT + ph - 21;
+    if (Math.abs(avgY - (laterTop + 7)) < 12) laterTop = avgY - 22;
+
+    // The list of expenses. Bars compare the expenses with each other: the biggest one fills the row.
+    const sort = st.sort || 'amount';
+    const sorted = items.slice().sort((p, q) => sort === 'amount' ? (q.amount - p.amount) : ((q.n - p.n) || ((q.h * 60 + q.mi) - (p.h * 60 + p.mi))));
+    const maxAmt = items.reduce((m, x) => Math.max(m, x.amount), 1);
+    const rows = sorted.map((x, i) => {
+      const d = K.dt(x.n);
+      return {
+        day: String(d.getUTCDate()),
+        wd: K.WS[d.getUTCDay()],
+        title: x.note || c.name,
+        amt: K.fmt(x.amount),
+        pct: ((x.amount / (total || 1)) * 100).toFixed(1) + '%',
+        w: ((x.amount / maxAmt) * 100).toFixed(1) + '%',
+        divider: i < sorted.length - 1 ? 'inset 0 -1px 0 ' + t.line : 'none'
+      };
+    });
+    const sortBtns = [['amount', 'By amount'], ['date', 'By date']].map(([key, label]) => {
+      const on = key === sort;
+      return { label, on, bg: on ? t.accent : 'transparent', fg: on ? t.onAccent : t.text2, fw: on ? '800' : '600', pick: () => this.setState({ sort: key }) };
+    });
+
+    return {
+      t,
+      catName: c.name,
+      catEmoji: c.emoji,
+      catColor: c.color,
+      spentLabel: 'Spent on ' + c.name,
+      total: K.fmt(total),
+      avg: K.fmt(avgV),
+      count: String(items.length),
+      avgLegend: 'Dashed line = average ' + K.fmt(avgV),
+      trendAria: 'Column chart of daily spending on ' + c.name + ' in October 2026. Peak ' + K.fmt(peakV) + ' on ' + pts[peakIdx].long + '. Average ' + K.fmt(avgV) + ' a day.',
+      gridPath, yTicks, xTicks, bars,
+      avgPath: 'M' + padL + ' ' + (Math.round(Y(avgV)) + 0.5) + ' H' + (firstFuture >= 0 ? (X(firstFuture) - pitch / 2).toFixed(1) : W),
+      showPeak: hover === null && peakV > 0,
+      peakText: 'Peak ' + K.fmt(peakV),
+      peakLeft: peakLeft.toFixed(1) + 'px',
+      peakTop: (peakY - 18).toFixed(1) + 'px',
+      peakAlign,
+      showLater: firstFuture >= 0 && laterW >= 70,
+      laterLeft: laterLeft.toFixed(1) + 'px',
+      laterW: laterW.toFixed(1) + 'px',
+      laterTop: laterTop.toFixed(1) + 'px',
+      showTip: hover !== null,
+      tipLeft: tipLeft.toFixed(1) + 'px',
+      tipTop: tipTop.toFixed(1) + 'px',
+      tipLabel: hover !== null ? pts[hover].long : '',
+      tipValue: hover !== null ? K.fmt(pts[hover].v) : '',
+      slots,
+      unpeek: () => { if ((this.state || {}).peek != null) this.setState({ peek: null }); },
+      sortBtns,
+      rows
+    };
+  }
+}
+</script>
+</body>
+</html>

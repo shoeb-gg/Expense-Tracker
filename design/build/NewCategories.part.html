@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Categories</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!--@HELMET add,arrow_back,delete,drag_indicator,edit,lock-->
+<div style="width: 360px; height: 1114px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; color: {{t.text}}; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <header style="height: 60px; flex-shrink: 0; padding: 0 16px; display: grid; grid-template-columns: 88px minmax(0, 1fr) 88px; align-items: center">
+    <a href="NewSettings.dc.html" aria-label="Back to settings" style="justify-self: start; width: 40px; height: 40px; border-radius: 20px; background: {{t.surface}}; color: {{t.text}}; display: flex; align-items: center; justify-content: center; text-decoration: none">
+      <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">arrow_back</span>
+    </a>
+    <h1 style="margin: 0; text-align: center; font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">Categories</h1>
+    <span aria-hidden="true"></span>
+  </header>
+
+  <main style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 2px 16px 96px">
+    <section aria-label="Your categories" style="border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center">
+        <div style="flex: 1; min-width: 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
+          <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800; white-space: nowrap">{{countText}}</h2>
+          <span style="display: inline-flex; align-items: center; gap: 2px; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}; white-space: nowrap">Hold<span class="ms" aria-hidden="true" style="font-size: 16px; width: 16px; height: 16px">drag_indicator</span>and drag to reorder</span>
+        </div>
+      </div>
+      <div style="padding: 4px 0">
+        <sc-for list="{{rows}}" as="r" hint-placeholder-count="15">
+          <div style="display: flex; align-items: center; gap: 12px; padding-left: 16px">
+            <span style="position: relative; width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{t.tile}}; display: flex; align-items: center; justify-content: center">
+              <span class="em" aria-hidden="true" style="font-size: 22px">{{r.emoji}}</span>
+              <span aria-hidden="true" style="position: absolute; right: -3px; bottom: -3px; width: 12px; height: 12px; border-radius: 6px; background: {{r.color}}; box-shadow: 0 0 0 2.5px {{t.surface}}"></span>
+            </span>
+            <span style="flex: 1; min-width: 0; height: 60px; margin-right: 16px; box-shadow: {{r.divider}}; display: flex; align-items: center">
+              <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                <span style="font-size: 15px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.name}}</span>
+                <sc-if value="{{r.locked}}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}; white-space: nowrap">Can't be deleted</span>
+                </sc-if>
+              </span>
+              <button type="button" aria-label="{{r.delAria}}" disabled="{{r.locked}}" onClick="{{r.askDelete}}" style="width: 30px; height: 36px; flex-shrink: 0; border: 0; border-radius: 16px; padding: 0; background: transparent; color: {{t.text3}}; opacity: {{r.delOp}}; display: flex; align-items: center; justify-content: center; cursor: {{r.delCursor}}">
+                <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px">{{r.delIcon}}</span>
+              </button>
+              <a href="NewCategoryEdit.dc.html" aria-label="{{r.editAria}}" style="width: 30px; height: 36px; flex-shrink: 0; border-radius: 16px; color: {{t.text3}}; display: flex; align-items: center; justify-content: center; text-decoration: none">
+                <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px">edit</span>
+              </a>
+              <span role="img" aria-label="Drag to reorder" style="width: 30px; height: 36px; flex-shrink: 0; margin-right: -10px; color: {{t.text3}}; display: flex; align-items: center; justify-content: center; cursor: grab">
+                <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">drag_indicator</span>
+              </span>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </main>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 20px 16px 16px; background: linear-gradient(to top, {{t.bg}} 62%, {{t.bgFade}})">
+    <a href="NewCategoryAdd.dc.html" style="height: 52px; border-radius: 18px; background: {{t.accent}}; color: {{t.onAccent}}; font-size: 15px; line-height: 20px; font-weight: 800; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 8px 22px -2px {{t.accentGlow}}">
+      <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">add</span>
+      Add category
+    </a>
+  </div>
+
+  <sc-if value="{{confirm}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 0; top: 0; width: 360px; height: 1114px; background: rgba(4, 10, 11, 0.88)">
+      <div role="alertdialog" aria-label="{{confirmTitle}}" style="position: absolute; left: 24px; top: 300px; width: 312px; box-sizing: border-box; padding: 20px; border-radius: 24px; background: {{t.surface2}}; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column">
+        <span style="font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">{{confirmTitle}}</span>
+        <span style="margin-top: 8px; font-size: 14px; line-height: 20px; font-weight: 700">{{confirmWhat}}</span>
+        <span style="font-size: 13.5px; line-height: 20px; font-weight: 500; color: {{t.text2}}">{{confirmNote}}</span>
+        <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+          <button type="button" onClick="{{cancelDelete}}" style="height: 48px; border: 0; border-radius: 16px; padding: 0; background: {{t.tile}}; color: {{t.text}}; font-size: 15px; line-height: 20px; font-weight: 700; cursor: pointer">Cancel</button>
+          <button type="button" onClick="{{doDelete}}" style="height: 48px; border: 0; border-radius: 16px; padding: 0; background: {{t.bad}}; color: #2A0B12; font-size: 15px; line-height: 20px; font-weight: 800; cursor: pointer">Delete</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mood":{"editor":"enum","options":["coral","aqua","iris"],"default":"aqua"},"$preview":{"width":360,"height":1114}}'>
+class Component extends DCLogic {
+  /*@THEME*/
+
+  /*@KIT*/
+
+  renderVals() {
+    const K = this.kit();
+    const st = this.state || {};
+    const t = this.theme(this.props.mood ?? 'aqua');
+    t.bgFade = t.bg + '00';
+    // The order shown here is the order of the tiles on the Add expense screen.
+    const ORDER = ['groceries', 'snacks', 'transport', 'shopping', 'rent', 'electric', 'internet', 'phone', 'gas', 'health', 'gym', 'selfcare', 'subs', 'gifts', 'misc'];
+    const gone = st.gone || [];
+    const counts = {};
+    Object.keys(K.byDay).forEach((n) => K.byDay[n].forEach((x) => { counts[x.catId] = (counts[x.catId] || 0) + 1; }));
+    const list = ORDER.filter((id) => gone.indexOf(id) < 0);
+    const rows = list.map((id, i) => {
+      const c = K.CAT[id];
+      const locked = id === 'misc';
+      return {
+        name: c.name,
+        emoji: c.emoji,
+        locked,
+        color: c.color,
+        delIcon: locked ? 'lock' : 'delete',
+        delOp: locked ? 0.6 : 1,
+        delCursor: locked ? 'default' : 'pointer',
+        delAria: locked ? c.name + ' cannot be deleted' : 'Delete ' + c.name,
+        editAria: 'Edit ' + c.name,
+        divider: i < list.length - 1 ? 'inset 0 -1px 0 ' + t.line : 'none',
+        askDelete: () => { if (!locked) this.setState({ confirm: id }); }
+      };
+    });
+    const target = st.confirm ? K.CAT[st.confirm] : null;
+    const n = target ? (counts[target.id] || 0) : 0;
+    return {
+      t,
+      rows,
+      countText: list.length + (list.length === 1 ? ' category' : ' categories'),
+      confirm: !!target,
+      confirmTitle: target ? 'Delete ' + target.name + '?' : '',
+      confirmWhat: target ? (n === 0 ? target.name + ' has no expenses.' : (n === 1 ? '1 expense moves' : K.fmt(n) + ' expenses move') + ' to Miscellaneous.') : '',
+      confirmNote: n === 0 ? 'It will simply be removed.' : 'Nothing is lost.',
+      cancelDelete: () => this.setState({ confirm: null }),
+      doDelete: () => this.setState({ gone: gone.concat([st.confirm]), confirm: null })
+    };
+  }
+}
+</script>
+</body>
+</html>

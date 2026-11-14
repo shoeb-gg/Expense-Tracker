@@ -1,0 +1,8 @@
+reference/screens/
+Thumbs.db
+.DS_Store
+# Generated while measuring the mockup
+design/headertest/*.html
+design/headertest/*.png
+design/headertest/*.json
+design/headertest/out/

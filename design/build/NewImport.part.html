@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Import, step 1</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!--@HELMET arrow_back,upload_file-->
+<div style="width: 360px; height: 780px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; color: {{t.text}}; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <header style="height: 60px; flex-shrink: 0; padding: 0 16px; display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; align-items: center">
+    <a href="NewSettings.dc.html" aria-label="Back to settings" style="justify-self: start; width: 40px; height: 40px; border-radius: 20px; background: {{t.surface}}; color: {{t.text}}; display: flex; align-items: center; justify-content: center; text-decoration: none">
+      <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">arrow_back</span>
+    </a>
+    <div style="display: flex; flex-direction: column; align-items: center">
+      <h1 style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 800; letter-spacing: -0.2px; white-space: nowrap">Import</h1>
+      <span style="font-size: 12.5px; line-height: 16px; font-weight: 600; color: {{t.text3}}">Step 1 of 3</span>
+    </div>
+    <span aria-hidden="true"></span>
+  </header>
+
+  <main style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 2px 16px 24px; display: flex; flex-direction: column; gap: 12px">
+    <section style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; padding: 16px; display: flex; align-items: center; gap: 12px">
+      <span aria-hidden="true" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{t.tile}}; color: {{t.accent}}; display: flex; align-items: center; justify-content: center">
+        <span class="ms" style="font-size: 24px; width: 24px; height: 24px">upload_file</span>
+      </span>
+      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">Add expenses from a file</span>
+        <span style="font-size: 13.5px; line-height: 20px; font-weight: 500; color: {{t.text2}}">CSV, Excel or JSON files</span>
+      </span>
+    </section>
+
+    <section aria-label="How it works" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center">
+        <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">How it works</h2>
+      </div>
+      <sc-for list="{{steps}}" as="s" hint-placeholder-count="3">
+        <div style="margin: 0 16px; height: 64px; display: flex; align-items: center; gap: 12px">
+          <span aria-hidden="true" style="width: 44px; flex-shrink: 0; display: flex; justify-content: center">
+            <span style="width: 28px; height: 28px; border-radius: 14px; background: {{s.bg}}; color: {{s.fg}}; font-size: 13.5px; line-height: 28px; font-weight: 800; text-align: center">{{s.n}}</span>
+          </span>
+          <span style="flex: 1; min-width: 0; align-self: stretch; box-shadow: {{s.line}}; display: flex; flex-direction: column; justify-content: center; gap: 2px">
+            <span style="font-size: 15px; line-height: 20px; font-weight: 600">{{s.title}}</span>
+            <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{s.sub}}</span>
+          </span>
+        </div>
+      </sc-for>
+    </section>
+
+    <section aria-label="What the file needs" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center">
+        <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">What the file needs</h2>
+      </div>
+      <sc-for list="{{needs}}" as="s" hint-placeholder-count="2">
+        <div style="margin: 0 16px; height: 60px; box-shadow: {{s.line}}; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+          <span style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 15px; line-height: 20px; font-weight: 600">{{s.title}}</span>
+            <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{s.sub}}</span>
+          </span>
+          <span style="flex-shrink: 0; height: 24px; padding: 0 10px; border-radius: 12px; background: {{t.surface2}}; color: {{s.tagFg}}; font-size: 12px; line-height: 24px; font-weight: 700">{{s.tag}}</span>
+        </div>
+      </sc-for>
+      <span style="margin: 0 16px; padding: 10px 0 12px; box-shadow: inset 0 1px 0 {{t.line}}; text-align: center; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">A file exported from this app works as it is.</span>
+    </section>
+  </main>
+
+  <div style="flex-shrink: 0; padding: 12px 16px 14px; background: {{t.nav}}; box-shadow: inset 0 1px 0 {{t.line}}; display: flex; flex-direction: column; gap: 8px">
+    <a href="NewImportMatch.dc.html" style="height: 52px; border-radius: 18px; background: {{t.accent}}; color: {{t.onAccent}}; font-size: 15.5px; line-height: 20px; font-weight: 800; text-decoration: none; display: flex; align-items: center; justify-content: center">Choose a file</a>
+    <span style="text-align: center; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Nothing is added until the last step.</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mood":{"editor":"enum","options":["coral","aqua","iris"],"default":"aqua"},"$preview":{"width":360,"height":780}}'>
+class Component extends DCLogic {
+  /*@THEME*/
+
+  renderVals() {
+    const t = this.theme(this.props.mood ?? 'aqua');
+    const line = 'inset 0 -1px 0 ' + t.line;
+    return {
+      t,
+      steps: [
+        { n: '1', title: 'Choose a file', sub: 'From your phone or a cloud drive', bg: t.accent, fg: t.onAccent, line },
+        { n: '2', title: 'Check the columns', sub: 'Confirm which column is which', bg: t.accentSoft, fg: t.accent, line },
+        { n: '3', title: 'Review and import', sub: 'See what will be added before it is saved', bg: t.accentSoft, fg: t.accent, line: 'none' }
+      ],
+      needs: [
+        { title: 'Date and amount', sub: 'In every row', tag: 'Needed', tagFg: t.accent, line },
+        { title: 'Category and title', sub: 'Blank ones go to Miscellaneous', tag: 'Optional', tagFg: t.text3, line: 'none' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

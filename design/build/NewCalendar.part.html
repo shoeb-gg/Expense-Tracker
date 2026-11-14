@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Calendar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!--@HELMET add,arrow_back,chevron_left,chevron_right-->
+<div style="width: 360px; height: 780px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; color: {{t.text}}; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <header style="flex-shrink: 0; padding: 0 16px">
+    <div style="height: 60px; display: grid; grid-template-columns: 88px minmax(0, 1fr) 88px; align-items: center">
+      <a href="MoodAqua.dc.html" aria-label="Back to home" style="justify-self: start; width: 40px; height: 40px; border-radius: 20px; background: {{t.surface}}; color: {{t.text}}; display: flex; align-items: center; justify-content: center; text-decoration: none">
+        <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">arrow_back</span>
+      </a>
+      <h1 style="margin: 0; text-align: center; font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">Calendar</h1>
+      <button type="button" onClick="{{goToday}}" style="justify-self: end; height: 40px; padding: 0 16px; border: 0; border-radius: 20px; background: {{t.surface}}; color: {{t.text}}; font-size: 14px; line-height: 20px; font-weight: 700; cursor: pointer">Today</button>
+    </div>
+    <div style="height: 56px; padding: 0 8px; border-radius: 20px; background: {{t.accent}}; color: {{t.onAccent}}; display: flex; align-items: center; justify-content: space-between">
+      <button type="button" aria-label="Previous month" onClick="{{prev}}" disabled="{{atStart}}" style="width: 40px; height: 40px; flex-shrink: 0; border: 0; border-radius: 20px; padding: 0; background: {{t.onAccent}}; color: {{t.accent}}; opacity: {{prevOp}}; cursor: pointer; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px">chevron_left</span>
+      </button>
+      <div aria-live="polite" style="display: flex; flex-direction: column; align-items: center">
+        <span style="font-size: 16px; line-height: 20px; font-weight: 800; letter-spacing: -0.2px">{{monthLabel}}</span>
+        <span style="font-size: 12.5px; line-height: 16px; font-weight: 600; color: {{t.onAccentDim}}">{{monthTotal}}</span>
+      </div>
+      <button type="button" aria-label="Next month" onClick="{{next}}" disabled="{{atEnd}}" style="width: 40px; height: 40px; flex-shrink: 0; border: 0; border-radius: 20px; padding: 0; background: {{t.onAccent}}; color: {{t.accent}}; opacity: {{nextOp}}; cursor: pointer; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px">chevron_right</span>
+      </button>
+    </div>
+  </header>
+
+  <main style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 16px 16px 24px">
+    <div aria-hidden="true" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px">
+      <sc-for list="{{weekdays}}" as="w" hint-placeholder-count="7">
+        <span style="text-align: center; font-size: 12px; line-height: 16px; font-weight: 600; color: {{t.text3}}">{{w.label}}</span>
+      </sc-for>
+    </div>
+    <div onPointerDown="{{swDown}}" onPointerUp="{{swUp}}" style="margin-top: 8px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; touch-action: none; user-select: none">
+      <sc-for list="{{cells}}" as="c" hint-placeholder-count="35">
+        <sc-if value="{{c.blank}}" hint-placeholder-val="{{ false }}">
+          <span aria-hidden="true" style="height: 64px"></span>
+        </sc-if>
+        <sc-if value="{{c.isDay}}" hint-placeholder-val="{{ true }}">
+          <button type="button" aria-label="{{c.aria}}" aria-pressed="{{c.on}}" disabled="{{c.future}}" onClick="{{c.pick}}" style="height: 64px; border: 0; border-radius: 12px; padding: 4px 0 0; overflow: hidden; background: {{c.bg}}; color: {{c.fg}}; display: flex; flex-direction: column; justify-content: space-between; align-items: center; cursor: {{c.cursor}}">
+            <span style="width: {{c.badgeSize}}; height: {{c.badgeSize}}; margin: {{c.badgeMargin}}; flex-shrink: 0; border-radius: 13px; background: {{c.badgeBg}}; box-shadow: {{c.badgeRing}}; color: {{c.badgeFg}}; font-size: 15px; line-height: {{c.badgeSize}}; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; transition: background 0.15s, box-shadow 0.15s">{{c.day}}</span>
+            <sc-if value="{{c.hasAmt}}" hint-placeholder-val="{{ true }}">
+              <span style="align-self: stretch; height: 22px; flex-shrink: 0; background: {{c.chipBg}}; color: {{c.amtFg}}; font-size: 13.5px; line-height: 20px; font-weight: 700; letter-spacing: 0.1px; text-align: center; font-variant-numeric: tabular-nums">{{c.amt}}</span>
+            </sc-if>
+          </button>
+        </sc-if>
+      </sc-for>
+    </div>
+    <div style="margin-top: 12px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 12px; line-height: 16px; font-weight: 500; color: {{t.text3}}">
+      <span style="margin-right: auto">K = thousand</span>
+      <span style="margin-right: 4px">Less</span>
+      <sc-for list="{{legend}}" as="l" hint-placeholder-count="5">
+        <span aria-hidden="true" style="width: 14px; height: 14px; border-radius: 4px; background: {{l.bg}}"></span>
+      </sc-for>
+      <span style="margin-left: 4px">More</span>
+    </div>
+
+    <section aria-label="{{panelAria}}" style="margin-top: 16px; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 60px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; grid-template-rows: 20px 16px; column-gap: 12px; row-gap: 3px; align-content: center; align-items: baseline">
+        <span aria-hidden="true" style="grid-column: 1; grid-row: 1 / span 2; align-self: center; width: 44px; height: 40px; border-radius: 13px; background: {{panelBadgeBg}}; color: {{panelBadgeFg}}; font-size: 17px; line-height: 20px; font-weight: 800; font-variant-numeric: tabular-nums; display: flex; align-items: center; justify-content: center">{{panelNum}}</span>
+        <span style="grid-column: 2; grid-row: 1; position: relative; top: -1px; font-size: 15px; line-height: 20px; font-weight: 800">{{panelLabel}}</span>
+        <span style="grid-column: 3; grid-row: 1; justify-self: end; position: relative; top: -1px; font-size: 16px; line-height: 20px; font-weight: 800; color: {{t.accent}}; font-variant-numeric: tabular-nums">{{panelTotal}}</span>
+        <span style="grid-column: 2; grid-row: 2; position: relative; top: -1px; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{panelSub}}</span>
+        <span style="grid-column: 3; grid-row: 2; justify-self: end; position: relative; top: -1px; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Total</span>
+      </div>
+      <div style="padding: 4px 0">
+        <sc-for list="{{panelRows}}" as="r" hint-placeholder-count="1">
+          <div style="display: flex; align-items: center; gap: 12px; padding-left: 16px">
+            <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{t.tile}}; display: flex; align-items: center; justify-content: center">
+              <span class="em" aria-hidden="true" style="font-size: 22px">{{r.emoji}}</span>
+            </span>
+            <span style="flex: 1; min-width: 0; height: 68px; display: flex; align-items: center; gap: 12px; margin-right: 16px; box-shadow: {{r.divider}}">
+              <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                <span style="font-size: 15px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.title}}</span>
+                <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{r.sub}}</span>
+              </span>
+              <span style="font-size: 15px; line-height: 20px; font-weight: 700; font-variant-numeric: tabular-nums">{{r.amt}}</span>
+            </span>
+          </div>
+        </sc-for>
+        <sc-if value="{{noRows}}" hint-placeholder-val="{{ false }}">
+          <p style="margin: 0; padding: 16px; font-size: 13.5px; line-height: 20px; font-weight: 500; color: {{t.text3}}">Nothing spent on this day.</p>
+        </sc-if>
+      </div>
+      <a href="NewAdd.dc.html" style="margin: 4px 16px 16px; height: 48px; flex-shrink: 0; border-radius: 16px; background: {{t.accentSoft}}; color: {{t.accent}}; font-size: 14px; line-height: 20px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px">
+        <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px">add</span>
+        {{addLabel}}
+      </a>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mood":{"editor":"enum","options":["coral","aqua","iris"],"default":"aqua"},"$preview":{"width":360,"height":780}}'>
+class Component extends DCLogic {
+  /*@THEME*/
+
+  /*@KIT*/
+
+  renderVals() {
+    const v = this.calVals();
+    // Swiping pulls the neighbouring month into view. Dragging the finger left-to-right or top-to-bottom reveals the month
+    // on the left or above (the one before); dragging right-to-left or bottom-to-top reveals the month after.
+    v.swDown = (e) => { this._sw = { x: e.clientX, y: e.clientY }; };
+    v.swUp = (e) => {
+      const s = this._sw;
+      this._sw = null;
+      if (!s) return;
+      const dx = e.clientX - s.x;
+      const dy = e.clientY - s.y;
+      const far = Math.abs(dx) > Math.abs(dy) ? dx : dy;
+      if (Math.abs(far) < 24) return;
+      this._swiped = Date.now();
+      if (far > 0) { if (!v.atStart) v.prev(); } else if (!v.atEnd) v.next();
+    };
+    // A tap that ends a swipe does not also pick a day.
+    v.cells.forEach((c) => {
+      if (!c.pick) return;
+      const pick = c.pick;
+      c.pick = () => { if (Date.now() - (this._swiped || 0) > 350) pick(); };
+    });
+    return v;
+  }
+
+  calVals() {
+    const K = this.kit();
+    const st = this.state || {};
+    const t = this.theme(this.props.mood ?? 'aqua');
+    const now = K.dt(K.TODAY);
+    const cur = { y: now.getUTCFullYear(), m: now.getUTCMonth() };
+    const ym = st.ym || cur;
+    const first = K.dn(ym.y, ym.m, 1);
+    const last = K.dn(ym.y, ym.m + 1, 0);
+    const lastPast = Math.min(last, K.TODAY);
+    const isCurMonth = ym.y === cur.y && ym.m === cur.m;
+    const sel = st.sel != null && st.sel >= first && st.sel <= lastPast ? st.sel : (isCurMonth ? K.TODAY : last);
+    const lead = K.dt(first).getUTCDay();
+
+    // Heat level of a day: which quarter of this month's spending days it falls in.
+    const vals = [];
+    let monthSum = 0;
+    for (let n = first; n <= lastPast; n++) { const v = K.daySum(n); monthSum += v; if (v > 0) vals.push(v); }
+    vals.sort((p, q) => p - q);
+    const q = (p) => (vals.length ? vals[Math.floor(p * (vals.length - 1))] : 0);
+    const t1 = q(0.25), t2 = q(0.5), t3 = q(0.75);
+    const bucket = (v) => (v <= 0 ? 0 : v <= t1 ? 1 : v <= t2 ? 2 : v <= t3 ? 3 : 4);
+    const HEAT = [t.surface].concat(t.heat);
+
+    // Amounts in the cells are shortened so they always have room: 835 stays, 1,665 becomes 1.7K, 15,090 becomes 15K.
+    const short = (v) => (v < 1000 ? K.fmt(v) : (v < 9950 ? (v / 1000).toFixed(1).replace(/.0$/, '') : Math.round(v / 1000)) + 'K');
+    const cells = [];
+    for (let i = 0; i < lead; i++) cells.push({ blank: true, isDay: false });
+    for (let n = first; n <= last; n++) {
+      const d = K.dt(n);
+      const future = n > K.TODAY;
+      const v = future ? 0 : K.daySum(n);
+      const b = bucket(v);
+      const dark = b >= 3;
+      const on = n === sel;
+      const isToday = n === K.TODAY;
+      const fg = future ? t.dim : (dark ? t.onAccent : t.text);
+      cells.push({
+        blank: false,
+        isDay: true,
+        day: String(d.getUTCDate()),
+        aria: K.WD[d.getUTCDay()] + ', ' + K.ML[d.getUTCMonth()] + ' ' + d.getUTCDate() + (future ? '' : (v ? ', ' + K.fmt(v) + ' spent' : ', nothing spent')),
+        on,
+        future,
+        bg: future ? t.mix(t.surface, t.bg, 0.45) : HEAT[b],
+        fg,
+        amtFg: '#FFFFFF',
+        chipBg: t.onAccent + '8C',
+        badgeBg: on ? '#FFFFFF' : (isToday ? (dark ? t.onAccent : t.accent) : 'transparent'),
+        badgeFg: on ? t.onAccent : (isToday ? (dark ? t.accent : t.onAccent) : fg),
+        fw: isToday ? '800' : '700',
+        // When today is also the selected day, the white circle is 22px with a 2px turquoise ring around it (26px in all).
+        badgeRing: on && isToday ? '0 0 0 2px ' + (dark ? t.heat[1] : t.accent) : 'none',
+        badgeSize: on && isToday ? '22px' : '26px',
+        badgeMargin: on && isToday ? '2px' : '0',
+        hasAmt: !future && v > 0,
+        amt: short(v),
+        cursor: future ? 'default' : 'pointer',
+        pick: () => this.setState({ sel: n })
+      });
+    }
+
+    // The day card under the grid, in the same shape as a day card on Home.
+    const sd = K.dt(sel);
+    const xs = (K.byDay[sel] || []).slice().sort((p, r) => (r.h * 60 + r.mi) - (p.h * 60 + p.mi));
+    const panelRows = xs.map((x, i) => {
+      const c = K.CAT[x.catId];
+      const hh = x.h % 12 === 0 ? 12 : x.h % 12;
+      const time = hh + ':' + String(x.mi).padStart(2, '0') + (x.h < 12 ? ' AM' : ' PM');
+      return {
+        title: x.note || c.name,
+        sub: x.note ? c.name + ' · ' + time : time,
+        emoji: c.emoji,
+        amt: K.fmt(x.amount),
+        divider: i < xs.length - 1 ? 'inset 0 -1px 0 ' + t.line : 'none'
+      };
+    });
+    const recent = sel >= K.TODAY - 1;
+    const dateText = K.ML[sd.getUTCMonth()] + ' ' + sd.getUTCDate() + (sd.getUTCFullYear() !== cur.y ? ', ' + sd.getUTCFullYear() : '');
+    const prevYM = ym.m === 0 ? { y: ym.y - 1, m: 11 } : { y: ym.y, m: ym.m - 1 };
+    const nextYM = ym.m === 11 ? { y: ym.y + 1, m: 0 } : { y: ym.y, m: ym.m + 1 };
+    const atStart = ym.y === 2025 && ym.m === 0;
+    const atEnd = isCurMonth;
+
+    return {
+      t,
+      monthLabel: K.ML[ym.m] + ' ' + ym.y,
+      monthTotal: K.fmt(monthSum) + ' spent',
+      atStart,
+      atEnd,
+      prevOp: atStart ? 0.35 : 1,
+      nextOp: atEnd ? 0.35 : 1,
+      prev: () => { if (!atStart) this.setState({ ym: prevYM, sel: null }); },
+      next: () => { if (!atEnd) this.setState({ ym: nextYM, sel: null }); },
+      goToday: () => this.setState({ ym: cur, sel: K.TODAY }),
+      weekdays: K.WS.map((w) => ({ label: w })),
+      cells,
+      legend: HEAT.map((bg) => ({ bg })),
+      panelAria: K.WD[sd.getUTCDay()] + ', ' + dateText,
+      panelNum: String(sd.getUTCDate()),
+      panelBadgeBg: sel === K.TODAY ? t.accent : t.accentSoft,
+      panelBadgeFg: sel === K.TODAY ? t.onAccent : t.accent,
+      panelLabel: sel === K.TODAY ? 'Today' : (sel === K.TODAY - 1 ? 'Yesterday' : K.WD[sd.getUTCDay()]),
+      panelSub: recent ? K.WD[sd.getUTCDay()] : dateText,
+      panelTotal: K.fmt(K.daySum(sel)),
+      panelRows,
+      noRows: panelRows.length === 0,
+      addLabel: 'Add expense on ' + K.MS[sd.getUTCMonth()] + ' ' + sd.getUTCDate()
+    };
+  }
+}
+</script>
+</body>
+</html>

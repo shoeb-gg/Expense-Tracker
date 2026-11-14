@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&amp;display=swap">
+<style>
+html,body{margin:0;overflow:hidden}
+main{scrollbar-width:none}
+main::-webkit-scrollbar{display:none}
+button,input{font-family:inherit}
+a{color:inherit}
+main::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+<div style="width: 360px; height: 780px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: #181818; color: #FFFFFF; font-family: 'DM Sans', system-ui, sans-serif">
+  <header style="flex-shrink: 0; background: #1E1E1E; padding: 0 16px 16px">
+    <div style="height: 56px; display: flex; align-items: center; justify-content: space-between">
+      <h1 style="margin: 0; font-size: 20px; line-height: 24px; font-weight: 700; letter-spacing: -0.2px">Expense Tracker</h1>
+      <div style="display: flex; align-items: center; gap: 4px; margin-right: -11px">
+        <button type="button" aria-label="{{privacyLabel}}" onClick="{{togglePrivacy}}" style="width: 40px; height: 40px; border: 0; border-radius: 20px; background: transparent; color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0">
+          <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="{{eyeIcon}}"></path></svg>
+        </button>
+        <a href="Calendar.dc.html" aria-label="Calendar" style="width: 40px; height: 40px; border-radius: 20px; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+          <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1ZM4 10h16M8 3v4M16 3v4"></path></svg>
+        </a>
+      </div>
+    </div>
+    <div style="position: relative; height: 72px; border-radius: 16px; background: #262626; box-shadow: inset 0 0 0 1px #303030; display: grid; grid-template-columns: 80px minmax(0, 1fr); grid-template-rows: 30px 42px">
+      <button type="button" aria-label="Choose month, October 2026" style="grid-column: 1; grid-row: 1 / span 2; display: grid; grid-template-rows: subgrid; justify-items: start; border: 0; border-radius: 16px 0 0 16px; background: transparent; color: #FFFFFF; padding: 0 0 0 16px; cursor: pointer; text-align: left">
+        <span style="align-self: end; font-size: 12px; line-height: 16px; color: #A5A5A5">2026</span>
+        <span style="align-self: baseline; margin-top: 2px; display: flex; align-items: center; gap: 2px; font-size: 18px; line-height: 28px; font-weight: 600">
+          <span>Oct</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 16px; height: 16px; margin-top: 1px; fill: none; stroke: #C8C8C8; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round"><path d="M6 9l6 6 6-6"></path></svg>
+        </span>
+      </button>
+      <span aria-hidden="true" style="position: absolute; left: 80px; top: 16px; width: 1px; height: 40px; background: #3A3A3A"></span>
+      <a href="Reports.dc.html" style="grid-column: 2; grid-row: 1 / span 2; display: grid; grid-template-rows: subgrid; grid-template-columns: minmax(0, 1fr) 24px; padding: 0 9.5px 0 16px; border-radius: 0 16px 16px 0; color: #FFFFFF; text-decoration: none">
+        <span style="grid-column: 1; grid-row: 1; align-self: end; font-size: 12px; line-height: 16px; color: #A5A5A5">Total spent</span>
+        <span style="grid-column: 1; grid-row: 2; align-self: baseline; margin-top: 2px; font-size: 26px; line-height: 28px; font-weight: 700; letter-spacing: -0.4px; font-variant-numeric: tabular-nums">{{totalShown}}</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true" style="grid-column: 2; grid-row: 1 / span 2; align-self: center; justify-self: end; width: 20px; height: 20px; fill: none; stroke: #B5B5B5; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg>
+      </a>
+    </div>
+  </header>
+
+  <main style="flex: 1; overflow-y: auto; scrollbar-width: none; padding-bottom: 8px">
+    <sc-for list="{{days}}" as="day" hint-placeholder-count="4">
+      <section aria-label="{{day.aria}}" style="display: flex; flex-direction: column">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; padding: 20px 16px 2px">
+          <span style="display: flex; align-items: baseline; gap: 8px">
+            <span style="font-size: 13px; line-height: 16px; font-weight: 600; color: #D1D1D1">{{day.label}}</span>
+            <span style="font-size: 13px; line-height: 16px; color: #8C8C8C">{{day.weekday}}</span>
+          </span>
+          <span style="font-size: 13px; line-height: 16px; color: #A5A5A5; font-variant-numeric: tabular-nums">{{day.total}}</span>
+        </div>
+        <sc-for list="{{day.rows}}" as="r" hint-placeholder-count="2">
+          <div style="display: flex; align-items: center; gap: 12px; padding-left: 16px">
+            <span style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 20px; background: {{r.tint}}; color: {{r.color}}; display: flex; align-items: center; justify-content: center">
+              <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="{{r.icon}}"></path></svg>
+            </span>
+            <span style="flex: 1; min-width: 0; height: 60px; display: flex; align-items: center; gap: 12px; padding-right: 16px; box-shadow: {{r.divider}}">
+              <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                <span style="font-size: 15px; line-height: 20px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.title}}</span>
+                <sc-if value="{{r.hasSub}}" hint-placeholder-val="{{ true }}">
+                  <span style="font-size: 12px; line-height: 16px; color: #8C8C8C">{{r.sub}}</span>
+                </sc-if>
+              </span>
+              <span style="font-size: 15px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums">{{r.amt}}</span>
+            </span>
+          </div>
+        </sc-for>
+      </section>
+    </sc-for>
+    <div style="display: flex; justify-content: center; padding: 24px 0 16px">
+      <button type="button" style="height: 40px; padding: 0 18px 0 12px; border: 1px solid #333333; border-radius: 20px; background: transparent; color: #FFFFFF; font-size: 14px; line-height: 20px; display: flex; align-items: center; gap: 6px; cursor: pointer">
+        <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M15 6l-6 6 6 6"></path></svg>
+        September 2026
+      </button>
+    </div>
+  </main>
+
+  <nav aria-label="Main" style="height: 68px; flex-shrink: 0; background: #1E1E1E; border-top: 1px solid #262626; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center">
+    <a href="Main.dc.html" aria-current="page" style="height: 68px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{accent}}; text-decoration: none; font-size: 11.5px; font-weight: 600">
+      <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1v-9.5Z"></path></svg>
+      Home
+    </a>
+    <a href="Charts.dc.html" style="height: 68px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #A5A5A5; text-decoration: none; font-size: 11.5px; font-weight: 500">
+      <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M11 5a8 8 0 1 0 8 8h-8V5ZM13.5 3a7.5 7.5 0 0 1 7.5 7.5h-7.5V3Z"></path></svg>
+      Charts
+    </a>
+    <a href="Add.dc.html" aria-label="Add expense" style="height: 68px; display: flex; align-items: center; justify-content: center; text-decoration: none">
+      <span style="width: 54px; height: 54px; border-radius: 27px; background: {{accent}}; color: #161616; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px {{accentGlow}}">
+        <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round"><path d="M12 5v14M5 12h14"></path></svg>
+      </span>
+    </a>
+    <a href="Reports.dc.html" style="height: 68px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #A5A5A5; text-decoration: none; font-size: 11.5px; font-weight: 500">
+      <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M4 20.5h16M7 17v-6M12 17V5M17 17V8"></path></svg>
+      Reports
+    </a>
+    <a href="Settings.dc.html" style="height: 68px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #A5A5A5; text-decoration: none; font-size: 11.5px; font-weight: 500">
+      <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9M15 5v4M9 15v4"></path></svg>
+      Settings
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FFD946","options":["#FFD946","#FF9F43","#6CB8FF","#6EE7A8"]},"$preview":{"width":360,"height":780}}'>
+class Component extends DCLogic {
+  kit() {
+    if (this._kit) return this._kit;
+    const DAY = 86400000;
+    const dn = (y, m, d) => Date.UTC(y, m, d) / DAY;
+    const dt = (n) => new Date(n * DAY);
+    const TODAY = dn(2026, 9, 18);
+    const MS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const ML = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const WD = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const WS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const fmt = (v) => Math.round(v).toLocaleString('en-US');
+    const CATS = [
+      { id: 'groceries', name: 'Groceries', color: '#C98500' },
+      { id: 'snacks', name: 'Snacks', color: '#008300' },
+      { id: 'transport', name: 'Transportation', color: '#E66767' },
+      { id: 'shopping', name: 'Shopping', color: '#D55181' },
+      { id: 'rent', name: 'House Rent', color: '#3987E5' },
+      { id: 'electric', name: 'Electric Bill', color: '#9085E9' },
+      { id: 'internet', name: 'Internet Bill', color: '#16A39A' },
+      { id: 'phone', name: 'Phone', color: '#16A39A' },
+      { id: 'gas', name: 'Gas', color: '#B07A3C' },
+      { id: 'health', name: 'Health', color: '#16A39A' },
+      { id: 'gym', name: 'Gym', color: '#9085E9' },
+      { id: 'selfcare', name: 'Self Care', color: '#B465CF' },
+      { id: 'subs', name: 'Online Subscriptions', color: '#D95926' },
+      { id: 'gifts', name: 'Gifts', color: '#B465CF' },
+      { id: 'misc', name: 'Miscellaneous', color: '#B07A3C' }
+    ];
+    const CAT = {};
+    CATS.forEach((c) => { CAT[c.id] = c; });
+    const IC = {
+      groceries: 'M3 10h18M5 10l1.6 8.4A2 2 0 0 0 8.6 20h6.8a2 2 0 0 0 2-1.6L19 10M9 10l3-6 3 6M10 14v3M14 14v3',
+      snacks: 'M5 8h12v5a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5V8ZM17 10h1.5a2.5 2.5 0 0 1 0 5H17M8 3v2M11 3v2M14 3v2',
+      transport: 'M6 4h12a2 2 0 0 1 2 2v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a2 2 0 0 1 2-2ZM4 11h16M8 17v2M16 17v2M7.5 14h.01M16.5 14h.01',
+      shopping: 'M6 8h12l-1 12H7L6 8ZM9 8V6a3 3 0 0 1 6 0v2',
+      rent: 'M4 11l8-7 8 7M6 9.5V20h12V9.5M10 20v-5h4v5',
+      electric: 'M13 3L5 13h6l-1 8 8-10h-6l1-8Z',
+      internet: 'M2 9.5a14.5 14.5 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8 15.5a5.5 5.5 0 0 1 8 0M12 19h.01',
+      phone: 'M8 3h8a1.5 1.5 0 0 1 1.5 1.5v15A1.5 1.5 0 0 1 16 21H8a1.5 1.5 0 0 1-1.5-1.5v-15A1.5 1.5 0 0 1 8 3ZM11 18h2',
+      gas: 'M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-4 2.5-5 .3 1.5 1 2.5 2 3 0-3 .5-5.5.5-8Z',
+      health: 'M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20ZM8 12.5h2.2l1.3-2 2 4 1.3-2H16',
+      gym: 'M6.5 7v10M17.5 7v10M3.5 10v4M20.5 10v4M6.5 12h11',
+      selfcare: 'M12 3.5l1.7 4.8 4.8 1.7-4.8 1.7L12 16.5l-1.7-4.8L5.5 10l4.8-1.7L12 3.5ZM18.5 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8Z',
+      subs: 'M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1ZM10 8.5v5l4.5-2.5L10 8.5ZM8 21h8',
+      gifts: 'M4 9h16v4H4ZM5 13v8h14v-8M12 9v12M12 9c-2 0-4.5-1-4.5-3a2 2 0 0 1 4.5 0M12 9c2 0 4.5-1 4.5-3a2 2 0 0 0-4.5 0',
+      misc: 'M4 4h6v6H4ZM14 4h6v6h-6ZM4 14h6v6H4ZM14 14h6v6h-6Z'
+    };
+    const UI = {
+      eye: 'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12ZM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z',
+      eyeOff: 'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12ZM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM4 4l16 16'
+    };
+    const light = (hex) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * 0.6 + 102).toString(16).padStart(2, '0')).join('');
+    let a = 20261018;
+    const rnd = () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const pick = (arr) => arr[Math.floor(rnd() * arr.length)];
+    const NOTES = {
+      groceries: ['Weekly bazaar', 'Vegetables & fish', 'Supermarket run', 'Rice & lentils', ''],
+      snacks: ['Coffee', 'Tea & biscuits', 'Ice cream', 'Bakery', 'Chips & soda', ''],
+      transport: ['Ride to office', 'Ride home', 'Bus fare', ''],
+      shopping: ['New shoes', 'T-shirts', 'Kitchen stuff', ''],
+      selfcare: ['Haircut', 'Skincare', ''],
+      health: ['Pharmacy', 'Doctor visit', ''],
+      gifts: ['Birthday gift', 'Wedding gift'],
+      misc: ['Laundry', 'Stationery', '']
+    };
+    const T = [];
+    let id = 1;
+    const add = (catId, amount, y, m, d, note) => T.push({ id: id++, catId, amount, y, m, d, n: dn(y, m, d), note: note || '', h: 8 + Math.floor(rnd() * 14), mi: Math.floor(rnd() * 60) });
+    for (let n = dn(2025, 0, 1); n <= TODAY; n++) {
+      const t = dt(n);
+      const y = t.getUTCFullYear(), m = t.getUTCMonth(), d = t.getUTCDate(), dow = t.getUTCDay();
+      if (d === 1) add('rent', 15000, y, m, d, ML[m] + ' rent');
+      if (d === 3) add('gym', 1000, y, m, d, 'Membership');
+      if (d === 5) add('internet', 1500, y, m, d, 'Broadband');
+      if (d === 8) add('subs', 685, y, m, d, 'Streaming');
+      if (d === 12) add('electric', Math.round((2300 + rnd() * 1400) / 10) * 10, y, m, d, ML[m] + ' bill');
+      if (d === 20) add('gas', 1150, y, m, d, 'Cooking gas');
+      if (d === 2 || d === 16) add('phone', 500, y, m, d, 'Mobile recharge');
+      if (rnd() < 0.72) add('snacks', Math.round((60 + rnd() * 380) / 5) * 5, y, m, d, pick(NOTES.snacks));
+      if ((dow === 2 || dow === 5) && rnd() < 0.85) add('groceries', Math.round((450 + rnd() * 1800) / 10) * 10, y, m, d, pick(NOTES.groceries));
+      if (dow >= 1 && dow <= 5 && rnd() < 0.7) add('transport', Math.round((40 + rnd() * 300) / 10) * 10, y, m, d, pick(NOTES.transport));
+      if (rnd() < 0.05) add('shopping', Math.round((800 + rnd() * 3700) / 50) * 50, y, m, d, pick(NOTES.shopping));
+      if (rnd() < 0.035) add('selfcare', Math.round((300 + rnd() * 900) / 50) * 50, y, m, d, pick(NOTES.selfcare));
+      if (rnd() < 0.03) add('health', Math.round((200 + rnd() * 2300) / 10) * 10, y, m, d, pick(NOTES.health));
+      if (rnd() < 0.015) add('gifts', Math.round((500 + rnd() * 2500) / 100) * 100, y, m, d, pick(NOTES.gifts));
+      if (rnd() < 0.07) add('misc', Math.round((50 + rnd() * 550) / 10) * 10, y, m, d, pick(NOTES.misc));
+    }
+    const byDay = {};
+    T.forEach((x) => { (byDay[x.n] = byDay[x.n] || []).push(x); });
+    const daySum = (n) => (byDay[n] || []).reduce((s, x) => s + x.amount, 0);
+    const sum = (s, e) => { let tot = 0; for (let n = s; n <= e; n++) tot += daySum(n); return tot; };
+    this._kit = { dn, dt, TODAY, MS, ML, WD, WS, fmt, CAT, IC, UI, light, byDay, sum };
+    return this._kit;
+  }
+
+  renderVals() {
+    const K = this.kit();
+    const st = this.state || {};
+    const accent = this.props.accent ?? '#FFD946';
+    const hidden = !!st.hidden;
+    const days = [];
+    for (let n = K.TODAY; n >= K.dn(2026, 9, 1); n--) {
+      const xs = K.byDay[n] || [];
+      if (!xs.length) continue;
+      const d = K.dt(n);
+      const sorted = xs.slice().sort((p, q) => (q.h * 60 + q.mi) - (p.h * 60 + p.mi));
+      const rows = sorted.map((x, i) => {
+        const c = K.CAT[x.catId];
+        // Sample data: yesterday's snack is shown as saved without a title, to demonstrate that row style.
+        const note = n === K.TODAY - 1 && x.catId === 'snacks' ? '' : x.note;
+        return {
+          title: note || c.name,
+          sub: c.name,
+          hasSub: !!note,
+          icon: K.IC[c.id],
+          color: K.light(c.color),
+          tint: c.color + '33',
+          amt: K.fmt(x.amount),
+          divider: i < sorted.length - 1 ? 'inset 0 -1px 0 #262626' : 'none'
+        };
+      });
+      const label = n === K.TODAY ? 'Today' : (n === K.TODAY - 1 ? 'Yesterday' : K.MS[d.getUTCMonth()] + ' ' + d.getUTCDate());
+      const total = xs.reduce((s, x) => s + x.amount, 0);
+      days.push({
+        label,
+        weekday: K.WD[d.getUTCDay()],
+        aria: K.WD[d.getUTCDay()] + ', ' + K.ML[d.getUTCMonth()] + ' ' + d.getUTCDate(),
+        total: K.fmt(total),
+        rows
+      });
+    }
+    const total = K.sum(K.dn(2026, 9, 1), K.TODAY);
+    return {
+      accent,
+      accentGlow: accent.length === 7 ? accent + '4D' : 'rgba(0,0,0,0)',
+      days,
+      totalShown: hidden ? '••••••' : K.fmt(total),
+      eyeIcon: hidden ? K.UI.eyeOff : K.UI.eye,
+      privacyLabel: hidden ? 'Show total' : 'Hide total',
+      togglePrivacy: () => this.setState({ hidden: !hidden })
+    };
+  }
+}
+</script>
+</body>
+</html>

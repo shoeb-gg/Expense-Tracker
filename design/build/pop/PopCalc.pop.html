@@ -1,0 +1,39 @@
+<!--@POP {"host":"NewSettings","title":"Settings, calculator keys","height":780,"scroll":948,"icons":"check"}-->
+  <div data-pop="sheet" style="position: absolute; left: 0; top: 0; width: 360px; height: 780px; z-index: 50; background: rgba(4, 10, 11, 0.88); display: flex; align-items: flex-end">
+    <div role="dialog" aria-label="Calculator keys" style="width: 360px; box-sizing: border-box; padding: 10px 16px 24px; border-radius: 28px 28px 0 0; background: {{t.surface2}}; box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45); display: flex; flex-direction: column">
+      <span aria-hidden="true" style="align-self: center; width: 40px; height: 4px; border-radius: 2px; background: {{pop.grab}}"></span>
+      <span style="margin: 14px 16px 0; font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">Calculator keys</span>
+      <span style="margin: 2px 16px 0; font-size: 13.5px; line-height: 20px; font-weight: 500; color: {{t.text2}}">Math keys on the Add expense keypad.</span>
+      <div role="radiogroup" aria-label="Calculator keys" style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px">
+        <sc-for list="{{pop.opts}}" as="o" hint-placeholder-count="2">
+          <button type="button" role="radio" aria-checked="{{o.on}}" aria-label="{{o.aria}}" onClick="{{o.pick}}" style="height: 56px; border: 0; border-radius: 16px; padding: 0 16px; background: {{o.bg}}; box-shadow: {{o.ring}}; color: {{t.text}}; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; transition: background 0.15s">
+            <span style="flex: 1; min-width: 0; font-size: 15px; line-height: 20px; font-weight: {{o.fw}}; white-space: nowrap">{{o.label}}</span>
+            <span aria-hidden="true" style="display: flex; gap: 4px">
+              <sc-for list="{{o.keys}}" as="c" hint-placeholder-count="4">
+                <span style="width: 28px; height: 28px; border-radius: 9px; opacity: {{c.op}}; background: {{t.surface}}; color: {{t.accent}}; font-size: 17px; line-height: 28px; font-weight: 700; text-align: center">{{c.ch}}</span>
+              </sc-for>
+            </span>
+            <span aria-hidden="true" style="width: 24px; height: 24px; flex-shrink: 0; border-radius: 12px; background: {{o.dotBg}}; box-shadow: {{o.dotRing}}; color: {{t.onAccent}}; display: flex; align-items: center; justify-content: center">
+              <sc-if value="{{o.on}}" hint-placeholder-val="{{ false }}">
+                <span class="ms" style="font-size: 18px; width: 18px; height: 18px">check</span>
+              </sc-if>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+<!--@LOGIC-->
+  // Calculator keys: plus and minus only, or all four.
+  popVals(t) {
+    const k = this.popKit(t);
+    const st = this.state || {};
+    const cur = st.popPick != null ? st.popPick : 0;
+    // Both rows show all four keys in the same places; the ones a choice leaves out are faded.
+    const KEYS = ['+', '\u2212', '\u00D7', '\u00F7'];
+    const LIST = [['Plus and minus', 2], ['All four keys', 4]];
+    return {
+      grab: k.grab,
+      opts: LIST.map(([label, n], i) => Object.assign(k.opt(i === cur), { label, aria: label, keys: KEYS.map((ch, j) => ({ ch, op: j < n ? 1 : 0.3 })), pick: () => this.setState({ popPick: i }) }))
+    };
+  }

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Expense details</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!--@HELMET arrow_back,calendar_month,chevron_right,delete,donut_small,edit,notes,photo_camera-->
+<div style="width: 360px; height: 780px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; color: {{t.text}}; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <header style="height: 60px; flex-shrink: 0; padding: 0 16px; display: grid; grid-template-columns: 88px minmax(0, 1fr) 88px; align-items: center">
+    <a href="MoodAqua.dc.html" aria-label="Back to home" style="justify-self: start; width: 40px; height: 40px; border-radius: 20px; background: {{t.surface}}; color: {{t.text}}; display: flex; align-items: center; justify-content: center; text-decoration: none">
+      <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">arrow_back</span>
+    </a>
+    <h1 style="margin: 0; text-align: center; font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">Details</h1>
+    <span aria-hidden="true"></span>
+  </header>
+
+  <main style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 2px 16px 16px; display: flex; flex-direction: column; gap: 12px">
+    <section aria-label="Expense" style="flex-shrink: 0; border-radius: 24px; background: {{t.accent}}; color: {{t.onAccent}}; padding: 20px 16px; display: flex; flex-direction: column; align-items: center">
+      <span style="width: 64px; height: 64px; border-radius: 20px; background: {{t.onAccent}}; display: flex; align-items: center; justify-content: center">
+        <span class="em" aria-hidden="true" style="font-size: 32px">{{emoji}}</span>
+      </span>
+      <span style="margin-top: 10px; font-size: 15px; line-height: 20px; font-weight: 700; color: {{t.onAccentDim}}">{{catName}}</span>
+      <span style="margin-top: 2px; font-size: 40px; line-height: 48px; font-weight: 800; letter-spacing: -0.8px">{{amount}}</span>
+    </section>
+
+    <section aria-label="More about this expense" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; padding: 4px 0; display: flex; flex-direction: column">
+      <sc-if value="{{hasTitle}}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; align-items: center; gap: 12px; padding-left: 16px">
+          <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{t.tile}}; color: {{t.text2}}; display: flex; align-items: center; justify-content: center">
+            <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">notes</span>
+          </span>
+          <span style="flex: 1; min-width: 0; height: 68px; margin-right: 16px; box-shadow: inset 0 -1px 0 {{t.line}}; display: flex; flex-direction: column; justify-content: center; gap: 2px">
+            <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Title</span>
+            <span style="font-size: 15px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{title}}</span>
+          </span>
+        </div>
+      </sc-if>
+      <div style="display: flex; align-items: center; gap: 12px; padding-left: 16px">
+        <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{t.tile}}; color: {{t.text2}}; display: flex; align-items: center; justify-content: center">
+          <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">calendar_month</span>
+        </span>
+        <span style="flex: 1; min-width: 0; height: 88px; margin-right: 16px; box-shadow: inset 0 -1px 0 {{t.line}}; display: flex; flex-direction: column; justify-content: center; gap: 2px">
+          <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Date</span>
+          <span style="font-size: 15px; line-height: 20px; font-weight: 600">{{dateText}}</span>
+          <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{addedText}}</span>
+        </span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px; padding-left: 16px">
+        <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{t.tile}}; color: {{t.text2}}; display: flex; align-items: center; justify-content: center">
+          <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">photo_camera</span>
+        </span>
+        <span style="flex: 1; min-width: 0; height: 68px; margin-right: 16px; display: flex; align-items: center; gap: 12px">
+          <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Photo</span>
+            <span style="font-size: 15px; line-height: 20px; font-weight: 600">Receipt, tap to view</span>
+          </span>
+          <span role="img" aria-label="Receipt photo" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 12px; overflow: hidden; background: linear-gradient(135deg, #6A5747, #3F332A); display: flex; align-items: center; justify-content: center"><span style="width: 22px; height: 31px; box-sizing: border-box; border-radius: 2.5px; background: #F4F1EA; transform: rotate(-8deg); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; justify-content: center; gap: 3px; padding: 0 4px"><span style="height: 2px; border-radius: 1px; background: #B9B2A2"></span><span style="width: 70%; height: 2px; border-radius: 1px; background: #CFC9BA"></span><span style="height: 2px; border-radius: 1px; background: #CFC9BA"></span><span style="width: 50%; height: 2px; border-radius: 1px; background: #B9B2A2"></span></span></span>
+        </span>
+      </div>
+    </section>
+
+    <a href="NewCategory.dc.html" aria-label="{{monthAria}}" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; color: {{t.text}}; text-decoration: none; display: flex; align-items: center; gap: 12px; padding-left: 16px">
+      <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{t.tile}}; color: {{t.accent}}; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">donut_small</span>
+      </span>
+      <span style="flex: 1; min-width: 0; height: 76px; margin-right: 16px; display: flex; align-items: center; gap: 12px">
+        <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 15px; line-height: 20px; font-weight: 600">{{monthLabel}}</span>
+          <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{monthText}}</span>
+        </span>
+        <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; margin-right: -6px; color: {{t.text3}}">chevron_right</span>
+      </span>
+    </a>
+
+  </main>
+
+  <div style="flex-shrink: 0; padding: 12px 16px 16px; background: {{t.nav}}; box-shadow: inset 0 1px 0 {{t.line}}; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+      <a href="NewEdit.dc.html" style="height: 52px; border-radius: 18px; background: {{t.accent}}; color: {{t.onAccent}}; font-size: 15px; line-height: 20px; font-weight: 800; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px">
+        <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px">edit</span>
+        Edit
+      </a>
+      <button type="button" onClick="{{askDelete}}" style="height: 52px; border: 0; border-radius: 18px; padding: 0; background: {{t.surface2}}; color: {{t.bad}}; font-size: 15px; line-height: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer">
+        <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px">delete</span>
+        Delete
+      </button>
+  </div>
+
+  <sc-if value="{{confirm}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 0; top: 0; width: 360px; height: 780px; background: rgba(4, 10, 11, 0.88); display: flex; align-items: center; justify-content: center">
+      <div role="alertdialog" aria-label="Delete this expense?" style="width: 312px; box-sizing: border-box; padding: 20px; border-radius: 24px; background: {{t.surface2}}; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column">
+        <span style="font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">Delete this expense?</span>
+        <span style="margin-top: 8px; font-size: 14px; line-height: 20px; font-weight: 700">{{confirmWhat}}</span>
+        <span style="font-size: 13.5px; line-height: 20px; font-weight: 500; color: {{t.text2}}">This can't be undone.</span>
+        <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+          <button type="button" onClick="{{cancelDelete}}" style="height: 48px; border: 0; border-radius: 16px; padding: 0; background: {{t.tile}}; color: {{t.text}}; font-size: 15px; line-height: 20px; font-weight: 700; cursor: pointer">Cancel</button>
+          <a href="MoodAqua.dc.html" style="height: 48px; border-radius: 16px; background: {{t.bad}}; color: #2A0B12; font-size: 15px; line-height: 20px; font-weight: 800; text-decoration: none; display: flex; align-items: center; justify-content: center">Delete</a>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mood":{"editor":"enum","options":["coral","aqua","iris"],"default":"aqua"},"$preview":{"width":360,"height":780}}'>
+class Component extends DCLogic {
+  /*@THEME*/
+
+  /*@KIT*/
+
+  renderVals() {
+    const K = this.kit();
+    const st = this.state || {};
+    const t = this.theme(this.props.mood ?? 'aqua');
+    // The sample shows today's latest expense; in the app this screen opens for whichever expense was tapped.
+    const xs = (K.byDay[K.TODAY] || []).slice().sort((p, r) => (r.h * 60 + r.mi) - (p.h * 60 + p.mi));
+    const x = xs[0];
+    const c = K.CAT[x.catId];
+    const d = K.dt(x.n);
+    const hh = x.h % 12 === 0 ? 12 : x.h % 12;
+    const time = hh + ':' + String(x.mi).padStart(2, '0') + (x.h < 12 ? ' AM' : ' PM');
+    const amount = K.fmt(x.amount);
+    // This category's spending in the same month, for context.
+    let monthSum = 0, monthCount = 0;
+    for (let n = K.dn(d.getUTCFullYear(), d.getUTCMonth(), 1); n <= K.TODAY; n++) (K.byDay[n] || []).forEach((y) => { if (y.catId === c.id) { monthSum += y.amount; monthCount++; } });
+    return {
+      t,
+      emoji: c.emoji,
+      catName: c.name,
+      amount,
+      hasTitle: !!x.note,
+      title: x.note,
+      dateText: K.WD[d.getUTCDay()] + ', ' + K.ML[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear(),
+      addedText: 'Added ' + K.MS[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear() + ' at ' + time,
+      monthLabel: 'See all ' + c.name + ' in ' + K.ML[d.getUTCMonth()],
+      monthText: monthCount === 1 ? '1 expense so far' : monthCount + ' expenses so far',
+      monthAria: 'See all ' + c.name + ' expenses this month',
+      confirm: !!st.confirm,
+      confirmWhat: (x.note || c.name) + ' \u00B7 ' + amount,
+      askDelete: () => this.setState({ confirm: true }),
+      cancelDelete: () => this.setState({ confirm: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

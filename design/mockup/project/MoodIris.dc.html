@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home, Iris look</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,0..1,0&amp;icon_names=add,bar_chart,bolt,calendar_month,call,category,chevron_left,cookie,directions_bus,donut_small,expand_more,fitness_center,home,local_fire_department,monitor_heart,north_east,redeem,shopping_bag,shopping_basket,spa,subscriptions,tune,visibility,visibility_off,wifi&amp;display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&amp;display=swap">
+<style>
+html,body{margin:0;overflow:hidden}
+.em{font-family:'Noto Color Emoji','Apple Color Emoji','Segoe UI Emoji',sans-serif;line-height:1;display:inline-block;flex-shrink:0}
+button,input{font-family:inherit}
+a{color:inherit}
+main::-webkit-scrollbar{display:none}
+.ms{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;line-height:1;display:inline-block;flex-shrink:0;overflow:hidden;white-space:nowrap;letter-spacing:normal;text-transform:none;direction:ltr;font-feature-settings:'liga';-webkit-font-smoothing:antialiased}
+</style>
+</helmet>
+<div style="width: 360px; height: 780px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; color: {{t.text}}; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <header style="flex-shrink: 0; padding: 0 16px">
+    <div style="height: 64px; display: flex; align-items: center; justify-content: space-between">
+      <h1 style="margin: 0; font-size: 21px; line-height: 28px; font-weight: 800; letter-spacing: -0.3px">Expense Tracker</h1>
+      <div style="display: flex; align-items: center; gap: 8px">
+        <button type="button" aria-label="{{privacyLabel}}" onClick="{{togglePrivacy}}" style="width: 40px; height: 40px; border: 0; border-radius: 20px; background: {{t.surface}}; color: {{t.text}}; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0">
+          <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">{{eyeIcon}}</span>
+        </button>
+        <a href="NewCalendar.dc.html" aria-label="Calendar" style="width: 40px; height: 40px; border-radius: 20px; background: {{t.surface}}; color: {{t.text}}; display: flex; align-items: center; justify-content: center; text-decoration: none">
+          <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">calendar_month</span>
+        </a>
+      </div>
+    </div>
+    <div style="position: relative; overflow: hidden; height: 92px; border-radius: 24px; background: {{t.accent}}; color: {{t.onAccent}}; box-shadow: inset 0 1px 0 {{t.sheen}}; display: grid; grid-template-columns: 88px minmax(0, 1fr); grid-template-rows: 35px 57px">
+      <span aria-hidden="true" style="position: absolute; right: 0; bottom: 0; width: 56px; height: 56px; box-sizing: border-box; border-top-left-radius: 56px; border-top: 1.5px solid {{t.ring}}; border-left: 1.5px solid {{t.ring}}"></span>
+      <span aria-hidden="true" style="position: absolute; right: 0; bottom: 0; width: 92px; height: 92px; box-sizing: border-box; border-top-left-radius: 92px; border-top: 1.5px solid {{t.ringSoft}}; border-left: 1.5px solid {{t.ringSoft}}"></span>
+      <button type="button" aria-label="Choose month, October 2026" style="position: relative; grid-column: 1; grid-row: 1 / span 2; margin: 8px 0 8px 8px; display: grid; grid-template-rows: subgrid; justify-items: center; border: 0; border-radius: 16px; background: {{t.onAccent}}; color: #FFFFFF; padding: 0; cursor: pointer">
+        <span style="align-self: end; font-size: 12.5px; line-height: 16px; font-weight: 600; color: {{t.pillDim}}">2026</span>
+        <span style="align-self: baseline; margin-top: 2px; display: flex; align-items: center; font-size: 22px; line-height: 36px; font-weight: 800; letter-spacing: -0.3px">
+          <span>Oct</span>
+          <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; margin: 2px -4px 0 0; color: {{t.accent}}">expand_more</span>
+        </span>
+      </button>
+      <a href="NewReports.dc.html" style="position: relative; grid-column: 2; grid-row: 1 / span 2; display: grid; grid-template-rows: subgrid; grid-template-columns: minmax(0, 1fr) 32px; padding: 0 16px; color: {{t.onAccent}}; text-decoration: none">
+        <span style="grid-column: 1; grid-row: 1; align-self: end; font-size: 12.5px; line-height: 16px; font-weight: 700; color: {{t.onAccentDim}}">Spent in October</span>
+        <span style="grid-column: 1; grid-row: 2; align-self: baseline; margin-top: 2px; font-size: 32px; line-height: 36px; font-weight: 800; letter-spacing: -0.8px; font-variant-numeric: tabular-nums">{{totalShown}}</span>
+        <span aria-hidden="true" style="grid-column: 2; grid-row: 1 / span 2; align-self: center; justify-self: end; width: 32px; height: 32px; border-radius: 16px; background: {{t.onAccent}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+          <span class="ms" style="font-size: 18px; width: 18px; height: 18px">north_east</span>
+        </span>
+      </a>
+    </div>
+  </header>
+
+  <main style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 0 0 24px">
+    <sc-for list="{{days}}" as="day" hint-placeholder-count="4">
+      <section aria-label="{{day.aria}}" style="margin: 12px 16px 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+        <div style="height: 60px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; grid-template-rows: 20px 16px; column-gap: 12px; row-gap: 3px; align-content: center; align-items: baseline">
+          <span aria-hidden="true" style="grid-column: 1; grid-row: 1 / span 2; align-self: center; width: 44px; height: 40px; border-radius: 13px; background: {{day.badgeBg}}; color: {{day.badgeFg}}; font-size: 17px; line-height: 20px; font-weight: 800; font-variant-numeric: tabular-nums; display: flex; align-items: center; justify-content: center">{{day.num}}</span>
+          <span style="grid-column: 2; grid-row: 1; position: relative; top: -1px; font-size: 15px; line-height: 20px; font-weight: 800">{{day.label}}</span>
+          <span style="grid-column: 3; grid-row: 1; justify-self: end; position: relative; top: -1px; font-size: 16px; line-height: 20px; font-weight: 800; color: {{t.accent}}; font-variant-numeric: tabular-nums">{{day.total}}</span>
+          <span style="grid-column: 2; grid-row: 2; position: relative; top: -1px; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{day.weekday}}</span>
+          <span style="grid-column: 3; grid-row: 2; justify-self: end; position: relative; top: -1px; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Total</span>
+        </div>
+        <div style="padding: 4px 0">
+          <sc-for list="{{day.rows}}" as="r" hint-placeholder-count="2">
+            <a href="NewExpense.dc.html" style="display: flex; align-items: center; gap: 12px; padding-left: 16px; text-decoration: none; color: inherit">
+              <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{r.tile}}; display: flex; align-items: center; justify-content: center">
+                <span class="em" aria-hidden="true" style="font-size: 22px">{{r.emoji}}</span>
+              </span>
+              <span style="flex: 1; min-width: 0; height: 68px; display: flex; align-items: center; gap: 12px; margin-right: 16px; box-shadow: {{r.divider}}">
+                <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                  <span style="font-size: 15px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.title}}</span>
+                  <sc-if value="{{r.hasSub}}" hint-placeholder-val="{{ true }}">
+                    <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{r.sub}}</span>
+                  </sc-if>
+                </span>
+                <span style="font-size: 15px; line-height: 20px; font-weight: 700; font-variant-numeric: tabular-nums">{{r.amt}}</span>
+              </span>
+            </a>
+          </sc-for>
+        </div>
+      </section>
+    </sc-for>
+    <div style="display: flex; justify-content: center; padding: 20px 0 8px">
+      <button type="button" style="height: 40px; padding: 0 18px 0 10px; border: 0; border-radius: 20px; background: {{t.surface}}; color: {{t.text}}; font-size: 13.5px; line-height: 20px; font-weight: 600; display: flex; align-items: center; gap: 4px; cursor: pointer">
+        <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px">chevron_left</span>
+        See September
+      </button>
+    </div>
+  </main>
+
+  <nav aria-label="Main" style="height: 72px; flex-shrink: 0; position: relative; background: {{t.nav}}; box-shadow: inset 0 1px 0 {{t.line}}; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center">
+    <a href="MoodIris.dc.html" aria-current="page" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{t.accent}}; text-decoration: none; font-size: 11.5px; line-height: 14px; font-weight: 700">
+      <span style="width: 48px; height: 28px; border-radius: 14px; background: {{t.accentSoft}}; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px; font-variation-settings: 'FILL' 1">home</span>
+      </span>
+      Home
+    </a>
+    <a href="NewCharts.dc.html" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{t.text2}}; text-decoration: none; font-size: 11.5px; line-height: 14px; font-weight: 600">
+      <span style="width: 48px; height: 28px; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px">donut_small</span>
+      </span>
+      Charts
+    </a>
+    <a href="NewAdd.dc.html" aria-label="Add expense" style="height: 72px; display: flex; align-items: flex-start; justify-content: center; text-decoration: none">
+      <span style="margin-top: -16px; width: 58px; height: 58px; border-radius: 29px; background: {{t.accent}}; color: {{t.onAccent}}; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 22px -2px {{t.accentGlow}}, 0 2px 6px rgba(0, 0, 0, 0.35)">
+        <span class="ms" aria-hidden="true" style="font-size: 30px; width: 30px; height: 30px">add</span>
+      </span>
+    </a>
+    <a href="NewReports.dc.html" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{t.text2}}; text-decoration: none; font-size: 11.5px; line-height: 14px; font-weight: 600">
+      <span style="width: 48px; height: 28px; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px">bar_chart</span>
+      </span>
+      Reports
+    </a>
+    <a href="NewSettings.dc.html" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{t.text2}}; text-decoration: none; font-size: 11.5px; line-height: 14px; font-weight: 600">
+      <span style="width: 48px; height: 28px; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px">tune</span>
+      </span>
+      Settings
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mood":{"editor":"enum","options":["coral","aqua","iris"],"default":"iris"},"$preview":{"width":360,"height":780}}'>
+class Component extends DCLogic {
+  theme(mood) {
+    const MOODS = {
+      coral: { bg: '#0F1320', nav: '#151A2A', surface: '#1A2033', line: '#2B3350', text: '#FFFFFF', text2: '#D3D8E8', text3: '#A2ABC4', accent: '#FF7A5F', onAccent: '#2A0F0A', ink: '#171B2B' },
+      aqua: { bg: '#0B1517', nav: '#101D20', surface: '#152528', line: '#24383C', text: '#FFFFFF', text2: '#CBDADC', text3: '#9BB0B3', accent: '#4FD1C5', onAccent: '#04231F', ink: '#0F1E21' },
+      iris: { bg: '#100F1C', nav: '#171527', surface: '#1D1B30', line: '#33304D', text: '#FFFFFF', text2: '#D4D1EC', text3: '#A9A6CA', accent: '#A898FF', onAccent: '#150F33', ink: '#17132B' }
+    };
+    const t = Object.assign({}, MOODS[mood] || MOODS.coral);
+    t.accentSoft = t.accent + '2E';
+    t.surface2 = { coral: '#232A42', aqua: '#1C3034', iris: '#27243E' }[mood] || '#232A42';
+    t.tile = '#' + [1, 3, 5].map((i) => Math.round(parseInt(t.surface.slice(i, i + 2), 16) * 0.87 + 33).toString(16).padStart(2, '0')).join('');
+    t.accentGlow = t.accent + '59';
+    t.onAccentDim = t.onAccent + 'D9';
+    t.pillDim = '#FFFFFFB8';
+    t.sheen = '#FFFFFF4D';
+    t.ring = '#FFFFFF47';
+    t.ringSoft = '#FFFFFF26';
+    return t;
+  }
+
+  kit() {
+    if (this._kit) return this._kit;
+    const DAY = 86400000;
+    const dn = (y, m, d) => Date.UTC(y, m, d) / DAY;
+    const dt = (n) => new Date(n * DAY);
+    const TODAY = dn(2026, 9, 18);
+    const MS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const ML = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const WD = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const fmt = (v) => Math.round(v).toLocaleString('en-US');
+    const CATS = [
+      { id: 'groceries', name: 'Groceries', tile: '#8FDDA0', emoji: '🥦' },
+      { id: 'snacks', name: 'Snacks', tile: '#FFB37A', emoji: '🍗' },
+      { id: 'transport', name: 'Transportation', tile: '#93C0FF', emoji: '🚍' },
+      { id: 'shopping', name: 'Shopping', tile: '#FFA3C4', emoji: '🛍️' },
+      { id: 'rent', name: 'House Rent', tile: '#C3B5FF', emoji: '🏠' },
+      { id: 'electric', name: 'Electric Bill', tile: '#F5E678', emoji: '⚡' },
+      { id: 'internet', name: 'Internet Bill', tile: '#89DCF0', emoji: '🌐' },
+      { id: 'phone', name: 'Phone', tile: '#7DE1CD', emoji: '☎️' },
+      { id: 'gas', name: 'Gas', tile: '#FFD077', emoji: '🔥' },
+      { id: 'health', name: 'Health', tile: '#FF9999', emoji: '💊' },
+      { id: 'gym', name: 'Gym', tile: '#CDEA85', emoji: '💪' },
+      { id: 'selfcare', name: 'Self Care', tile: '#EAB4F6', emoji: '🧴' },
+      { id: 'subs', name: 'Online Subscriptions', tile: '#AAB2FF', emoji: '▶️' },
+      { id: 'gifts', name: 'Gifts', tile: '#FFAB99', emoji: '🎁' },
+      { id: 'misc', name: 'Miscellaneous', tile: '#DECFB5', emoji: '🧩' }
+    ];
+    const CAT = {};
+    CATS.forEach((c) => { CAT[c.id] = c; });
+    let a = 20261018;
+    const rnd = () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const pick = (arr) => arr[Math.floor(rnd() * arr.length)];
+    const NOTES = {
+      groceries: ['Weekly bazaar', 'Vegetables & fish', 'Supermarket run', 'Rice & lentils', ''],
+      snacks: ['Coffee', 'Tea & biscuits', 'Ice cream', 'Bakery', 'Chips & soda', ''],
+      transport: ['Ride to office', 'Ride home', 'Bus fare', ''],
+      shopping: ['New shoes', 'T-shirts', 'Kitchen stuff', ''],
+      selfcare: ['Haircut', 'Skincare', ''],
+      health: ['Pharmacy', 'Doctor visit', ''],
+      gifts: ['Birthday gift', 'Wedding gift'],
+      misc: ['Laundry', 'Stationery', '']
+    };
+    const T = [];
+    let id = 1;
+    const add = (catId, amount, y, m, d, note) => T.push({ id: id++, catId, amount, y, m, d, n: dn(y, m, d), note: note || '', h: 8 + Math.floor(rnd() * 14), mi: Math.floor(rnd() * 60) });
+    for (let n = dn(2025, 0, 1); n <= TODAY; n++) {
+      const t = dt(n);
+      const y = t.getUTCFullYear(), m = t.getUTCMonth(), d = t.getUTCDate(), dow = t.getUTCDay();
+      if (d === 1) add('rent', 15000, y, m, d, ML[m] + ' rent');
+      if (d === 3) add('gym', 1000, y, m, d, 'Membership');
+      if (d === 5) add('internet', 1500, y, m, d, 'Broadband');
+      if (d === 8) add('subs', 685, y, m, d, 'Streaming');
+      if (d === 12) add('electric', Math.round((2300 + rnd() * 1400) / 10) * 10, y, m, d, ML[m] + ' bill');
+      if (d === 20) add('gas', 1150, y, m, d, 'Cooking gas');
+      if (d === 2 || d === 16) add('phone', 500, y, m, d, 'Mobile recharge');
+      if (rnd() < 0.72) add('snacks', Math.round((60 + rnd() * 380) / 5) * 5, y, m, d, pick(NOTES.snacks));
+      if ((dow === 2 || dow === 5) && rnd() < 0.85) add('groceries', Math.round((450 + rnd() * 1800) / 10) * 10, y, m, d, pick(NOTES.groceries));
+      if (dow >= 1 && dow <= 5 && rnd() < 0.7) add('transport', Math.round((40 + rnd() * 300) / 10) * 10, y, m, d, pick(NOTES.transport));
+      if (rnd() < 0.05) add('shopping', Math.round((800 + rnd() * 3700) / 50) * 50, y, m, d, pick(NOTES.shopping));
+      if (rnd() < 0.035) add('selfcare', Math.round((300 + rnd() * 900) / 50) * 50, y, m, d, pick(NOTES.selfcare));
+      if (rnd() < 0.03) add('health', Math.round((200 + rnd() * 2300) / 10) * 10, y, m, d, pick(NOTES.health));
+      if (rnd() < 0.015) add('gifts', Math.round((500 + rnd() * 2500) / 100) * 100, y, m, d, pick(NOTES.gifts));
+      if (rnd() < 0.07) add('misc', Math.round((50 + rnd() * 550) / 10) * 10, y, m, d, pick(NOTES.misc));
+    }
+    const byDay = {};
+    T.forEach((x) => { (byDay[x.n] = byDay[x.n] || []).push(x); });
+    const daySum = (n) => (byDay[n] || []).reduce((s, x) => s + x.amount, 0);
+    const sum = (s, e) => { let tot = 0; for (let n = s; n <= e; n++) tot += daySum(n); return tot; };
+    this._kit = { dn, dt, TODAY, MS, ML, WD, fmt, CAT, byDay, sum };
+    return this._kit;
+  }
+
+  renderVals() {
+    const K = this.kit();
+    const st = this.state || {};
+    const t = this.theme(this.props.mood ?? 'iris');
+    const hidden = !!st.hidden;
+    const days = [];
+    for (let n = K.TODAY; n >= K.dn(2026, 9, 1); n--) {
+      const xs = K.byDay[n] || [];
+      if (!xs.length) continue;
+      const d = K.dt(n);
+      const sorted = xs.slice().sort((p, q) => (q.h * 60 + q.mi) - (p.h * 60 + p.mi));
+      const rows = sorted.map((x, i) => {
+        const c = K.CAT[x.catId];
+        // Sample data: yesterday's snack is shown as saved without a title, to demonstrate that row style.
+        const note = n === K.TODAY - 1 && x.catId === 'snacks' ? '' : x.note;
+        return {
+          title: note || c.name,
+          sub: c.name,
+          hasSub: !!note,
+          emoji: c.emoji,
+          tile: t.tile,
+          amt: K.fmt(x.amount),
+          divider: i < sorted.length - 1 ? 'inset 0 -1px 0 ' + t.line : 'none'
+        };
+      });
+      const recent = n >= K.TODAY - 1;
+      const label = n === K.TODAY ? 'Today' : (n === K.TODAY - 1 ? 'Yesterday' : K.WD[d.getUTCDay()]);
+      const total = xs.reduce((s, x) => s + x.amount, 0);
+      days.push({
+        label,
+        num: String(d.getUTCDate()),
+        badgeBg: n === K.TODAY ? t.accent : t.accentSoft,
+        badgeFg: n === K.TODAY ? t.onAccent : t.accent,
+        weekday: recent ? K.WD[d.getUTCDay()] : (K.TODAY - n) + ' days ago',
+        aria: K.WD[d.getUTCDay()] + ', ' + K.ML[d.getUTCMonth()] + ' ' + d.getUTCDate(),
+        total: K.fmt(total),
+        rows
+      });
+    }
+    const total = K.sum(K.dn(2026, 9, 1), K.TODAY);
+    return {
+      t,
+      days,
+      totalShown: hidden ? '••••••' : K.fmt(total),
+      eyeIcon: hidden ? 'visibility_off' : 'visibility',
+      privacyLabel: hidden ? 'Show total' : 'Hide total',
+      togglePrivacy: () => this.setState({ hidden: !hidden })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Add expense, as it opens</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,0..1,0&amp;icon_names=arrow_upward,backspace,bolt,calendar_month,call,category,cookie,dialpad,directions_bus,edit,expand_less,expand_more,fitness_center,home,image,keyboard,local_fire_department,monitor_heart,photo_camera,redeem,shopping_bag,shopping_basket,spa,subscriptions,touch_app,wifi&amp;display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&amp;display=swap">
+<style>
+html,body{margin:0;overflow:hidden}
+.em{font-family:'Noto Color Emoji','Apple Color Emoji','Segoe UI Emoji',sans-serif;line-height:1;display:inline-block;flex-shrink:0}
+button,input{font-family:inherit}
+a{color:inherit}
+input::placeholder{color:inherit;opacity:.55}
+.ms{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;line-height:1;display:inline-block;flex-shrink:0;overflow:hidden;white-space:nowrap;letter-spacing:normal;text-transform:none;direction:ltr;font-feature-settings:'liga';-webkit-font-smoothing:antialiased}
+</style>
+</helmet>
+<div lang="en" style="width: 360px; height: 780px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; color: {{t.text}}; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <header style="height: 60px; flex-shrink: 0; padding: 0 16px; display: grid; grid-template-columns: 88px minmax(0, 1fr) 88px; align-items: center">
+    <a href="MoodAqua.dc.html" style="justify-self: start; height: 36px; padding: 0 14px; border-radius: 18px; background: {{t.surface}}; color: {{t.text}}; font-size: 14px; line-height: 20px; font-weight: 700; display: flex; align-items: center; text-decoration: none">Cancel</a>
+    <h1 style="margin: 0; text-align: center; font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">Add expense</h1>
+    <span aria-hidden="true"></span>
+  </header>
+
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 8px 14.67px 0">
+    <sc-for list="{{tiles}}" as="c" hint-placeholder-count="15">
+      <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="height: 84px; border: 0; background: transparent; color: {{c.labelColor}}; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px; padding: 0; cursor: pointer">
+        <span style="width: 48px; height: 48px; flex-shrink: 0; border-radius: 15px; background: {{c.tile}}; box-shadow: {{c.ring}}; display: flex; align-items: center; justify-content: center">
+          <span class="em" aria-hidden="true" style="font-size: 24px">{{c.emoji}}</span>
+        </span>
+        <span style="max-width: 100%; font-size: 11.5px; line-height: 14px; font-weight: {{c.fw}}; text-align: center; hyphens: auto; overflow-wrap: break-word">{{c.name}}</span>
+      </button>
+    </sc-for>
+    <a href="NewCategories.dc.html" style="height: 84px; color: {{t.text2}}; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 6px">
+      <span style="width: 48px; height: 48px; box-sizing: border-box; border-radius: 15px; border: 1.5px dashed {{t.text3}}; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">edit</span>
+      </span>
+      <span style="font-size: 11.5px; line-height: 14px; font-weight: 600">Manage</span>
+    </a>
+  </div>
+
+  <sc-if value="{{qv.unknown}}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="flex-shrink: 0; margin: 18px 16px 0; height: 64px; box-sizing: border-box; padding: 0 16px; border-radius: 20px; background: {{qv.bannerBg}}; box-shadow: {{qv.bannerLine}}; display: flex; align-items: center; gap: 12px">
+      <span aria-hidden="true" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{qv.bannerTile}}; color: {{t.accent}}; display: flex; align-items: center; justify-content: center">
+        <span class="ms" style="font-size: 26px; width: 26px; height: 26px">arrow_upward</span>
+      </span>
+      <span style="min-width: 0; display: flex; flex-direction: column; gap: 1px">
+        <span style="font-size: 17px; line-height: 22px; font-weight: 800; letter-spacing: -0.2px; color: {{t.accent}}">Select a category above</span>
+        <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text2}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{qv.bannerSub}}</span>
+      </span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{showPanel}}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 370px; box-sizing: border-box; padding: 12px 16px 16px; background: {{t.nav}}; border-radius: 28px 28px 0 0; box-shadow: inset 0 1px 0 {{t.line}}, 0 -12px 32px rgba(0, 0, 0, 0.35); display: flex; flex-direction: column">
+      <div style="height: 56px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+        <button type="button" aria-label="{{chipLabel}}" onClick="{{closePanel}}" style="height: 44px; flex-shrink: 0; padding: 0 8px 0 4px; border: 0; border-radius: 22px; background: {{t.surface2}}; color: {{t.text}}; display: flex; align-items: center; gap: 8px; cursor: pointer">
+          <span style="width: 36px; height: 36px; border-radius: 18px; background: {{pickedTile}}; display: flex; align-items: center; justify-content: center">
+            <span class="em" aria-hidden="true" style="font-size: 18px">{{pickedEmoji}}</span>
+          </span>
+          <span style="font-size: 14.5px; line-height: 20px; font-weight: 700">{{pickedName}}</span>
+          <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; color: {{t.text2}}">expand_more</span>
+        </button>
+        <div aria-live="polite" style="min-width: 0; display: flex; flex-direction: column; align-items: flex-end">
+          <sc-if value="{{hasOp}}" hint-placeholder-val="{{ false }}">
+            <span style="font-size: 12.5px; line-height: 16px; font-weight: 600; color: {{t.text3}}; font-variant-numeric: tabular-nums; white-space: nowrap">{{exprShown}}</span>
+          </sc-if>
+          <span style="font-size: 34px; line-height: 40px; font-weight: 800; letter-spacing: -0.8px; font-variant-numeric: tabular-nums; color: {{amountColor}}; white-space: nowrap">{{bigAmount}}</span>
+        </div>
+      </div>
+
+      <div style="height: 48px; flex-shrink: 0; margin-top: 10px; padding: 0 4px 0 14px; border-radius: 14px; background: {{t.surface2}}; display: flex; align-items: center; gap: 2px">
+        <label for="title-input" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Title, optional</label>
+        <input id="title-input" type="text" value="{{note}}" onChange="{{onNote}}" placeholder="Add a title (optional)" style="flex: 1; min-width: 0; height: 44px; border: 0; background: transparent; color: {{t.text}}; font-size: 15px; font-weight: 600; outline: none; padding: 0">
+        <button type="button" aria-label="Take a receipt photo" style="width: 40px; height: 40px; flex-shrink: 0; border: 0; border-radius: 20px; background: transparent; color: {{t.text2}}; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0">
+          <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">photo_camera</span>
+        </button>
+        <button type="button" aria-label="Attach a photo from the gallery" style="width: 40px; height: 40px; flex-shrink: 0; border: 0; border-radius: 20px; background: transparent; color: {{t.text2}}; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0">
+          <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">image</span>
+        </button>
+      </div>
+
+      <div style="margin-top: 12px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+        <sc-for list="{{keys}}" as="k" hint-placeholder-count="16">
+          <sc-if value="{{k.isLink}}" hint-placeholder-val="{{ false }}">
+            <a href="MoodAqua.dc.html" aria-label="Save expense" style="height: 48px; border-radius: 14px; background: {{k.bg}}; color: {{k.fg}}; font-size: 15px; line-height: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; text-decoration: none">Save</a>
+          </sc-if>
+          <sc-if value="{{k.isButton}}" hint-placeholder-val="{{ true }}">
+            <button type="button" aria-label="{{k.aria}}" onClick="{{k.press}}" style="height: 48px; border: 0; border-radius: 14px; background: {{k.bg}}; color: {{k.fg}}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; padding: 0; font-size: {{k.fs}}; line-height: 1; font-weight: {{k.fw}}; font-variant-numeric: tabular-nums">
+              <sc-if value="{{k.hasIcon}}" hint-placeholder-val="{{ false }}">
+                <span class="ms" aria-hidden="true" style="font-size: {{k.isz}}; width: {{k.isz}}; height: {{k.isz}}">{{k.icon}}</span>
+              </sc-if>
+              <sc-if value="{{k.hasText}}" hint-placeholder-val="{{ true }}">
+                <span>{{k.text}}</span>
+              </sc-if>
+            </button>
+          </sc-if>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{showQuick}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; background: {{t.bg}}">
+      <sc-if value="{{qv.show}}" hint-placeholder-val="{{ true }}">
+        <div style="border-radius: 20px; background: {{t.surface}}; display: flex; flex-direction: column">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px">
+          <button type="button" aria-label="{{qv.aria}}" style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; border: 0; padding: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+            <span style="width: 44px; height: 44px; flex-shrink: 0; box-sizing: border-box; border-radius: 14px; background: {{qv.tile}}; border: {{qv.tileLine}}; display: flex; align-items: center; justify-content: center">
+              <sc-if value="{{qv.known}}" hint-placeholder-val="{{ true }}">
+                <span class="em" aria-hidden="true" style="font-size: 22px">{{qv.emoji}}</span>
+              </sc-if>
+              <sc-if value="{{qv.unknown}}" hint-placeholder-val="{{ false }}">
+                <span aria-hidden="true" style="font-size: 20px; line-height: 24px; font-weight: 800; color: {{t.accent}}">?</span>
+              </sc-if>
+            </span>
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="display: flex; align-items: center; font-size: 15px; line-height: 20px; font-weight: {{qv.nameFw}}; color: {{qv.nameFg}}; white-space: nowrap">
+                <span style="min-width: 0; overflow: hidden; text-overflow: ellipsis">{{qv.name}}</span>
+              </span>
+              <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{qv.sub}}</span>
+            </span>
+          </button>
+          <span style="font-size: 17px; line-height: 24px; font-weight: 800; font-variant-numeric: tabular-nums">{{qv.amount}}</span>
+          <a href="MoodAqua.dc.html" aria-disabled="{{qv.unknown}}" style="height: 40px; flex-shrink: 0; padding: 0 14px; border-radius: 20px; background: {{qv.addBg}}; color: {{qv.addFg}}; pointer-events: {{qv.addPe}}; font-size: 14.5px; line-height: 20px; font-weight: 800; display: flex; align-items: center; text-decoration: none">Add</a>
+          </div>
+          <sc-if value="{{qv.hasNote}}" hint-placeholder-val="{{ false }}">
+            <span style="margin: 0 16px; padding: 9px 0 11px; box-shadow: inset 0 1px 0 {{t.line}}; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{qv.hint}}</span>
+          </sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{qv.guide}}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 20px; background: {{t.surface}}">
+            <span aria-hidden="true" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{t.tile}}; color: {{t.accent}}; display: flex; align-items: center; justify-content: center">
+              <span class="ms" style="font-size: 24px; width: 24px; height: 24px">{{qv.guideIcon}}</span>
+            </span>
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 15px; line-height: 20px; font-weight: 800">{{qv.guideTitle}}</span>
+              <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{qv.guideSub}}</span>
+            </span>
+          </div>
+        </sc-if>
+      <div style="height: 56px; flex-shrink: 0; padding: 0 8px 0 18px; border-radius: 28px; background: {{t.surface}}; box-shadow: inset 0 0 0 1px {{t.line}}; display: flex; align-items: center; gap: 10px">
+        <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px; color: {{t.accent}}">keyboard</span>
+        <label for="quick-input" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Type to add an expense</label>
+        <input id="quick-input" type="text" value="{{typed}}" onChange="{{onTyped}}" placeholder="Type it, like coffee 120" style="flex: 1; min-width: 0; height: 48px; border: 0; background: transparent; color: {{t.text}}; font-size: 15px; font-weight: 600; outline: none; padding: 0">
+        <button type="button" aria-label="Take a receipt photo" style="width: 40px; height: 40px; flex-shrink: 0; border: 0; border-radius: 20px; background: {{t.surface2}}; color: {{t.text2}}; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0">
+          <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">photo_camera</span>
+        </button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mood":{"editor":"enum","options":["aqua","coral","iris"],"default":"aqua"},"$preview":{"width":360,"height":780}}'>
+class Component extends DCLogic {
+  theme(mood) {
+    const MOODS = {
+      coral: { bg: '#0F1320', nav: '#151A2A', surface: '#1A2033', surface2: '#232A42', line: '#2B3350', text: '#FFFFFF', text2: '#D3D8E8', text3: '#A2ABC4', accent: '#FF7A5F', onAccent: '#2A0F0A', ink: '#171B2B' },
+      aqua: { bg: '#0B1517', nav: '#101D20', surface: '#152528', surface2: '#1C3034', line: '#24383C', text: '#FFFFFF', text2: '#CBDADC', text3: '#9BB0B3', accent: '#4FD1C5', onAccent: '#04231F', ink: '#0F1E21' },
+      iris: { bg: '#100F1C', nav: '#171527', surface: '#1D1B30', surface2: '#27243E', line: '#33304D', text: '#FFFFFF', text2: '#D4D1EC', text3: '#A9A6CA', accent: '#A898FF', onAccent: '#150F33', ink: '#17132B' }
+    };
+    const t = Object.assign({}, MOODS[mood] || MOODS.aqua);
+    t.accentSoft = t.accent + '2E';
+    t.tile = '#' + [1, 3, 5].map((i) => Math.round(parseInt(t.surface.slice(i, i + 2), 16) * 0.87 + 33).toString(16).padStart(2, '0')).join('');
+    return t;
+  }
+
+  kit() {
+    if (this._kit) return this._kit;
+    const CATS = [
+      { id: 'groceries', name: 'Groceries', tile: '#8FDDA0', emoji: '🥦' },
+      { id: 'snacks', name: 'Snacks', tile: '#FFB37A', emoji: '🍗' },
+      { id: 'transport', name: 'Transportation', tile: '#93C0FF', emoji: '🚍' },
+      { id: 'shopping', name: 'Shopping', tile: '#FFA3C4', emoji: '🛍️' },
+      { id: 'rent', name: 'House Rent', tile: '#C3B5FF', emoji: '🏠' },
+      { id: 'electric', name: 'Electric Bill', tile: '#F5E678', emoji: '⚡' },
+      { id: 'internet', name: 'Internet Bill', tile: '#89DCF0', emoji: '🌐' },
+      { id: 'phone', name: 'Phone', tile: '#7DE1CD', emoji: '☎️' },
+      { id: 'gas', name: 'Gas', tile: '#FFD077', emoji: '🔥' },
+      { id: 'health', name: 'Health', tile: '#FF9999', emoji: '💊' },
+      { id: 'gym', name: 'Gym', tile: '#CDEA85', emoji: '💪' },
+      { id: 'selfcare', name: 'Self Care', tile: '#EAB4F6', emoji: '🧴' },
+      { id: 'subs', name: 'Online Subscriptions', tile: '#AAB2FF', emoji: '▶️' },
+      { id: 'gifts', name: 'Gifts', tile: '#FFAB99', emoji: '🎁' },
+      { id: 'misc', name: 'Miscellaneous', tile: '#DECFB5', emoji: '🧩' }
+    ];
+    const CAT = {};
+    CATS.forEach((c) => { CAT[c.id] = c; });
+    this._kit = { CATS, CAT };
+    return this._kit;
+  }
+
+  defaults() {
+    return { picked: null, expr: '', note: '', typed: '' };
+  }
+
+  pretty(s) {
+    if (s === '') return '0';
+    const parts = s.split('.');
+    const whole = parseInt(parts[0] || '0', 10).toLocaleString('en-US');
+    return parts.length > 1 ? whole + '.' + parts[1] : whole;
+  }
+
+  calc(expr) {
+    const parts = expr.split(/([+−])/);
+    let v = parseFloat(parts[0]) || 0;
+    for (let i = 1; i < parts.length; i += 2) {
+      const n = parseFloat(parts[i + 1]) || 0;
+      v = parts[i] === '+' ? v + n : v - n;
+    }
+    return Math.max(0, Math.round(v * 100) / 100);
+  }
+
+  parseQuick(K, s) {
+    const words = s.trim().toLowerCase().split(/\s+/).filter((w) => w);
+    if (!words.length) return null;
+    let amount = null;
+    const rest = [];
+    words.forEach((w) => {
+      const v = w.replace(/,/g, '');
+      if (amount === null && /^\d+(\.\d{1,2})?$/.test(v)) amount = parseFloat(v);
+      else rest.push(w);
+    });
+    const KEY = { coffee: 'snacks', tea: 'snacks', snack: 'snacks', bus: 'transport', ride: 'transport', taxi: 'transport', rice: 'groceries', vegetables: 'groceries', fish: 'groceries', bazaar: 'groceries', haircut: 'selfcare', medicine: 'health', doctor: 'health', pharmacy: 'health', netflix: 'subs', recharge: 'phone', electricity: 'electric', wifi: 'internet', gift: 'gifts' };
+    let cat = null;
+    let consumed = -1;
+    rest.forEach((w, i) => {
+      if (cat) return;
+      const byName = K.CATS.find((c) => w.length >= 3 && c.name.toLowerCase().split(' ').some((p) => p.indexOf(w) === 0));
+      if (byName) { cat = byName; consumed = i; return; }
+      if (KEY[w]) cat = K.CAT[KEY[w]];
+    });
+    const noteWords = rest.filter((w, i) => i !== consumed);
+    const note = noteWords.length ? noteWords.join(' ').replace(/^./, (ch) => ch.toUpperCase()) : '';
+    return { cat, amount, note };
+  }
+
+  renderVals() {
+    const v = this.quickHostVals();
+    v.qv = this.quickVals(v.t);
+    // Whenever the keypad is not up, the typing bar is, with a card above it that says what to do next.
+    if (!v.showPanel) v.showQuick = true;
+    // Whatever needs saying about a typed expense is said inside the preview card, so the line under it is not shown then.
+    if (v.qv.show) v.hasHint = false;
+    // While a typed expense is on show, the screen stays in type-to-add mode: tapping a category tile sets the category
+    // of that expense instead of opening the keypad.
+    if (v.qv.show) {
+      v.showPanel = false;
+      v.showQuick = true;
+    }
+    // The tile of the category in use is marked, whether the app guessed it from the typed word or the user chose it.
+    const inUse = v.qv.show ? (v.qv.known ? v.qv.name : '') : v.qv.guess;
+    v.tiles.forEach((c) => {
+      if (!inUse || c.name !== inUse) return;
+      c.on = true;
+      c.ring = '0 0 0 3px ' + v.t.bg + ', 0 0 0 5px ' + v.t.accent + ', 0 0 18px 7px ' + v.t.accent + '96';
+      c.labelColor = v.t.accent;
+      c.fw = '800';
+    });
+    // A selected tile is ringed, glows, and is lit from inside: a little of the accent colour is mixed into its fill.
+    const lit = '#' + [1, 3, 5].map((i) => Math.round(parseInt(v.t.accent.slice(i, i + 2), 16) * 0.15 + parseInt(v.t.tile.slice(i, i + 2), 16) * 0.85).toString(16).padStart(2, '0')).join('');
+    v.tiles.forEach((c) => { if (c.on) c.tile = lit; });
+    // While the app is waiting for a category, every tile gets a thin outline: the grid itself looks ready to be tapped.
+    if (v.qv.unknown) v.tiles.forEach((c) => { if (!c.on) c.ring = 'inset 0 0 0 1.5px ' + v.t.accent + '73'; });
+    return v;
+  }
+
+  // Type to add: the preview shows as soon as there is an amount. A word the app has not seen asks for a category once.
+  // Tapping a category tile, or the category on the preview, overrides the guess.
+  quickVals(t) {
+    const K = this.kit();
+    const st = Object.assign(this.defaults(), this.state || {});
+    const q = this.parseQuick(K, st.typed);
+    const typed = (st.typed || '').trim();
+    const show = !!(q && q.amount);
+    const cat = show ? (st.picked ? K.CAT[st.picked] : q.cat) : null;
+    const known = !!cat;
+    return {
+      show,
+      // Before there is an amount, the card above the bar is a guide: pick a category, or finish typing.
+      guide: !show,
+      // With an amount but no category, a banner under the grid asks for one.
+      bannerBg: t.accent + '1F',
+      bannerLine: 'inset 0 0 0 1.5px ' + t.accent + '8C',
+      bannerTile: t.accent + '33',
+      bannerSub: q && q.note ? 'So the app knows where “' + q.note.toLowerCase() + '” goes' : 'So the app knows where this goes',
+      guess: !show && !st.picked && q && q.cat ? q.cat.name : '',
+      guideIcon: typed ? 'dialpad' : 'touch_app',
+      guideTitle: typed ? 'Now add the amount' : 'Select a category',
+      guideSub: typed ? 'Like “' + typed + ' 120”' : 'Tap one above, or just type below',
+      known,
+      unknown: show && !known,
+      emoji: known ? cat.emoji : '',
+      name: known ? cat.name : 'No category',
+      aria: known ? 'Category: ' + cat.name + '. Tap, then pick another one from the grid above' : 'Pick a category from the grid above',
+      tile: known ? t.tile : 'transparent',
+      tileLine: known ? '0 solid transparent' : '1.5px dashed ' + t.accent,
+      nameFg: known ? t.text : t.text2,
+      nameFw: known ? '600' : '700',
+      sub: show ? (q.note ? q.note + ' \u00B7 ' : '') + 'Today' : '',
+      amount: show ? this.pretty(String(q.amount)) : '',
+      addBg: known ? t.accent : t.surface2,
+      addFg: known ? t.onAccent : t.text3,
+      addPe: known ? 'auto' : 'none',
+      // A new word asks for a category. Once the user has chosen one by hand, the note says what will happen next time.
+      hasNote: show && known && !!st.picked && !!q.note,
+      hint: !show ? '' : (!known ? '' : (st.picked && q.note ? 'Next time, “' + q.note.toLowerCase() + '” goes to ' + cat.name + '.' : ''))
+    };
+  }
+
+  quickHostVals() {
+    const K = this.kit();
+    const st = Object.assign(this.defaults(), this.state || {});
+    const t = this.theme(this.props.mood ?? 'aqua');
+    const picked = st.picked;
+    const expr = st.expr;
+    const hasOp = /[+−]/.test(expr);
+    const result = this.calc(expr);
+    const pc = picked ? K.CAT[picked] : null;
+
+    const tiles = K.CATS.map((c) => {
+      const on = picked === c.id;
+      return {
+        name: c.name,
+        emoji: c.emoji,
+        tile: t.tile,
+        on,
+        ring: on ? '0 0 0 3px ' + t.bg + ', 0 0 0 5px ' + t.accent + ', 0 0 18px 7px ' + t.accent + '96' : 'none',
+        labelColor: on ? t.accent : t.text,
+        fw: on ? '800' : '600',
+        pick: () => this.setState({ picked: on ? null : c.id })
+      };
+    });
+
+    const press = (k) => () => {
+      let e = expr;
+      const last = e.split(/[+−]/).pop();
+      if (/^[0-9]$/.test(k)) {
+        if (last.indexOf('.') >= 0 && last.split('.')[1].length >= 2) return;
+        if (last === '0') e = e.slice(0, -1) + k;
+        else if (last.replace('.', '').length < 9) e = e + k;
+      } else if (k === '.') {
+        if (last.indexOf('.') < 0) e = e + (last === '' ? '0.' : '.');
+      } else if (k === '+' || k === '−') {
+        if (e === '') return;
+        e = /[+−]$/.test(e) ? e.slice(0, -1) + k : e + k;
+      } else if (k === 'del') {
+        e = e.slice(0, -1);
+      } else if (k === '=') {
+        e = String(this.calc(e));
+      }
+      this.setState({ expr: e });
+    };
+
+    const keyDef = (k) => {
+      const base = { isLink: false, isButton: true, hasIcon: false, hasText: true, text: k, icon: '', isz: '22px', bg: t.surface2, fg: t.text, fs: '21px', fw: '700', aria: k, press: press(k) };
+      if (k === '+' || k === '−') return Object.assign(base, { fg: t.accent, fs: '25px', fw: '600', aria: k === '+' ? 'Plus' : 'Minus' });
+      if (k === 'del') return Object.assign(base, { hasIcon: true, hasText: false, icon: 'backspace', aria: 'Delete last digit' });
+      if (k === 'date') return Object.assign(base, { hasIcon: true, text: 'Today', icon: 'calendar_month', isz: '18px', fs: '11.5px', fw: '800', bg: t.accentSoft, fg: t.accent, aria: 'Date: today', press: () => {} });
+      if (k === 'ok') {
+        if (hasOp) return Object.assign(base, { text: '=', bg: t.accent, fg: t.onAccent, fs: '25px', fw: '700', aria: 'Calculate', press: press('=') });
+        if (result > 0) return Object.assign(base, { isLink: true, isButton: false, bg: t.accent, fg: t.onAccent });
+        return Object.assign(base, { text: 'Save', fg: t.text3, fs: '15px', fw: '800', aria: 'Save (enter an amount first)', press: () => {} });
+      }
+      return base;
+    };
+    const keys = ['7', '8', '9', 'date', '4', '5', '6', '+', '1', '2', '3', '−', '.', '0', 'del', 'ok'].map(keyDef);
+
+    const q = this.parseQuick(K, st.typed);
+    const hasPreview = !!(q && q.cat && q.amount);
+    let hint = 'Type what it was and how much, like “snacks 120”.';
+    if (q && !hasPreview) hint = q.cat ? 'Now add the amount, like “' + q.cat.name.toLowerCase() + ' 120”.' : 'No matching category yet. Tap one above instead.';
+
+    return {
+      t,
+      tiles,
+      keys,
+      showPanel: !!pc,
+      showQuick: !pc,
+      closePanel: () => this.setState({ picked: null }),
+      chipLabel: pc ? 'Category: ' + pc.name + '. Tap to change' : '',
+      pickedName: pc ? pc.name : '',
+      pickedEmoji: pc ? pc.emoji : '',
+      pickedTile: t.tile,
+      hasOp,
+      exprShown: expr.replace(/([+−])/g, ' $1 '),
+      bigAmount: hasOp ? this.pretty(String(result)) : this.pretty(expr),
+      amountColor: expr === '' ? t.text3 : t.text,
+      note: st.note,
+      onNote: (ev) => this.setState({ note: ev.target.value }),
+      typed: st.typed,
+      onTyped: (ev) => this.setState({ typed: ev.target.value }),
+      hasPreview,
+      hasHint: !hasPreview,
+      hint,
+      qName: hasPreview ? q.cat.name : '',
+      qSub: hasPreview ? (q.note ? q.note + ' · Today' : 'Today') : '',
+      qEmoji: hasPreview ? q.cat.emoji : '',
+      qTile: t.tile,
+      qAmount: hasPreview ? this.pretty(String(q.amount)) : ''
+    };
+  }
+}
+</script>
+</body>
+</html>

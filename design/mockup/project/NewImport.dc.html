@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Import, step 1</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,0..1,0&amp;icon_names=arrow_back,upload_file&amp;display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&amp;display=swap">
+<style>
+html,body{margin:0;overflow:hidden}
+.em{font-family:'Noto Color Emoji','Apple Color Emoji','Segoe UI Emoji',sans-serif;line-height:1;display:inline-block;flex-shrink:0}
+button,input{font-family:inherit}
+a{color:inherit}
+main::-webkit-scrollbar{display:none}
+.ms{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;line-height:1;display:inline-block;flex-shrink:0;overflow:hidden;white-space:nowrap;letter-spacing:normal;text-transform:none;direction:ltr;font-feature-settings:'liga';-webkit-font-smoothing:antialiased}
+</style>
+</helmet>
+<div style="width: 360px; height: 780px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; color: {{t.text}}; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <header style="height: 60px; flex-shrink: 0; padding: 0 16px; display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; align-items: center">
+    <a href="NewSettings.dc.html" aria-label="Back to settings" style="justify-self: start; width: 40px; height: 40px; border-radius: 20px; background: {{t.surface}}; color: {{t.text}}; display: flex; align-items: center; justify-content: center; text-decoration: none">
+      <span class="ms" aria-hidden="true" style="font-size: 22px; width: 22px; height: 22px">arrow_back</span>
+    </a>
+    <div style="display: flex; flex-direction: column; align-items: center">
+      <h1 style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 800; letter-spacing: -0.2px; white-space: nowrap">Import</h1>
+      <span style="font-size: 12.5px; line-height: 16px; font-weight: 600; color: {{t.text3}}">Step 1 of 3</span>
+    </div>
+    <span aria-hidden="true"></span>
+  </header>
+
+  <main style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 2px 16px 24px; display: flex; flex-direction: column; gap: 12px">
+    <section style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; padding: 16px; display: flex; align-items: center; gap: 12px">
+      <span aria-hidden="true" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{t.tile}}; color: {{t.accent}}; display: flex; align-items: center; justify-content: center">
+        <span class="ms" style="font-size: 24px; width: 24px; height: 24px">upload_file</span>
+      </span>
+      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">Add expenses from a file</span>
+        <span style="font-size: 13.5px; line-height: 20px; font-weight: 500; color: {{t.text2}}">CSV, Excel or JSON files</span>
+      </span>
+    </section>
+
+    <section aria-label="How it works" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center">
+        <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">How it works</h2>
+      </div>
+      <sc-for list="{{steps}}" as="s" hint-placeholder-count="3">
+        <div style="margin: 0 16px; height: 64px; display: flex; align-items: center; gap: 12px">
+          <span aria-hidden="true" style="width: 44px; flex-shrink: 0; display: flex; justify-content: center">
+            <span style="width: 28px; height: 28px; border-radius: 14px; background: {{s.bg}}; color: {{s.fg}}; font-size: 13.5px; line-height: 28px; font-weight: 800; text-align: center">{{s.n}}</span>
+          </span>
+          <span style="flex: 1; min-width: 0; align-self: stretch; box-shadow: {{s.line}}; display: flex; flex-direction: column; justify-content: center; gap: 2px">
+            <span style="font-size: 15px; line-height: 20px; font-weight: 600">{{s.title}}</span>
+            <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{s.sub}}</span>
+          </span>
+        </div>
+      </sc-for>
+    </section>
+
+    <section aria-label="What the file needs" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center">
+        <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">What the file needs</h2>
+      </div>
+      <sc-for list="{{needs}}" as="s" hint-placeholder-count="2">
+        <div style="margin: 0 16px; height: 60px; box-shadow: {{s.line}}; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+          <span style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 15px; line-height: 20px; font-weight: 600">{{s.title}}</span>
+            <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{s.sub}}</span>
+          </span>
+          <span style="flex-shrink: 0; height: 24px; padding: 0 10px; border-radius: 12px; background: {{t.surface2}}; color: {{s.tagFg}}; font-size: 12px; line-height: 24px; font-weight: 700">{{s.tag}}</span>
+        </div>
+      </sc-for>
+      <span style="margin: 0 16px; padding: 10px 0 12px; box-shadow: inset 0 1px 0 {{t.line}}; text-align: center; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">A file exported from this app works as it is.</span>
+    </section>
+  </main>
+
+  <div style="flex-shrink: 0; padding: 12px 16px 14px; background: {{t.nav}}; box-shadow: inset 0 1px 0 {{t.line}}; display: flex; flex-direction: column; gap: 8px">
+    <a href="NewImportMatch.dc.html" style="height: 52px; border-radius: 18px; background: {{t.accent}}; color: {{t.onAccent}}; font-size: 15.5px; line-height: 20px; font-weight: 800; text-decoration: none; display: flex; align-items: center; justify-content: center">Choose a file</a>
+    <span style="text-align: center; font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Nothing is added until the last step.</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mood":{"editor":"enum","options":["coral","aqua","iris"],"default":"aqua"},"$preview":{"width":360,"height":780}}'>
+class Component extends DCLogic {
+  theme(mood) {
+    const MOODS = {
+      coral: { bg: '#0F1320', nav: '#151A2A', surface: '#1A2033', line: '#2B3350', text: '#FFFFFF', text2: '#D3D8E8', text3: '#A2ABC4', accent: '#FF7A5F', onAccent: '#2A0F0A', ink: '#171B2B' },
+      aqua: { bg: '#0B1517', nav: '#101D20', surface: '#152528', line: '#24383C', text: '#FFFFFF', text2: '#CBDADC', text3: '#9BB0B3', accent: '#4FD1C5', onAccent: '#04231F', ink: '#0F1E21' },
+      iris: { bg: '#100F1C', nav: '#171527', surface: '#1D1B30', line: '#33304D', text: '#FFFFFF', text2: '#D4D1EC', text3: '#A9A6CA', accent: '#A898FF', onAccent: '#150F33', ink: '#17132B' }
+    };
+    const t = Object.assign({}, MOODS[mood] || MOODS.coral);
+    // mix(a, b, w): w parts of colour a, the rest colour b.
+    const mix = (a, b, w) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(a.slice(i, i + 2), 16) * w + parseInt(b.slice(i, i + 2), 16) * (1 - w)).toString(16).padStart(2, '0')).join('');
+    t.accentSoft = t.accent + '2E';
+    t.surface2 = { coral: '#232A42', aqua: '#1C3034', iris: '#27243E' }[mood] || '#232A42';
+    t.tile = '#' + [1, 3, 5].map((i) => Math.round(parseInt(t.surface.slice(i, i + 2), 16) * 0.87 + 33).toString(16).padStart(2, '0')).join('');
+    t.accentGlow = t.accent + '59';
+    t.wash = t.accent + '29';
+    // Chart colours that follow the theme. Category colours do not: they are fixed per category.
+    t.other = mix(t.text3, t.surface, 0.5);
+    t.barSoft = mix(t.accent, t.surface, 0.6);
+    t.barDim = mix(t.accent, t.surface, 0.36);
+    t.ramp = [1, 0.86, 0.72, 0.58, 0.44].map((w) => mix(t.accent, t.surface, w));
+    t.tip = mix('#FFFFFF', t.surface2, 0.1);
+    t.stub = mix(t.text3, t.surface, 0.28);
+    t.track = mix(t.bg, t.surface, 0.5);
+    // Shared by the other boards: text on accent, the calendar heat ramp, a dim text tone, and the mixer itself.
+    t.onAccentDim = t.onAccent + 'D9';
+    t.heat = [0.4, 0.56, 0.74, 0.94].map((w) => mix(t.accent, t.bg, w));
+    t.dim = mix(t.text3, t.bg, 0.55);
+    t.good = '#5BD49B';
+    t.bad = '#FF8C9A';
+    t.mix = mix;
+    return t;
+  }
+
+  renderVals() {
+    const t = this.theme(this.props.mood ?? 'aqua');
+    const line = 'inset 0 -1px 0 ' + t.line;
+    return {
+      t,
+      steps: [
+        { n: '1', title: 'Choose a file', sub: 'From your phone or a cloud drive', bg: t.accent, fg: t.onAccent, line },
+        { n: '2', title: 'Check the columns', sub: 'Confirm which column is which', bg: t.accentSoft, fg: t.accent, line },
+        { n: '3', title: 'Review and import', sub: 'See what will be added before it is saved', bg: t.accentSoft, fg: t.accent, line: 'none' }
+      ],
+      needs: [
+        { title: 'Date and amount', sub: 'In every row', tag: 'Needed', tagFg: t.accent, line },
+        { title: 'Category and title', sub: 'Blank ones go to Miscellaneous', tag: 'Optional', tagFg: t.text3, line: 'none' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

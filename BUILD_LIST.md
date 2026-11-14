@@ -1,0 +1,170 @@
+# Build List
+
+Features approved for the Expense Tracker app. Source: reference/feature_batches.md.
+
+## Batch 1 - Adding a transaction
+- [x] Add expense - Expense only. No Income tab (changed from original).
+- [x] Pick a category - Category grid, with a tile that opens category management.
+- [x] Amount keypad with calculator - Decimals, backspace, simple + and -.
+- [x] Note - Free-text note on any expense. (Called "title" in the designs; it is optional.)
+- [x] Choose the date - Calendar pop-up, Today by default, past or future allowed.
+- [x] Save and jump to that month - Saving switches Home to that expense's month.
+
+## Batch 2 - Home screen
+- [x] Monthly total - Month's total spending at the top of Home (no income/balance).
+- [x] Day-by-day list - Grouped by day, newest first, day totals, note (or category) and amount per entry.
+- [x] Month navigation - Month/year picker, plus "previous month" button at end of list.
+- [x] All-time overview - Tap total for all-time spending and month-by-month table, filter by year.
+- [x] Show or hide the total on Home.
+- [x] Privacy hide - Mask the amount on Home.
+
+## Batch 3 - Viewing, editing and deleting
+- [x] Expense details - Category, amount, date, note on one screen.
+- [x] Date added - Exact creation date and time.
+- [x] Edit - Change amount, category, note, date.
+- [x] Delete with confirmation - "Are you sure?" prompt, totals update immediately.
+- [x] Quick menu - Long-press entry for Edit, Delete, Details.
+
+## Batch 4 - Categories
+- [x] Manage categories - All expense categories on one screen.
+- [x] Add a category - Name, colour (16 choices), icon from themed groups. (Icon is now a colour emoji; colour is one of 8 checked chart colours; see Design decisions.)
+- [x] Edit a category - Name, colour, icon.
+- [x] Delete a category.
+- [x] Reorder - Drag to reorder.
+- [ ] ~~Subcategories~~ - Dropped.
+
+## Batch 5 - Calendar
+- [x] Calendar view - Month grid with each day's spending total.
+- [x] Open a day - Tap a day to see its expenses or add one for that day.
+- [x] Calendar button toggle - Show or hide the Calendar button on Home.
+- [x] Daily amounts toggle - Show or hide amounts inside calendar days.
+- [x] First day of week - Sunday, Monday or Saturday.
+
+## Batch 6 - Charts: views and periods
+- [x] Time range - Week, month, year, or custom range.
+- [x] Swipe through periods - Earlier periods, quick "This"/"Last" tabs.
+- [x] Ring chart by category - Total in the middle.
+- [x] Ring chart by day - Which days had the most spending.
+- [x] Line chart - Daily or monthly spending with total and average. (Built as a column chart called "Over time"; see Design decisions.)
+
+**Design requirement (all charts):** Must look better than the original. Modern, tasteful design. Interactive (tap/hover to inspect values, highlight on select, smooth transitions). Data must stay very clear and easy to read. Original charts are considered dated and boring.
+
+## Batch 7 - Category breakdown and Reports
+- [x] Category ranking - Biggest first, amount, coloured bar, percentage.
+- [x] Category drill-down - Category's own chart, total, average, expenses.
+- [x] Sort - Category's expenses by amount or date.
+- [ ] ~~Reports tabs (Analytics / Accounts)~~ - Dropped. No accounts feature.
+- [x] Monthly stats card - Month's spending on Reports; tap for full overview.
+
+## Batch 8 - Budgets
+- [ ] ~~Entire batch~~ - Dropped. No budget feature.
+
+## Batch 9 - Accounts and transfers
+- [ ] ~~Entire batch~~ - Dropped. No accounts feature.
+
+## Batch 10 - Cashbooks and sharing
+- [ ] ~~Entire batch~~ - Dropped. Single expense book, no sharing.
+
+## Batch 11 - Recurring expenses
+- [ ] ~~Entire batch~~ - Dropped. No recurring expenses.
+
+## Batch 12 - Number formats
+- [ ] Default currency - One currency for the whole app. (Dropped 2026-11-14: the user wants no currency anywhere in the app.)
+- [ ] ~~Exchange rates~~ - Dropped.
+- [ ] ~~Currency per expense~~ - Dropped.
+- [x] Number format - Four styles for big numbers and decimals.
+- [x] Thousands separator on/off.
+
+## Batch 13 - Appearance and language
+- [x] Basic themes - Dark, light, follow system.
+- [x] Colour themes - Orange, blue, green, pink, purple, plus more colour options beyond the original. (Now three colour themes: Aqua, Coral, Iris; see Design decisions.)
+- [x] Font size slider.
+- [ ] ~~Category icon style~~ - Dropped.
+- [ ] ~~Add screen icon style~~ - Dropped.
+- [ ] ~~Language~~ - Dropped. English only.
+
+## Batch 14 - Preferences and reminders
+- [x] Calculator mode - Plus/minus only, or also multiply/divide.
+- [ ] ~~Sound effects~~ - Dropped.
+- [ ] ~~Notification shortcut~~ - Dropped.
+- [ ] ~~Month start day~~ - Dropped. Months run 1st to last day.
+- [ ] ~~Daily reminder~~ - Dropped.
+- [x] Clear cache.
+
+## Batch 15 - Security and data
+- [ ] ~~Passcode lock~~ - Dropped.
+- [x] Export - Expenses for a chosen date range to a file.
+- [x] Import - CSV, Excel, JSON. (PDF and image import moved to the AI phase.)
+- [x] Auto backup - Phone + Google Drive, with last-backup time. (Later phase.)
+- [x] Delete all data - Wipe everything.
+- [ ] ~~Import from Money Tracker (dedicated)~~ - Not selected.
+
+## Batch 16 - Profile and support
+- [ ] ~~Entire batch~~ - Dropped. No profile, sign-in, help, feedback or about screens.
+
+## Batch 17 - AI assistant
+- [ ] Deferred. Not in v1. The user will design their own AI version after the core app is built.
+
+## Batch 18 - Quick entry tools
+- [x] Type to add - "snacks 555" saves instantly, simple matching (no AI). (Changed 2026-11-14: it shows a preview first and saves when the user taps Add.)
+- [ ] ~~Voice entry~~ - Dropped.
+- [x] Receipt photo - Camera, attach to expense.
+- [x] Photo from gallery - Attach existing picture.
+- [ ] ~~Auto entry from notifications~~ - Dropped.
+- [ ] ~~Developer API~~ - Dropped.
+
+## Batch 19 - Ads and upsell
+- [ ] ~~Entire batch~~ - Dropped. No ads, no paywall, no premium, no garden game, no promos.
+
+## Design decisions
+- **Expense title is optional** (decided 2026-11-14). An expense needs only a category and an amount.
+- *Proposed, awaiting approval:* with a title, a row shows the title with the category name under it. Without a title, the category name takes the title's place as a single centred line. Row height and amount position stay the same. No "No title" placeholder.
+- **Second-pass visual redesign** (requested 2026-11-14). The app gets its own look instead of copying Money Tracker. Goals: cheerful, happy, tasteful, attention-grabbing, yet mature and elegant, and obvious to any user. Rule: no UI element changes position. Open to change: icons, buttons, colours, spacing, button wording, backgrounds and boxes, and all charts.
+- **Look chosen** (decided 2026-11-14). **Aqua** is the default: turquoise accent on a deep petrol-green background. **Coral** (coral on midnight navy) and **Iris** (lavender on deep indigo) ship as additional colour themes the user can switch to. This fills the "Colour themes" item in Batch 13. Category colours stay the same in every theme, so a category always looks the same.
+- **Category icons are colour emojis** (decided 2026-11-14). The user rejected single-colour icons as unclear and asked for colourful emojis so a category is understood at a glance. Each category shows its emoji on a neutral tile. Snacks uses the chicken drumstick, as asked. Consequence for Batch 4: when adding or editing a category, the user picks an emoji instead of an icon from themed groups. Buttons and the bottom bar keep plain icons.
+- **Emoji rendering** (decided 2026-11-14). Each phone draws category emojis in its own style (Pixel, Samsung and iPhone differ slightly). No emoji font is bundled in the app. Decided by the user on 2026-11-14.
+- **New-look Home day cards** (approved 2026-11-14). Each day is one card with a 60px two-line header strip (date badge, day name over weekday, day total over "Total").
+- **New-look Add expense screens** (approved 2026-11-14 after a skim). Covers the keypad screen and the type to add screen.
+- **No scrollbars on any screen** (decided 2026-11-14). Every screen must show in full, with no scrollbar visible anywhere.
+- **New-look Charts screen** (approved 2026-11-14). Same order of elements as the first pass: title, Week / Month / Year / Custom switch, period tabs, total and average with the more/less note, three chart buttons, chart card, ranked category list.
+- **Chart buttons reworded** (approved 2026-11-14). "Categories", "Top days", "Over time" replace "Categories", "Days", "Trend", so a beginner knows what each chart shows.
+- **Ring chart** (approved 2026-11-14). Shows the five biggest categories in colour plus one quiet slate slice for all the rest. Each slice has a small label tile next to it: the category emoji, or "+6" for the rest. Tapping a slice or a list row lifts that slice, fades the others, and shows its amount and share in the middle.
+- **Ranked list bars** (approved 2026-11-14). Bars compare categories with each other, so the biggest category fills the row. The five biggest use the same colour as their ring slice. Categories inside the slate "rest" slice have slate bars, so list and ring always match.
+- **"Over time" is a column chart, not a line chart** (approved 2026-11-14). One column per day, or per month in a year. Reason: daily spending is separate amounts, and a line implies a smooth change between days. The tallest column is labelled "Peak". A dashed line shows the average so far and matches the average in the summary. Days or months still to come show faint marks with the words "Still to come". A month in progress is drawn hollow and labelled "so far". Touching or dragging shows the exact amount for a column.
+- **Chart colours** (approved 2026-11-14). Eight colours checked with a colour-blind safety tool on all three themes: blue #3987E5, green #41AE61, violet #9085E9, amber #C98500, cyan #0096AF, pink #D55181, orange #D95926, coral #E66767. Fifteen categories share these eight, assigned so that categories that appear next to each other on the ring in the sample data never share or nearly share a colour. Sample assignment: House Rent blue, Groceries green, Snacks violet, Electric Bill amber, Internet Bill cyan, Phone cyan, Health cyan, Transportation pink, Shopping pink, Gym orange, Gas orange, Gifts coral, Self Care coral, Online Subscriptions blue, Miscellaneous violet. In the real app the user picks each category's colour, so the emoji label on every slice is what guarantees a slice is never identified by colour alone.
+- **New-look Calendar, Category drill-down, Reports and Settings** (built 2026-11-14, awaiting the user's approval). All four keep the order of elements from the first pass. Each was measured in a browser and reviewed by Opus before being shown.
+- **Calendar** (proposed 2026-11-14). The month switcher is a turquoise bar with the month and its total. A brighter day cell means more was spent that day, in four steps, with the amount written in the cell. Days still to come are faint tiles. Today's date sits on a turquoise circle; the selected day is marked by a white circle behind its date. The selected-day card is the same card as on Home, with an "Add expense on <date>" button.
+- **Category drill-down** (proposed 2026-11-14). Opens from "Details" on Charts. Summary (total, daily average, entries), a column chart in the category's own colour with the same rules as the Charts "Over time" chart, and the list of expenses with date tiles and a "By amount / By date" switch.
+- **Reports** (proposed 2026-11-14). The three monthly statistics sit left, centre and right; the comparison says "2% more" or "2% less" in words. In the year chart the selected month is bright, a month in progress is hollow, months still to come are faint marks, and a dashed line shows that year's monthly average. The month-by-month table shows a green down arrow when spending fell and a rose up arrow when it rose.
+- **Settings** (proposed 2026-11-14). "Color theme" offers the three themes (Aqua, Coral, Iris) as small preview tiles, and picking one re-themes the screen at once; this replaces the twelve accent swatches of the first pass. Text size is a five-step slider with a preview line. "Manage categories" shows a peek of the category tiles. "Clear cache" and "Delete all data" each have a line saying what they do; delete is rose with a bin icon.
+- **Chart axis numbers** (changed 2026-11-14). Right-aligned against the plot on Charts, Category and Reports, after two reviews asked for it. This is a small change to the already approved Charts screen.
+- **Calendar day cells reworked** (changed 2026-11-14 after the user's feedback that date and amount were small and easy to confuse, and that the white ring around the selected day looked dated). Each day shows a larger date at the top and the amount in white on a darker band across the foot of the cell, so the two cannot be mixed up. The selected day is marked by a white circle behind its date; today by a turquoise circle. Amounts of 10,000 and more are shortened, for example "15K".
+- **Tap a column to see its amount** (added 2026-11-14 at the user's request). On the Charts "Over time" chart and the Category chart, tapping a column pins a small label with its date and amount; tapping it again clears it. Moving the mouse over a column shows the same label.
+- **Chart keys in words** (changed 2026-11-14). The dashed-line sample beside "Average" was read as punctuation, so the charts now say "Dashed line = average 363" under the chart title. Reports says "Dashed line = 2026 monthly average" and "Hollow column = month in progress" under its chart.
+- **One yearly average** (fixed 2026-11-14). The monthly average in the Charts year view now counts full months only, so it matches the figure on Reports.
+- **No currency** (decided 2026-11-14). The app shows plain numbers with no currency symbol, and there is no currency setting. The Settings group is called "Numbers". The kept-feature count drops from 51 to 50.
+- **Deleting a category** (decided 2026-11-14). Its expenses move to Miscellaneous, so nothing is lost. Miscellaneous itself cannot be deleted.
+- **Type to add shows a preview** (decided 2026-11-14). Typing "coffee 120" shows a preview card with the category, title and amount; the expense is saved only when the user taps Add. The user chose this over saving instantly.
+- **Light theme comes later** (decided 2026-11-14). The first working app is dark only, in the three colour themes. The Light and System options are designed and built after that.
+- **How type to add picks a category** (decided 2026-11-14). No built-in word list (the user rejected it: there could be millions of words). The app matches only against the user's own history (a word saved under a category before goes there again) and against category names ("snacks 555"). The number in the text is the amount; words such as a currency name are ignored; the remaining words become the title. If several words point to different categories, the category with the most matching words wins. For a word it has never seen, the preview asks the user to pick the category once and remembers it. The category on the preview can always be tapped to change it, and that choice is remembered too.
+- **Expense details, edit and delete** (designed 2026-11-14, awaiting the user's approval). Tapping an expense on Home opens Details: the category and amount on a turquoise card, then the title (only if there is one), the date with the time it was added underneath, and the receipt photo. Edit and Delete sit in a bar at the bottom, Edit on the left. Delete asks first and names the expense. Edit is the Add expense screen, prefilled. Holding an expense on Home opens a small menu: Edit, Delete, Details.
+- **Category management** (designed 2026-11-14, awaiting the user's approval). The Categories screen lists every category with a bin, a pencil and a drag handle, and an "Add category" button fixed at the bottom. It opens from Settings and from the "Manage" tile on the Add expense screen. Miscellaneous shows a lock and "Can't be deleted". Deleting a category asks first and says how many expenses move to Miscellaneous. The add and edit form has the name, eight chart colours, and an emoji picker in groups, plus a button to pick any emoji from the phone's keyboard. Each category tile shows a small dot in its chart colour.
+- **"Edit" tile renamed "Manage"** (changed 2026-11-14). The dashed tile at the end of the category grid on the Add and Edit expense screens now says "Manage", so it is not confused with editing the expense.
+- **Choosing a category emoji** (decided 2026-11-14). The Add category and Edit category screens keep the fixed shortlist of 36 emojis in six titled groups, with the button "Pick any emoji from your keyboard" under them. The emojis are plain characters drawn by each phone's own emoji font; the app does not ship emoji images. A full in-app emoji screen ("See all emojis", with search) was offered and the user declined it, preferring the keyboard button, so no emoji picker package is needed. Note for the build: Android cannot open the keyboard directly on its emoji page, so the button focuses a text field that accepts a single emoji and the user taps the emoji key on their keyboard.
+- **Designs approved as a whole** (decided 2026-11-14). The user looked over all the new-look boards, up to mockup Version 34, and said: "so far, it looks pretty good. I guess we are pretty much done with the designs and planning." Any item above that is still marked proposed or awaiting approval is covered by this. Still not designed, and agreed to be designed right before each one is built: the date picker (Add expense), the month and year picker (Home, Category), the custom date range (Charts), the number format choice, the calculator keys choice, the first day of week choice, the export and import screens, the receipt photo viewer, the "Delete all data" confirmation, and, for type to add, a clearly tappable category on the preview card plus the "unknown word, pick a category" state. The Light theme comes after the first working app. All of the items listed here as not yet designed were drawn on 2026-11-14 as mockup Version 36 (see the bullets below) and are waiting for the user's check.
+- **Pop-ups and small screens** (proposed 2026-11-14). Sixteen boards in a new top row of the mockup, called "Pop-ups and small screens" (Version 36). The user asked to see every remaining pop-up and small screen before the build starts. Awaiting his check. Each board was reviewed twice by an Opus design reviewer. A seventeenth board, a pop-up sheet for choosing a category in type to add, was removed on 2026-11-14 at the user's request, because it repeated the category grid that is already on the screen.
+- **Date pop-up (Add and Edit expense)** (proposed 2026-11-14). A centred pop-up in Money Tracker's order: the chosen date in words, then the month at the left with two arrows at the right, then the days, then Cancel (left) and Confirm (right). It always shows six weeks, so the buttons never move. Days of the neighbouring months are faint and can be tapped. The chosen day is a filled circle; today is a turquoise number with a dot. It opens on today. Tapping the month name switches to the month tiles inside the same pop-up. Weeks start on the day set in Settings. Past and future dates are allowed.
+- **Month pop-up (Home, Calendar, Category)** (proposed 2026-11-14). The same pop-up from all three places: "Month to show", the chosen month in words, the year at the left with arrows that step one year, twelve month tiles, then Cancel and Confirm. Tapping the year swaps the twelve tiles for twelve years. The label then shows the span, and the arrows step twelve years. Picking a year goes back to the months.
+- **Custom range (Charts)** (proposed 2026-11-14). Tapping "Custom" always opens the pop-up, filled with the last range used (the last 30 days the first time). It has three quick choices (7, 30 and 90 days, ending today), From above To, a line saying how many days the charts will show, and Cancel and Confirm. Charts switch to Custom only after Confirm. From and To open the date pop-up. If To is earlier than From, Confirm is switched off and the line says so. The quick choices are new (not in Money Tracker).
+- **Settings choices open as bottom sheets** (proposed 2026-11-14). First day of the week, Number format and Calculator keys each open a sheet from the bottom: a title, one line of explanation, and the options as rows with the current one tinted and ticked. A tap chooses and closes. Money Tracker uses full pages for two of these; sheets avoid half-empty pages. First day of the week keeps Money Tracker's order (Monday, Saturday, Sunday) and starts on Sunday.
+- **Number format has five styles** (proposed 2026-11-14). 1,234,567.89 (the default), 1.234.567,89, 1 234 567.89, 1 234 567,89 and 12,34,567.89 (lakh and crore). The fifth is new: it was added because the user records in taka, and he still has to confirm he wants it. The Settings row shows a seven-digit sample so every style can be told apart. When "Thousands separator" is off, the sheet lists only the two decimal styles (1234567.89 and 1234567,89). Open question for later: whether to fold the thousands separator switch into this sheet as one more option.
+- **Calculator keys** (proposed 2026-11-14). "Plus and minus" (the default) or "All four keys". With all four, the keypad has five columns: 7 8 9 and a wide date key; 4 5 6 × +; 1 2 3 ÷ −; then the decimal point, 0, backspace and a wide check key. Plus, minus, the date key and the check key stay where they are. Sums follow the normal order (× and ÷ before + and −). Dividing by zero gives no result.
+- **Receipt photo** (proposed 2026-11-14). On Add expense the camera button opens the camera and the picture button opens the gallery. On Edit expense, tapping the small receipt picture opens a sheet: View photo, Take a new photo, Choose from gallery, Remove photo. The viewer is full screen and always dark: a close button, the photo, a caption with the title, date and amount, and pinch to zoom. One photo per expense.
+- **Type to add, preview states** (decided 2026-11-14). The preview card shows as soon as the typed text has an amount. The grid of categories at the top of the Add expense screen is the one and only place to choose a category. There is no separate sheet. While a typed expense is on show, tapping any category tile sets the category of that expense (it does not open the keypad). With nothing typed, tapping a tile opens the keypad as before. The tile of the category in use is ringed in the grid, whether the app guessed it or the user chose it, so the card and the grid always agree. The category name on the card has no arrow. (The user rejected the arrow: it "doesn't make sense".) The app remembers the choice for that word. After the user chooses a category by hand, a line inside the card confirms it, for example: Next time, "saree" goes to Gifts. No other hint line is shown under the card while a typed expense is on show. A typed expense whose word the app has never seen: the card shows a dashed "?" tile, "No category", the typed word, the date and the amount, with a grey Add that cannot save. A turquoise-tinted panel appears right under the category grid, with an up arrow, the title "Select a category above" and the line "So the app knows where "saree" goes". Every category tile gets a thin turquoise outline while the app waits, so the grid itself looks ready to be tapped. The user asked for this after rejecting a small note on the card: "we should immediately understand that we need to select a category from above". Tapping the panel, the card or the grey Add never does nothing: it hides the phone keyboard if it is open and makes all the tile outlines flash, so the user sees where to tap. The Done key on the phone keyboard hides the keyboard. With the keyboard open, the card and the typing bar sit just above it and cover the lowest row of the grid and the panel, so hiding the keyboard is what brings the whole grid and the panel into view. After a tile is tapped the panel and the outlines go away, the chosen tile glows, and a line inside the card confirms it, for example: Next time, "saree" goes to Gifts. When the phone keyboard is open, the preview card and the typing bar sit just above it. The user chose this on 2026-11-14 after finding the sheet confusing ("Why are there two categories in the same type of UI").
+- **Export screen** (proposed 2026-11-14). "Which expenses": This month, This year or Everything, or a From and To date (each opens the date pop-up). The card shows how many expenses match. "File type": Excel or CSV. The button reads "Export N expenses", and then the phone's own save or share sheet opens. The file has one row per expense: date, category, title and amount. Receipt photos are not included.
+- **Import in three steps** (proposed 2026-11-14). Step 1 explains the three steps and what the file needs (a date and an amount in every row; category and title are optional, and a blank category goes to Miscellaneous), with "Choose a file" at the bottom. Step 2, "Check the columns": the app guesses which column of the file is which, and each guess can be changed. If the dates can be read two ways, the user picks day first or month first (this card is hidden when the file settles it). A column that cannot be found shows "Choose a column" and Next stays off. Step 3, "Review and import": how many expenses will be added, how many are already in the app and are skipped (same date, amount, category and title), which rows cannot be read, which categories will be created, a look at the first three, then "Import N expenses". Nothing is saved before that button. After importing, Home shows "N expenses added" with Undo. Skipping repeats, creating new categories and Undo are new rules that the user still has to confirm.
+- **Delete all data** (proposed 2026-11-14). A pop-up: "Delete all data?", "All expenses, categories and photos", "This can't be undone.", a row "Save a copy first" that opens Export, a tick box "Yes, erase everything", then Cancel and "Delete all". The red button stays faded until the box is ticked.
+- **Clear cache** (proposed 2026-11-14). No pop-up. It removes temporary files only (small copies of photos, old export files), keeps every expense and photo, and says how much space was freed.
+- **Small changes to approved boards** (proposed 2026-11-14). In Settings, the Export and Import rows open their screens, the Number format row shows a longer sample (1,234,567.89), and the delete row now reads "This can't be undone". (An arrow beside the category name on the type to add preview was tried and removed the same day.) Nothing moved.
+- **Swipe to change the month** (decided 2026-11-14). The user asked for this after seeing the date and month pop-ups: the arrows alone are not enough, swiping must work too. It works in three places: the date pop-up (changes the month), the month pop-up (changes the year, and in the year view moves twelve years at a time) and the Calendar screen (changes the month). Direction, in the user's own words: "swiping left means revealing the left side", and "when we swipe left and swipe up, we see the previous values, and swiping bottom and right, we reveal the later values." What the finger does: dragging the finger from left to right, or from top to bottom, pulls the previous one into view. It comes in from the left or from above. Dragging the finger from right to left, or from bottom to top, pulls the next one into view. It comes in from the right or from below. Note: an earlier version of this bullet and of the mockup had the direction reversed, because "swipe left" was read as "the finger moves left". It was corrected the same day (mockup Version 40). Always describe swipes by what the finger does and what comes into view. The arrows stay and do the same thing. A swipe that ends on a day does not also pick that day. On the Calendar screen a swipe stops at the same limits as the arrows. The mockup does this too; it can be tried by dragging with the mouse.
+- **Add expense: selected tile, opening state** (decided 2026-11-14). After trying type to add, the user asked for three things. First, a selected category tile must be unmistakable. His words: "Just ring won't do. Make some sort of a glow around the selection". So the selected tile now has its turquoise ring, a soft turquoise glow around it, a slightly brighter fill, and a turquoise label. This is the same wherever a category tile is selected, on Add expense and on Edit expense. Second, when nothing is selected the screen must say what to do. His words: "say something like 'Select a category'". The card just above the typing bar now guides the user. With nothing typed it says "Select a category" and "Tap one above, or just type below". With a word typed but no amount it says "Now add the amount" and shows an example. Once there is an amount it becomes the preview of the expense. A word the app already knows lights up its category tile as soon as it is typed, before the amount. Third, he could not find where type to add starts. The mockup now has a board "Add expense: when it opens" (no category chosen, nothing typed). Every plus button in the mockup opens this board. The keypad state has its own board, "Add expense: keypad". In the app, Add expense always opens in this state: tap a category to get the keypad, or type in the bar at the bottom.

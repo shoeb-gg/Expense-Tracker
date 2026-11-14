@@ -1,0 +1,436 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Add.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Add expense: keypad",
+      "w": 360,
+      "x": 440,
+      "y": 0
+    },
+    "AddQuick.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Add expense: type to add",
+      "w": 360,
+      "x": 880,
+      "y": 0
+    },
+    "Calendar.dc.html": {
+      "h": 880,
+      "is_interactive": true,
+      "title": "Calendar",
+      "w": 360,
+      "x": 440,
+      "y": 1800
+    },
+    "Category.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Category drill-down",
+      "w": 360,
+      "x": 0,
+      "y": 1800
+    },
+    "Charts.dc.html": {
+      "h": 1400,
+      "is_interactive": true,
+      "title": "Charts",
+      "w": 360,
+      "x": 1320,
+      "y": 0
+    },
+    "Main.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Home",
+      "w": 360,
+      "x": 0,
+      "y": 0
+    },
+    "MoodAqua.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Home",
+      "w": 360,
+      "x": 0,
+      "y": -2760
+    },
+    "MoodCoral.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Home in Coral theme",
+      "w": 360,
+      "x": 0,
+      "y": -1380
+    },
+    "MoodIris.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Home in Iris theme",
+      "w": 360,
+      "x": 440,
+      "y": -1380
+    },
+    "NewAdd.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Add expense: when it opens",
+      "w": 360,
+      "x": 440,
+      "y": -2760
+    },
+    "NewAddCalc.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Add expense: four calculator keys",
+      "w": 360,
+      "x": 4400,
+      "y": -4040
+    },
+    "NewAddQuick.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Add expense: type to add",
+      "w": 360,
+      "x": 1320,
+      "y": -2760
+    },
+    "NewAddQuickNew.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Type to add: a new word",
+      "w": 360,
+      "x": 1760,
+      "y": -4040
+    },
+    "NewCalendar.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Calendar",
+      "w": 360,
+      "x": 2640,
+      "y": -2760
+    },
+    "NewCategories.dc.html": {
+      "h": 1114,
+      "is_interactive": true,
+      "title": "Categories",
+      "w": 360,
+      "x": 5280,
+      "y": -2760
+    },
+    "NewCategory.dc.html": {
+      "h": 834,
+      "is_interactive": true,
+      "title": "Category drill-down",
+      "w": 360,
+      "x": 2200,
+      "y": -2760
+    },
+    "NewCategoryAdd.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Add category",
+      "w": 360,
+      "x": 6160,
+      "y": -2760
+    },
+    "NewCategoryEdit.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Edit category",
+      "w": 360,
+      "x": 5720,
+      "y": -2760
+    },
+    "NewCharts.dc.html": {
+      "h": 1606,
+      "is_interactive": true,
+      "title": "Charts",
+      "w": 360,
+      "x": 1760,
+      "y": -2760
+    },
+    "NewEdit.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Edit expense",
+      "w": 360,
+      "x": 4400,
+      "y": -2760
+    },
+    "NewExpense.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Expense details",
+      "w": 360,
+      "x": 3960,
+      "y": -2760
+    },
+    "NewExport.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Export",
+      "w": 360,
+      "x": 4840,
+      "y": -4040
+    },
+    "NewImport.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Import: step 1",
+      "w": 360,
+      "x": 5280,
+      "y": -4040
+    },
+    "NewImportMatch.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Import: step 2",
+      "w": 360,
+      "x": 5720,
+      "y": -4040
+    },
+    "NewImportReview.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Import: step 3",
+      "w": 360,
+      "x": 6160,
+      "y": -4040
+    },
+    "NewPhoto.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Receipt photo",
+      "w": 360,
+      "x": 2640,
+      "y": -4040
+    },
+    "NewQuickMenu.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Home: hold an expense",
+      "w": 360,
+      "x": 4840,
+      "y": -2760
+    },
+    "NewReports.dc.html": {
+      "h": 1474,
+      "is_interactive": true,
+      "title": "Reports",
+      "w": 360,
+      "x": 3080,
+      "y": -2760
+    },
+    "NewSettings.dc.html": {
+      "h": 1740,
+      "is_interactive": true,
+      "title": "Settings",
+      "w": 360,
+      "x": 3520,
+      "y": -2760
+    },
+    "PopCalc.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Settings: calculator keys",
+      "w": 360,
+      "x": 3960,
+      "y": -4040
+    },
+    "PopDate.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Add expense: pick a date",
+      "w": 360,
+      "x": 0,
+      "y": -4040
+    },
+    "PopDeleteAll.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Settings: delete all data",
+      "w": 360,
+      "x": 6600,
+      "y": -4040
+    },
+    "PopMonth.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Home: pick a month",
+      "w": 360,
+      "x": 440,
+      "y": -4040
+    },
+    "PopNumber.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Settings: number format",
+      "w": 360,
+      "x": 3520,
+      "y": -4040
+    },
+    "PopPhoto.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Edit expense: receipt photo",
+      "w": 360,
+      "x": 2200,
+      "y": -4040
+    },
+    "PopRange.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Charts: custom range",
+      "w": 360,
+      "x": 1320,
+      "y": -4040
+    },
+    "PopWeekStart.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Settings: first day of the week",
+      "w": 360,
+      "x": 3080,
+      "y": -4040
+    },
+    "PopYear.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Home: pick a year",
+      "w": 360,
+      "x": 880,
+      "y": -4040
+    },
+    "Reports.dc.html": {
+      "h": 1410,
+      "is_interactive": true,
+      "title": "Reports",
+      "w": 360,
+      "x": 880,
+      "y": 1800
+    },
+    "Settings.dc.html": {
+      "h": 1620,
+      "is_interactive": true,
+      "title": "Settings",
+      "w": 360,
+      "x": 1320,
+      "y": 1800
+    },
+    "NewAddKeypad.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Add expense: keypad",
+      "w": 360,
+      "x": 880,
+      "y": -2760
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-18T12:00:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "noteOrder": [
+    "row0",
+    "rowT",
+    "row1",
+    "row2",
+    "rowP"
+  ],
+  "notes": {
+    "row0": {
+      "kind": "title1",
+      "maxW": 6520,
+      "text": "New look (Aqua)",
+      "w": 240,
+      "x": 0,
+      "y": -3060
+    },
+    "row1": {
+      "kind": "title1",
+      "maxW": 1680,
+      "text": "First pass (old look): everyday flow",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "row2": {
+      "kind": "title1",
+      "maxW": 1680,
+      "text": "First pass (old look): insights and settings",
+      "w": 240,
+      "x": 0,
+      "y": 1520
+    },
+    "rowP": {
+      "kind": "title1",
+      "maxW": 6960,
+      "text": "Pop-ups and small screens",
+      "w": 240,
+      "x": 0,
+      "y": -4340
+    },
+    "rowT": {
+      "kind": "title1",
+      "maxW": 800,
+      "text": "Other colour themes",
+      "w": 240,
+      "x": 0,
+      "y": -1680
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Add.dc.html",
+    "AddQuick.dc.html",
+    "Charts.dc.html",
+    "Category.dc.html",
+    "Calendar.dc.html",
+    "Reports.dc.html",
+    "Settings.dc.html",
+    "MoodCoral.dc.html",
+    "MoodIris.dc.html",
+    "MoodAqua.dc.html",
+    "NewAdd.dc.html",
+    "NewAddKeypad.dc.html",
+    "NewAddQuick.dc.html",
+    "NewCharts.dc.html",
+    "NewCategory.dc.html",
+    "NewCalendar.dc.html",
+    "NewReports.dc.html",
+    "NewSettings.dc.html",
+    "NewExpense.dc.html",
+    "NewEdit.dc.html",
+    "NewQuickMenu.dc.html",
+    "NewCategories.dc.html",
+    "NewCategoryEdit.dc.html",
+    "NewCategoryAdd.dc.html",
+    "PopDate.dc.html",
+    "PopMonth.dc.html",
+    "PopYear.dc.html",
+    "PopRange.dc.html",
+    "NewAddQuickNew.dc.html",
+    "PopPhoto.dc.html",
+    "NewPhoto.dc.html",
+    "PopWeekStart.dc.html",
+    "PopNumber.dc.html",
+    "PopCalc.dc.html",
+    "NewAddCalc.dc.html",
+    "NewExport.dc.html",
+    "NewImport.dc.html",
+    "NewImportMatch.dc.html",
+    "NewImportReview.dc.html",
+    "PopDeleteAll.dc.html"
+  ],
+  "pages": [],
+  "title": "Expense Tracker Mockup"
+}
