@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../data/db.dart';
 import '../../state/providers.dart';
@@ -257,16 +258,10 @@ class _NotFound extends StatelessWidget {
         child: Column(
           children: [
             SubHeader(title: title),
-            Expanded(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Text(
-                    'This category is no longer here.',
-                    textAlign: TextAlign.center,
-                    style: AppText.body.copyWith(color: c.text2),
-                  ),
-                ),
+            const Expanded(
+              child: NotFoundCard(
+                thing: 'Category',
+                icon: Symbols.category_rounded,
               ),
             ),
           ],

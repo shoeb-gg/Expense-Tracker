@@ -108,7 +108,7 @@ void main() {
     await tester.tap(find.byIcon(Symbols.close_rounded));
     await settle(tester);
     await pushRoute(tester, Routes.expense(99999));
-    expect(find.text('This expense is gone'), findsOneWidget);
+    expect(find.text('Expense not found'), findsOneWidget);
     await takeShot(tester, 'expense_gone');
     await closeAppWithFiles(tester, db);
   });

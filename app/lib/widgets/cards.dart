@@ -236,6 +236,83 @@ class IconTile extends StatelessWidget {
   }
 }
 
+/// A centred message on a card (radius 20, `surface`, padding 24 16): a
+/// 44 px accent tile with [icon], the 15/20 w800 [title] and a 13.5/20
+/// text3 [message]. Home's empty month card (PocketHome board) and the
+/// app's "not found" state ([NotFoundCard]). As wide as it is allowed and
+/// only as tall as its content.
+class MessageCard extends StatelessWidget {
+  const MessageCard({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.message,
+  });
+
+  final IconData icon;
+  final String title;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+      decoration: BoxDecoration(
+        color: c.surface,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconTile(icon: icon, background: c.accentSoft, iconColor: c.accent),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: AppText.cardTitle.copyWith(color: c.text),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: AppText.body.copyWith(color: c.text3),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The body of a screen whose item does not exist (a bad link, or it was
+/// deleted): a [MessageCard] "<[thing]> not found" / "It may have been
+/// deleted." at the top, 2 px under the header with 16 px gutters (where a
+/// sub-screen's first card sits). Put it where the screen's content goes
+/// (e.g. in the `Expanded` under a `SubHeader`).
+class NotFoundCard extends StatelessWidget {
+  const NotFoundCard({super.key, required this.thing, required this.icon});
+
+  /// "Expense", "Pocket", "Category".
+  final String thing;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 2, 16, 0),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: MessageCard(
+          icon: icon,
+          title: '$thing not found',
+          message: 'It may have been deleted.',
+        ),
+      ),
+    );
+  }
+}
+
 /// A list row inside a card.
 ///
 /// * With a [leading] tile (44 px): 16 px left padding, 12 px gap, and the

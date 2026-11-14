@@ -22,7 +22,7 @@ class PhotoScreen extends ConsumerWidget {
     if (expense == null) {
       return PhotoViewer(
         fileName: null,
-        title: async.isLoading ? '' : 'This expense is gone',
+        title: async.isLoading ? '' : 'Expense not found',
         caption: '',
       );
     }

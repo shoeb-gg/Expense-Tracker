@@ -9,6 +9,7 @@ import 'package:spill_the_bills/features/expense/photo_screen.dart';
 import 'package:spill_the_bills/features/home/home_screen.dart';
 import 'package:spill_the_bills/router.dart';
 import 'package:spill_the_bills/state/providers.dart';
+import 'package:spill_the_bills/widgets/kit.dart';
 
 import '../support/add_support.dart';
 import '../support/shots.dart';
@@ -170,12 +171,17 @@ void main() {
   testWidgets('a bad link shows a gone state, not an error', (tester) async {
     final db = await sampleDatabase(tester);
     await pumpApp(tester, db: db, location: Routes.expense(-1));
-    expect(find.text('This expense is gone'), findsOneWidget);
+    // The app's one "not found" card.
+    expect(find.byType(NotFoundCard), findsOneWidget);
+    expect(find.text('Expense not found'), findsOneWidget);
+    expect(find.text('It may have been deleted.'), findsOneWidget);
     await pushRoute(tester, Routes.editExpense(424242));
-    expect(find.text('This expense is gone'), findsWidgets);
+    expect(find.text('Expense not found'), findsWidgets);
+    expect(find.byType(NotFoundCard), findsWidgets);
     expect(find.text('Cancel'), findsOneWidget);
     await pushRoute(tester, Routes.expensePhoto(424242));
     expect(find.text('Photo not found'), findsOneWidget);
+    expect(find.text('Expense not found'), findsWidgets);
     expect(appContainer(tester).read(todayProvider), 20744);
     await closeApp(tester, db);
   });

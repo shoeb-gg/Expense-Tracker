@@ -172,4 +172,13 @@ void main() {
     await takeShot(tester, 'charts_single_category');
     await closeApp(tester, db);
   });
+
+  // Not drawn: the app's shared "not found" card.
+  testWidgets('charts: a category that is gone', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(tester, db: db, location: Routes.category(999));
+    expect(find.text('Category not found'), findsOneWidget);
+    await takeShot(tester, 'charts_category_not_found');
+    await closeApp(tester, db);
+  });
 }

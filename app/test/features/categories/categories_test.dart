@@ -130,7 +130,9 @@ void main() {
   testWidgets('an unknown category shows a message', (tester) async {
     final db = openTestDatabase();
     await pumpApp(tester, db: db, location: '/settings/categories/999');
-    expect(find.text('This category is no longer here.'), findsOneWidget);
+    expect(find.byType(NotFoundCard), findsOneWidget);
+    expect(find.text('Category not found'), findsOneWidget);
+    expect(find.text('It may have been deleted.'), findsOneWidget);
     await closeApp(tester, db);
   });
 

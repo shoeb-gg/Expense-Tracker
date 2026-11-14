@@ -12,6 +12,7 @@ import 'package:spill_the_bills/features/charts/column_chart.dart';
 import 'package:spill_the_bills/features/charts/range_popups.dart';
 import 'package:spill_the_bills/router.dart';
 import 'package:spill_the_bills/state/providers.dart';
+import 'package:spill_the_bills/widgets/kit.dart';
 
 import '../../support/shots.dart';
 
@@ -358,7 +359,9 @@ void main() {
     testWidgets('an unknown category says so', (tester) async {
       final db = await sampleDatabase(tester);
       await pumpApp(tester, db: db, location: Routes.category(999));
-      expect(find.text('This category no longer exists.'), findsOneWidget);
+      expect(find.byType(NotFoundCard), findsOneWidget);
+      expect(find.text('Category not found'), findsOneWidget);
+      expect(find.text('It may have been deleted.'), findsOneWidget);
       await closeApp(tester, db);
     });
   });

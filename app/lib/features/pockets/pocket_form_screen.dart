@@ -356,47 +356,14 @@ class _EmojiCell extends StatelessWidget {
   }
 }
 
-/// Edit pocket for a pocket that no longer exists (not drawn in the mockup).
+/// Edit pocket for a pocket that no longer exists (not drawn in the
+/// mockup): the app's shared "not found" card.
 class _NotFound extends StatelessWidget {
   const _NotFound();
 
   @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 2, 16, 0),
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
-          decoration: BoxDecoration(
-            color: c.surface,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconTile(
-                icon: Symbols.search_off_rounded,
-                background: c.tile,
-                iconColor: c.text3,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Pocket not found',
-                style: AppText.cardTitle.copyWith(color: c.text),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'It may have been deleted.',
-                textAlign: TextAlign.center,
-                style: AppText.body.copyWith(color: c.text3),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const NotFoundCard(
+    thing: 'Pocket',
+    icon: Symbols.account_balance_wallet_rounded,
+  );
 }

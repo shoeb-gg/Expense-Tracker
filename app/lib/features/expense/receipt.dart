@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../state/providers.dart';
-import '../../theme/text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/kit.dart';
 
@@ -120,37 +119,12 @@ Future<ReceiptAction?> showReceiptSheet(BuildContext context, {required String f
   );
 }
 
-/// Body for an expense that does not exist (bad link, or deleted).
+/// Body for an expense that does not exist (bad link, or deleted): the
+/// app's shared "Expense not found" card.
 class MissingExpense extends StatelessWidget {
   const MissingExpense({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(32, 0, 32, 60),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconTile(
-              icon: Symbols.receipt_long_rounded,
-              size: 64,
-              radius: 20,
-              iconSize: 30,
-              iconColor: c.text3,
-            ),
-            const SizedBox(height: 16),
-            Text('This expense is gone', style: AppText.cardTitle),
-            const SizedBox(height: 4),
-            Text(
-              'It may have been deleted.',
-              textAlign: TextAlign.center,
-              style: AppText.body.copyWith(color: c.text2),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      const NotFoundCard(thing: 'Expense', icon: Symbols.receipt_long_rounded);
 }

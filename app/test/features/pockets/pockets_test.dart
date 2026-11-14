@@ -397,7 +397,9 @@ void main() {
     testWidgets('an unknown pocket shows "Pocket not found"', (tester) async {
       final db = await sampleDatabase(tester);
       await _open(tester, db, Routes.editPocket(999));
+      expect(find.byType(NotFoundCard), findsOneWidget);
       expect(find.text('Pocket not found'), findsOneWidget);
+      expect(find.text('It may have been deleted.'), findsOneWidget);
       expect(find.text('Save'), findsNothing);
       await closeApp(tester, db);
     });

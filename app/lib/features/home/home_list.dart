@@ -331,36 +331,12 @@ class EmptyMonthCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.colors;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
-        decoration: BoxDecoration(
-          color: c.surface,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          children: [
-            IconTile(
-              icon: Symbols.receipt_long_rounded,
-              background: c.accentSoft,
-              iconColor: c.accent,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: AppText.cardTitle.copyWith(color: c.text),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: AppText.body.copyWith(color: c.text3),
-            ),
-          ],
-        ),
+      child: MessageCard(
+        icon: Symbols.receipt_long_rounded,
+        title: title,
+        message: message,
       ),
     );
   }

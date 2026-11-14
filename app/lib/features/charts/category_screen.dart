@@ -90,7 +90,12 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SubHeader(title: 'Category'),
-              EmptyNote('This category no longer exists.'),
+              Expanded(
+                child: NotFoundCard(
+                  thing: 'Category',
+                  icon: Symbols.category_rounded,
+                ),
+              ),
             ],
           ),
         ),

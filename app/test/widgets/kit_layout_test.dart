@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:spill_the_bills/core/days.dart';
 import 'package:spill_the_bills/theme/app_theme.dart';
 import 'package:spill_the_bills/theme/text.dart';
@@ -72,6 +73,42 @@ void main() {
     final style = tester.widget<Text>(find.text('▶️')).style!;
     expect(style.fontFamily, kEmojiFontFamily);
     expect(AppText.emoji.fontFamily, kEmojiFontFamily);
+  });
+
+  testWidgets('not-found card: Home\'s empty card at the top of the body', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildAppTheme(Mood.aqua),
+        home: const Scaffold(
+          body: Column(
+            children: [
+              Expanded(
+                child: NotFoundCard(
+                  thing: 'Pocket',
+                  icon: Symbols.account_balance_wallet_rounded,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Pocket not found'), findsOneWidget);
+    expect(find.text('It may have been deleted.'), findsOneWidget);
+    final card = tester.getRect(find.byType(MessageCard));
+    final width = tester.view.physicalSize.width / tester.view.devicePixelRatio;
+    // Full width less the 16 px gutters, 2 px under the header, and only
+    // as tall as its content (padding 24, tile 44, title, line).
+    expect(card.left, 16);
+    expect(card.right, width - 16);
+    expect(card.top, 2);
+    expect(card.height, 24 + 44 + 12 + 20 + 4 + 20 + 24);
+    final tile = tester.getRect(find.byType(IconTile));
+    expect(tile.size, const Size(44, 44));
+    expect(tile.center.dx, card.center.dx);
+    expect(tile.top, card.top + 24);
   });
 
   group('dialog bold line', () {

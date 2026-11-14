@@ -51,4 +51,14 @@ void main() {
     await takeShot(tester, 'categories_edit');
     await closeApp(tester, db);
   });
+
+  // Not drawn: the app's shared "not found" card (as pockets_not_found,
+  // expense_gone and charts_category_not_found).
+  testWidgets('categories: edit a category that is gone', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(tester, db: db, location: Routes.editCategory(999));
+    expect(find.text('Category not found'), findsOneWidget);
+    await takeShot(tester, 'categories_not_found');
+    await closeApp(tester, db);
+  });
 }
