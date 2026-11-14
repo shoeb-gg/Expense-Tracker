@@ -9,6 +9,7 @@ import '../../router.dart';
 import '../../state/providers.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/kit.dart';
+import '../home/home_state.dart' show homeMonthProvider;
 
 /// "First day of the week" sheet (Monday, Saturday, Sunday).
 Future<void> pickFirstDayOfWeek(BuildContext context, WidgetRef ref) async {
@@ -131,7 +132,8 @@ class _CalcChips extends StatelessWidget {
 }
 
 /// "Delete all data?" with its tick box. Erases every pocket, then the app
-/// starts again with one empty pocket and the starting categories.
+/// starts again with one empty pocket and the starting categories, and goes
+/// Home on this month (the PopDeleteAll board's "Delete all" leads Home).
 Future<void> confirmDeleteAll(BuildContext context, WidgetRef ref) async {
   final router = GoRouter.of(context);
   final ok = await showAppDialog(
@@ -154,10 +156,17 @@ Future<void> confirmDeleteAll(BuildContext context, WidgetRef ref) async {
     destructive: true,
   );
   if (!ok || !context.mounted) return;
-  // Stays on Settings, where the user acted, and says it is done.
+  // Wipe first, then go Home. Reading the pocket in use here brings it (and
+  // what follows it) up to date before Home builds: left for Home's first
+  // build to recompute, it would notify other providers during that build
+  // ("setState() called during build"). The toast lives in the root
+  // overlay, so it stays when the screen changes.
   await ref.read(dataActionsProvider).deleteAllData();
   if (!context.mounted) return;
+  ref.read(currentPocketIdProvider);
+  ref.read(homeMonthProvider.notifier).followToday();
   showToast(context, 'Everything was erased');
+  router.go(Routes.home);
 }
 
 /// Clear cache: no pop-up; says how much space was freed.

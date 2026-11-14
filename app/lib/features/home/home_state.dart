@@ -35,6 +35,9 @@ class HomeMonthNotifier extends Notifier<YearMonth?> {
 
   /// Shows the month that holds [day].
   void showDay(int day) => state = yearMonthOfDay(day);
+
+  /// Back to the month of today, following the clock (after Delete all).
+  void followToday() => state = null;
 }
 
 final homeMonthProvider = NotifierProvider<HomeMonthNotifier, YearMonth?>(

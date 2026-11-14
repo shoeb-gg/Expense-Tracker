@@ -7,6 +7,8 @@ import 'package:spill_the_bills/data/db.dart';
 import 'package:spill_the_bills/data/expenses_repo.dart';
 import 'package:spill_the_bills/data/pockets_repo.dart';
 import 'package:spill_the_bills/data/settings_store.dart';
+import 'package:spill_the_bills/features/home/home_screen.dart';
+import 'package:spill_the_bills/features/home/home_state.dart';
 import 'package:spill_the_bills/features/settings/settings_parts.dart';
 import 'package:spill_the_bills/features/settings/settings_screen.dart';
 import 'package:spill_the_bills/features/settings/settings_sheets.dart';
@@ -179,12 +181,44 @@ void main() {
     expect(find.byType(AppDialog), findsNothing);
     await settleUntil(tester, find.text('Everything was erased'));
     expect(find.text('Everything was erased'), findsOneWidget);
+    // Like the board, the app goes Home: one empty pocket, this month.
+    expect(tester.takeException(), isNull);
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.byType(SettingsScreen), findsNothing);
+    expect(find.text('Spent in October'), findsOneWidget);
+    expect(find.text('Nothing in Personal yet'), findsOneWidget);
     final left = await tester.runAsync(() => PocketsRepo(db).all());
     expect(left!.single.isDefault, isTrue);
     final count = await tester.runAsync(
       () => ExpensesRepo(db).count(left.single.id),
     );
     expect(count, 0);
+    await tester.pump(const Duration(seconds: 5));
+    await closeApp(tester, db);
+  });
+
+  testWidgets('delete all from a Home that was showing another month', (
+    tester,
+  ) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(tester, db: db);
+    // Home is built and showing March 2026; then the Settings tab.
+    ProviderScope.containerOf(
+      tester.element(find.byType(HomeScreen)),
+    ).read(homeMonthProvider.notifier).show((year: 2026, month: 3));
+    await settle(tester);
+    expect(find.text('Spent in March'), findsOneWidget);
+    await tester.tap(find.text('Settings'));
+    await settle(tester);
+    await tapRow(tester, 'Delete all data');
+    await tester.tap(find.text('Yes, erase everything'));
+    await settle(tester);
+    await tester.tap(find.text('Delete all'));
+    await settleUntil(tester, find.text('Everything was erased'));
+    expect(tester.takeException(), isNull);
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.text('Spent in October'), findsOneWidget);
+    expect(find.text('Nothing in Personal yet'), findsOneWidget);
     await tester.pump(const Duration(seconds: 5));
     await closeApp(tester, db);
   });
