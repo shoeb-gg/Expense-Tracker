@@ -9,10 +9,12 @@ import '../../widgets/kit.dart';
 
 /// The one way to delete an expense (Details and Home's hold menu).
 ///
-/// Asks "Delete this expense?" with "title (or category) · amount" (the
-/// NewExpense board, without "This can't be undone." because there is
-/// Undo). When confirmed it runs [onConfirmed] (Details keeps showing the
-/// expense while it closes), deletes the expense and shows "Expense
+/// Asks "Delete this expense?" with "title (or category) · amount" and a
+/// quiet second line (the NewExpense board's layout). The board's "This
+/// can't be undone." is not true here, because the toast offers Undo, so
+/// the line says that instead. When confirmed it runs [onConfirmed]
+/// (Details keeps showing the expense while it closes), deletes the
+/// expense and shows "Expense
 /// deleted" with Undo. The photo file stays on the phone until Clear cache
 /// or the next start, so Undo brings the photo back too.
 ///
@@ -31,6 +33,7 @@ Future<bool> deleteExpenseWithUndo(
     context,
     title: 'Delete this expense?',
     boldLine: '$name · ${fmt.format(expense.amount)}',
+    quietLine: 'You can undo this right after.',
     actionLabel: 'Delete',
     destructive: true,
   );

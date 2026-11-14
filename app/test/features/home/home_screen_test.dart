@@ -266,10 +266,12 @@ void main() {
       await settle(tester);
       await tester.tap(find.text('Delete'));
       await settle(tester);
-      // The same dialog as Details: no "can't be undone", there is Undo.
+      // The same dialog as Details: no "can't be undone", there is Undo,
+      // and the board's second line says so.
       expect(find.text('Delete this expense?'), findsOneWidget);
       expect(find.text('Doctor visit · 1,180'), findsOneWidget);
       expect(find.text("This can't be undone."), findsNothing);
+      expect(find.text('You can undo this right after.'), findsOneWidget);
       await tester.tap(find.text('Cancel'));
       await settle(tester);
       expect(find.text('Doctor visit'), findsOneWidget);

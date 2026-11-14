@@ -57,6 +57,8 @@ void main() {
     await tap(tester, find.text('Delete'));
     expect(find.text('Delete this expense?'), findsOneWidget);
     expect(find.text('Doctor visit · 1,180'), findsOneWidget);
+    // The board's second line, worded for the Undo that follows.
+    expect(find.text('You can undo this right after.'), findsOneWidget);
     await tap(tester, find.text('Cancel'));
     expect(await load(tester, db, doctorVisitId), isNotNull);
 
