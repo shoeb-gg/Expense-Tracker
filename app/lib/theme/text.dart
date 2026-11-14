@@ -11,6 +11,13 @@ import 'package:flutter/painting.dart';
 /// Font family name declared in pubspec.yaml.
 const String kFontFamily = 'PlusJakartaSans';
 
+/// Family of the phone's colour emoji font (Android), asked for first by
+/// [AppText.emoji] so the app font never draws an emoji: Plus Jakarta Sans
+/// has a plain ▶ (U+25B6) that would win over the colour ▶️ of "Online
+/// Subscriptions". When the name is not found, the phone's own fallback
+/// (in screenshot tests the loaded emoji font) draws the emoji.
+const String kEmojiFontFamily = 'Noto Color Emoji';
+
 TextStyle _s(
   double size,
   double lineHeight,
@@ -122,9 +129,14 @@ abstract final class AppText {
   /// Weekday letters above a month grid (colour text3): 12/20 w700.
   static final TextStyle weekdayLetter = _s(12, 20, FontWeight.w700);
 
-  /// Emoji on a 44 px tile: 22 px, line height 1.
-  static const TextStyle emoji =
-      TextStyle(fontSize: 22, height: 1, letterSpacing: 0);
+  /// Emoji on a 44 px tile: 22 px, line height 1, in the emoji font
+  /// ([kEmojiFontFamily]).
+  static const TextStyle emoji = TextStyle(
+    fontFamily: kEmojiFontFamily,
+    fontSize: 22,
+    height: 1,
+    letterSpacing: 0,
+  );
 
   /// Any style with tabular figures.
   static TextStyle tabular(TextStyle style) =>

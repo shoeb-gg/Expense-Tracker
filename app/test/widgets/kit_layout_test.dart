@@ -3,10 +3,13 @@
 // padding 16, so their content runs from x 40 to x 320).
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/core/days.dart';
+import 'package:spill_the_bills/theme/app_theme.dart';
+import 'package:spill_the_bills/theme/text.dart';
+import 'package:spill_the_bills/theme/tokens.dart';
 import 'package:spill_the_bills/widgets/kit.dart';
 
 import '../support/shots.dart' show loadShotFonts;
@@ -54,6 +57,21 @@ void main() {
       );
       expect(september.didExceedMaxLines, isFalse);
     });
+  });
+
+  testWidgets('emoji tiles ask for the emoji font, not the app font', (
+    tester,
+  ) async {
+    // Plus Jakarta Sans has a plain ▶ that would win over the colour ▶️.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildAppTheme(Mood.aqua),
+        home: const Center(child: EmojiTile(emoji: '▶️')),
+      ),
+    );
+    final style = tester.widget<Text>(find.text('▶️')).style!;
+    expect(style.fontFamily, kEmojiFontFamily);
+    expect(AppText.emoji.fontFamily, kEmojiFontFamily);
   });
 
   group('dialog bold line', () {

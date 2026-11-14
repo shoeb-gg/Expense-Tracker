@@ -36,17 +36,8 @@ List<BoxShadow> selectedTileShadows(AppColors c) => [
   BoxShadow(color: c.bg, spreadRadius: 3),
 ];
 
-/// Emoji text at a given size, drawn by the phone's emoji font.
-///
-/// The family is the emoji font's name, not the app font: Plus Jakarta Sans
-/// has a plain ▶ (U+25B6), which would otherwise win over the colour emoji
-/// ▶️ of "Online Subscriptions". When the name is not found, the phone's
-/// own fallback (or the test emoji font) draws the emoji.
-TextStyle emojiText(double size) =>
-    AppText.emoji.copyWith(fontSize: size, fontFamily: emojiFontFamily);
-
-/// Family name of the colour emoji font on Android.
-const String emojiFontFamily = 'Noto Color Emoji';
+/// Emoji text at a given size ([AppText.emoji], the phone's emoji font).
+TextStyle emojiText(double size) => AppText.emoji.copyWith(fontSize: size);
 
 /// A rounded square with an emoji in the middle (category and pocket tiles).
 class EmojiBox extends StatelessWidget {
