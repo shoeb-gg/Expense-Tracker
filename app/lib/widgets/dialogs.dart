@@ -89,6 +89,8 @@ class AppPopupCard extends StatelessWidget {
 /// `bad` with dark text. With [tickLabel] a tick box row is shown and the
 /// action stays faded rose until it is ticked (PopDeleteAll).
 /// [titleWidget] replaces the title (e.g. with an emoji).
+/// [boldTabular] draws the bold line with tabular figures (only the
+/// PocketDelete board does; the others use proportional figures).
 ///
 /// Returns true when the action was pressed, false otherwise.
 Future<bool> showAppDialog(
@@ -97,6 +99,7 @@ Future<bool> showAppDialog(
   required String actionLabel,
   Widget? titleWidget,
   String? boldLine,
+  bool boldTabular = false,
   String? quietLine,
   Widget? extra,
   String cancelLabel = 'Cancel',
@@ -109,6 +112,7 @@ Future<bool> showAppDialog(
       title: title,
       titleWidget: titleWidget,
       boldLine: boldLine,
+      boldTabular: boldTabular,
       quietLine: quietLine,
       extra: extra,
       cancelLabel: cancelLabel,
@@ -128,6 +132,7 @@ class AppDialog extends StatefulWidget {
     required this.actionLabel,
     this.titleWidget,
     this.boldLine,
+    this.boldTabular = false,
     this.quietLine,
     this.extra,
     this.cancelLabel = 'Cancel',
@@ -138,6 +143,7 @@ class AppDialog extends StatefulWidget {
   final String title;
   final Widget? titleWidget;
   final String? boldLine;
+  final bool boldTabular;
   final String? quietLine;
   final Widget? extra;
   final String cancelLabel;
@@ -167,7 +173,12 @@ class _AppDialogState extends State<AppDialog> {
               Text(widget.title, style: AppText.screenTitle),
           if (widget.boldLine != null) ...[
             const SizedBox(height: 8),
-            Text(widget.boldLine!, style: AppText.tabular(AppText.bodyStrong)),
+            Text(
+              widget.boldLine!,
+              style: widget.boldTabular
+                  ? AppText.tabular(AppText.bodyStrong)
+                  : AppText.bodyStrong,
+            ),
           ],
           if (widget.quietLine != null)
             Text(

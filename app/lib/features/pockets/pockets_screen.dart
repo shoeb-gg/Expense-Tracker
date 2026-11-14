@@ -53,6 +53,7 @@ class PocketsScreen extends ConsumerWidget {
       boldLine: empty
           ? 'This pocket is empty.'
           : 'Also deletes $expenses and photos',
+      boldTabular: true,
       quietLine: empty ? 'It will simply be removed.' : 'This can’t be undone.',
       extra: empty
           ? null
