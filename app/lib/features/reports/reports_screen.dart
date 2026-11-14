@@ -9,6 +9,7 @@ import '../../state/providers.dart';
 import '../../theme/text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/kit.dart';
+import '../charts/chart_parts.dart' show EmptyNote;
 import 'reports_logic.dart';
 import 'year_chart.dart';
 
@@ -465,6 +466,18 @@ class _MonthByMonth extends ConsumerWidget {
         SizedBox(width: 80, child: d),
       ],
     );
+    if (months.isEmpty) {
+      // No headings over nothing: a quiet line, like Charts' empty
+      // "By category" card (and its "Each month you spend in gets a
+      // column." under the empty chart).
+      return const BandCard(
+        title: 'Month by month',
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 4),
+          child: EmptyNote('Each month you spend in gets a row.'),
+        ),
+      );
+    }
     return BandCard(
       title: 'Month by month',
       child: Padding(

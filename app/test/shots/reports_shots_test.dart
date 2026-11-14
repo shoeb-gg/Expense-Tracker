@@ -67,6 +67,16 @@ void main() {
     );
     await boardHeight(tester, 1100);
     expect(find.text('Nothing spent yet'), findsOneWidget);
+    // The year chart keeps the placeholder scale of Charts' empty
+    // "Over time" chart instead of a lone "0".
+    for (final tick in ['250', '500', '750', '1,000']) {
+      expect(find.text(tick), findsOneWidget);
+    }
+    // Month by month says why it has no rows instead of bare headings.
+    // (Charts' empty column chart says "Each month you spend in gets a
+    // column.")
+    expect(find.text('Each month you spend in gets a row.'), findsOneWidget);
+    expect(find.text('vs previous'), findsNothing);
     await takeShot(tester, 'reports_empty');
     await closeApp(tester, db);
   });

@@ -302,7 +302,11 @@ class YearChart extends ConsumerWidget {
     for (final m in months) {
       if (m.shown && m.value / 100 > maxV) maxV = m.value / 100;
     }
-    final scale = axisScale(maxV);
+    // With nothing spent, the same placeholder scale as Charts' empty
+    // "Over time" chart (0, 250, 500, 750, 1,000).
+    final AxisScale scale = maxV > 0
+        ? axisScale(maxV)
+        : (step: 250, top: 1000);
     final compact = scale.top >= 10000;
     String tick(double v) {
       if (v == 0) return '0';
@@ -355,8 +359,7 @@ class YearChart extends ConsumerWidget {
                     ),
                   ),
                 ),
-                // With nothing spent the scale means nothing: only "0".
-                for (final t in ticks.where((t) => maxV > 0 || t == 0))
+                for (final t in ticks)
                   Positioned(
                     left: 0,
                     width: 28,
