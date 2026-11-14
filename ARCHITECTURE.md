@@ -16,6 +16,12 @@ Decisions for the Expense Tracker app. Scope lives in BUILD_LIST.md.
 - Why: reports and charts need totals by day, month and category, which SQL handles natively. Reactive queries refresh the UI as soon as data changes. Backup is a single database file.
 - Alternatives considered: ObjectBox, Hive, Isar (original Hive/Isar authors stopped maintaining them).
 
+## Pockets
+- **Expenses are stored per pocket.** Each expense carries the pocket it belongs to. There is always a Default pocket.
+- **Stored once for the whole app:** categories, the words type to add has learned, and settings.
+- **Receipt photos** belong to their expense and are removed with it. Deleting a pocket removes its expenses and their photos.
+- **Combined view of all pockets (later):** the storage must allow it without changes to existing data.
+
 ## Charts
 - **fl_chart**, plus custom-painted touches where needed (for example the ring chart center).
 - Why: free and open source, light, fully restylable (gradients, rounded segments, glow), built-in touch handling and animations.

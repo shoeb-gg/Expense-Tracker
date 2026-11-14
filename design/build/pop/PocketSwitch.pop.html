@@ -1,0 +1,61 @@
+<!--@POP {"host":"PocketHome","title":"Home, switch pocket","icons":"add,check,expand_less"}-->
+  <div data-pop="menu" style="position: absolute; left: 0; top: 0; width: 360px; height: 780px; z-index: 50; background: rgba(4, 10, 11, 0.8)">
+    <div aria-hidden="true" style="position: absolute; left: 16px; top: 12px; height: 40px; box-sizing: border-box; padding: 0 6px 0 4px; border-radius: 20px; background: {{pop.pillBg}}; color: {{t.text}}; display: flex; align-items: center; gap: 8px">
+      <span style="width: 32px; height: 32px; flex-shrink: 0; border-radius: 16px; background: {{t.bg}}; display: flex; align-items: center; justify-content: center">
+        <span class="em" style="font-size: 17px">{{pop.curEmoji}}</span>
+      </span>
+      <span style="font-size: 19px; line-height: 24px; font-weight: 800; letter-spacing: -0.3px; white-space: nowrap">{{pop.curName}}</span>
+      <span class="ms" style="font-size: 24px; width: 24px; height: 24px; flex-shrink: 0; margin-left: -4px; color: {{t.accent}}">expand_less</span>
+    </div>
+    <div role="dialog" aria-label="Your pockets" style="position: absolute; left: 16px; top: 60px; width: 328px; box-sizing: border-box; padding: 16px; border-radius: 24px; background: {{t.surface2}}; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column">
+      <span style="font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">Your pockets</span>
+      <span style="margin-top: 2px; font-size: 13.5px; line-height: 20px; font-weight: 500; color: {{t.text2}}">Tap one to switch to it.</span>
+      <div role="radiogroup" aria-label="Pockets" style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px">
+        <sc-for list="{{pop.rows}}" as="o" hint-placeholder-count="3">
+          <button type="button" role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="height: 64px; border: 0; border-radius: 16px; padding: 0 16px 0 10px; background: {{o.bg}}; box-shadow: {{o.ring}}; color: {{t.text}}; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; transition: background 0.15s">
+            <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{t.surface}}; display: flex; align-items: center; justify-content: center">
+              <span class="em" aria-hidden="true" style="font-size: 22px">{{o.emoji}}</span>
+            </span>
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="min-width: 0; display: flex; align-items: center; gap: 8px">
+                <span style="min-width: 0; font-size: 15px; line-height: 20px; font-weight: {{o.fw}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{o.name}}</span>
+                <sc-if value="{{o.on}}" hint-placeholder-val="{{ false }}">
+                  <span style="flex-shrink: 0; height: 18px; padding: 0 7px; border-radius: 9px; background: {{t.surface}}; color: {{t.accent}}; font-size: 11px; line-height: 18px; font-weight: 800">In use</span>
+                </sc-if>
+              </span>
+              <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}; white-space: nowrap; font-variant-numeric: tabular-nums">{{o.sub}}</span>
+            </span>
+            <span aria-hidden="true" style="width: 24px; height: 24px; flex-shrink: 0; border-radius: 12px; background: {{o.dotBg}}; box-shadow: {{o.dotRing}}; color: {{t.onAccent}}; display: flex; align-items: center; justify-content: center">
+              <sc-if value="{{o.on}}" hint-placeholder-val="{{ false }}">
+                <span class="ms" style="font-size: 18px; width: 18px; height: 18px">check</span>
+              </sc-if>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="margin-top: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+        <a href="PocketAdd.dc.html" style="height: 48px; border-radius: 16px; background: {{t.tile}}; color: {{t.text}}; font-size: 15px; line-height: 20px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px">
+          <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; color: {{t.accent}}">add</span>
+          Add pocket
+        </a>
+        <a href="PocketList.dc.html" style="height: 48px; border-radius: 16px; background: {{t.tile}}; color: {{t.text}}; font-size: 15px; line-height: 20px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center">Manage</a>
+      </div>
+    </div>
+  </div>
+<!--@LOGIC-->
+  // The pocket switcher: it drops down from the pocket button at the top-left of Home, which stays lit above the dimmed screen.
+  // Tapping a pocket switches to it and closes the panel.
+  popVals(t) {
+    const k = this.popKit(t);
+    const st = this.state || {};
+    const cur = st.popPick || 'personal';
+    const LIST = [['personal', 'Personal', '👛', '34,555 this month'], ['business', 'Business', '💼', '18,240 this month'], ['trip', 'Family trip', '🏖️', '6,300 this month']];
+    const now = LIST.find((p) => p[0] === cur);
+    return {
+      // The button's tint, made solid so the dimmed screen does not show through it.
+      pillBg: k.mix(t.accent, t.bg, 0.18),
+      curName: now[1],
+      curEmoji: now[2],
+      rows: LIST.map(([id, name, emoji, sub]) => Object.assign(k.opt(id === cur), { name, emoji, sub, pick: () => this.setState({ popPick: id }) }))
+    };
+  }

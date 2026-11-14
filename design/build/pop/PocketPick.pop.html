@@ -1,0 +1,40 @@
+<!--@POP {"host":"PocketAddExpense","title":"Add expense, choose the pocket","icons":"check"}-->
+  <div data-pop="sheet" style="position: absolute; left: 0; top: 0; width: 360px; height: 780px; z-index: 50; background: rgba(4, 10, 11, 0.88); display: flex; align-items: flex-end">
+    <div role="dialog" aria-label="Save in another pocket" style="width: 360px; box-sizing: border-box; padding: 10px 16px 24px; border-radius: 28px 28px 0 0; background: {{t.surface2}}; box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45); display: flex; flex-direction: column">
+      <span aria-hidden="true" style="align-self: center; width: 40px; height: 4px; border-radius: 2px; background: {{pop.grab}}"></span>
+      <span style="margin: 14px 16px 0; font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">Save in another pocket</span>
+      <span style="margin: 2px 16px 0; font-size: 13.5px; line-height: 20px; font-weight: 500; color: {{t.text2}}">Tap the pocket this expense should go in.</span>
+      <div role="radiogroup" aria-label="Pockets" style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px">
+        <sc-for list="{{pop.rows}}" as="o" hint-placeholder-count="3">
+          <button type="button" role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="height: 64px; border: 0; border-radius: 16px; padding: 0 16px; background: {{o.bg}}; box-shadow: {{o.ring}}; color: {{t.text}}; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; transition: background 0.15s">
+            <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: {{t.surface}}; display: flex; align-items: center; justify-content: center">
+              <span class="em" aria-hidden="true" style="font-size: 22px">{{o.emoji}}</span>
+            </span>
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 15px; line-height: 20px; font-weight: {{o.fw}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{o.name}}</span>
+              <sc-if value="{{o.on}}" hint-placeholder-val="{{ false }}">
+                <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}; white-space: nowrap">It will be saved here</span>
+              </sc-if>
+            </span>
+            <span aria-hidden="true" style="width: 24px; height: 24px; flex-shrink: 0; border-radius: 12px; background: {{o.dotBg}}; box-shadow: {{o.dotRing}}; color: {{t.onAccent}}; display: flex; align-items: center; justify-content: center">
+              <sc-if value="{{o.on}}" hint-placeholder-val="{{ false }}">
+                <span class="ms" style="font-size: 18px; width: 18px; height: 18px">check</span>
+              </sc-if>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+<!--@LOGIC-->
+  // Choosing the pocket for an expense. A tap picks the pocket and closes the sheet; Save on the Edit screen does the move.
+  popVals(t) {
+    const k = this.popKit(t);
+    const st = this.state || {};
+    const cur = st.popPick || 'personal';
+    const LIST = [['personal', 'Personal', '👛'], ['business', 'Business', '💼'], ['trip', 'Family trip', '🏖️']];
+    return {
+      grab: k.grab,
+      rows: LIST.map(([id, name, emoji]) => Object.assign(k.opt(id === cur), { name, emoji, pick: () => this.setState({ popPick: id }) }))
+    };
+  }

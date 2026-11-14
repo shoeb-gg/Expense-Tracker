@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings, the Pockets row</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,0..1,0&amp;icon_names=account_balance_wallet,add,bar_chart,calculate,calendar_month,category,check,chevron_right,delete,donut_small,folder,home,palette,tune&amp;display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&amp;display=swap">
+<style>
+html,body{margin:0;overflow:hidden}
+.em{font-family:'Noto Color Emoji','Apple Color Emoji','Segoe UI Emoji',sans-serif;line-height:1;display:inline-block;flex-shrink:0}
+button,input{font-family:inherit}
+a{color:inherit}
+main::-webkit-scrollbar{display:none}
+.ms{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;line-height:1;display:inline-block;flex-shrink:0;overflow:hidden;white-space:nowrap;letter-spacing:normal;text-transform:none;direction:ltr;font-feature-settings:'liga';-webkit-font-smoothing:antialiased}
+main>:first-child{margin-top:-652px}
+</style>
+</helmet>
+<div style="width: 360px; height: 780px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; color: {{t.text}}; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <header style="flex-shrink: 0; padding: 0 16px">
+    <div style="height: 64px; display: flex; align-items: center">
+      <h1 style="margin: 0; font-size: 21px; line-height: 28px; font-weight: 800; letter-spacing: -0.3px">Settings</h1>
+    </div>
+  </header>
+
+  <main style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 0 16px 28px; display: flex; flex-direction: column; gap: 12px">
+    <section aria-label="Appearance" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center; gap: 8px">
+        <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; color: {{t.accent}}">palette</span>
+        <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">Appearance</h2>
+      </div>
+      <div style="margin: 0 16px; height: 68px; box-shadow: inset 0 -1px 0 {{t.line}}; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+        <span style="font-size: 15px; line-height: 20px; font-weight: 600">Theme</span>
+        <div role="group" aria-label="Theme" style="height: 36px; box-sizing: border-box; padding: 3px; border-radius: 12px; background: {{t.bg}}; display: grid; grid-template-columns: repeat(3, 64px); gap: 2px">
+          <sc-for list="{{themeBtns}}" as="b" hint-placeholder-count="3">
+            <button type="button" aria-pressed="{{b.on}}" onClick="{{b.pick}}" style="height: 30px; border: 0; border-radius: 9px; padding: 0; background: {{b.bg}}; color: {{b.fg}}; font-size: 12.5px; line-height: 16px; font-weight: {{b.fw}}; cursor: pointer; transition: background 0.15s">{{b.label}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="margin: 0 16px; padding: 16px 0; box-shadow: inset 0 -1px 0 {{t.line}}; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: baseline; justify-content: space-between">
+          <span style="font-size: 15px; line-height: 20px; font-weight: 600">Color theme</span>
+          <span style="font-size: 13px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{moodName}}</span>
+        </div>
+        <div role="group" aria-label="Color theme" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+          <sc-for list="{{moods}}" as="m" hint-placeholder-count="3">
+            <button type="button" aria-label="{{m.name}}" aria-pressed="{{m.on}}" onClick="{{m.pick}}" style="border: 0; padding: 0; background: transparent; color: {{t.text}}; display: flex; flex-direction: column; align-items: stretch; gap: 6px; cursor: pointer">
+              <span style="height: 56px; border-radius: 16px; background: {{m.bg}}; box-shadow: {{m.ring}}; display: flex; align-items: center; gap: 8px; padding: 0 12px; transition: box-shadow 0.15s">
+                <span style="width: 24px; height: 24px; flex-shrink: 0; border-radius: 12px; background: {{m.accent}}; color: {{m.onAccent}}; display: flex; align-items: center; justify-content: center">
+                  <sc-if value="{{m.on}}" hint-placeholder-val="{{ false }}">
+                    <span class="ms" aria-hidden="true" style="font-size: 16px; width: 16px; height: 16px; font-variation-settings: 'wght' 500">check</span>
+                  </sc-if>
+                </span>
+                <span aria-hidden="true" style="margin-left: auto; height: 24px; display: flex; align-items: flex-end; gap: 3px">
+                  <span style="width: 6px; height: 10px; border-radius: 2px 2px 0 0; background: {{m.soft}}"></span>
+                  <span style="width: 6px; height: 24px; border-radius: 2px 2px 0 0; background: {{m.accent}}"></span>
+                  <span style="width: 6px; height: 16px; border-radius: 2px 2px 0 0; background: {{m.soft}}"></span>
+                  <span style="width: 6px; height: 20px; border-radius: 2px 2px 0 0; background: {{m.soft}}"></span>
+                </span>
+              </span>
+              <span style="text-align: center; font-size: 12.5px; line-height: 16px; font-weight: {{m.fw}}; color: {{m.fg}}">{{m.name}}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="margin: 0 16px; padding: 16px 0; display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; align-items: baseline; justify-content: space-between">
+          <label for="font-size" style="font-size: 15px; line-height: 20px; font-weight: 600">Text size</label>
+          <span style="font-size: 13px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{fontName}}</span>
+        </div>
+        <div style="height: 28px; display: flex; align-items: center; gap: 12px">
+          <span aria-hidden="true" style="font-size: 12px; line-height: 16px; font-weight: 700; color: {{t.text3}}">A</span>
+          <span style="position: relative; flex: 1; min-width: 0; height: 28px">
+            <span aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 12px; height: 4px; border-radius: 2px; background: {{t.track}}"></span>
+            <span aria-hidden="true" style="position: absolute; left: 0; top: 12px; width: calc((100% - 20px) * {{fontFrac}} + 10px); height: 4px; border-radius: 2px; background: {{t.accent}}"></span>
+            <sc-for list="{{fontStops}}" as="p" hint-placeholder-count="5">
+              <span aria-hidden="true" style="position: absolute; left: calc((100% - 20px) * {{p.frac}} + 8px); top: 12px; width: 4px; height: 4px; border-radius: 2px; background: {{p.bg}}"></span>
+            </sc-for>
+            <span aria-hidden="true" style="position: absolute; left: calc((100% - 20px) * {{fontFrac}}); top: 4px; width: 20px; height: 20px; border-radius: 10px; background: {{t.text}}; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); transition: left 0.15s"></span>
+            <input id="font-size" type="range" min="0" max="4" step="1" value="{{fontIdx}}" onChange="{{onFont}}" style="position: absolute; left: 0; top: 0; width: 100%; height: 28px; margin: 0; opacity: 0; cursor: pointer">
+          </span>
+          <span aria-hidden="true" style="font-size: 19px; line-height: 24px; font-weight: 700; color: {{t.text3}}">A</span>
+        </div>
+        <div style="height: 48px; box-sizing: border-box; padding: 0 12px; border-radius: 14px; background: {{t.bg}}; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: {{previewSize}}; line-height: 28px">
+          <span style="font-weight: 500; color: {{t.text2}}; white-space: nowrap">Spent in October</span>
+          <span style="font-weight: 800">{{previewAmount}}</span>
+        </div>
+        <span style="text-align: center; font-size: 12px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Preview. The whole app uses this size.</span>
+      </div>
+    </section>
+
+    <section aria-label="Home and calendar" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center; gap: 8px">
+        <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; color: {{t.accent}}">calendar_month</span>
+        <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">Home and calendar</h2>
+      </div>
+      <sc-for list="{{homeToggles}}" as="g" hint-placeholder-count="4">
+        <div style="margin: 0 16px; height: 68px; box-shadow: inset 0 -1px 0 {{t.line}}; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+          <span style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 15px; line-height: 20px; font-weight: 600">{{g.label}}</span>
+            <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">{{g.sub}}</span>
+          </span>
+          <button type="button" role="switch" aria-checked="{{g.on}}" aria-label="{{g.label}}" onClick="{{g.flip}}" style="position: relative; width: 48px; height: 28px; flex-shrink: 0; border: 0; border-radius: 14px; padding: 0; background: {{g.track}}; cursor: pointer; transition: background 0.15s">
+            <span style="position: absolute; top: 3px; left: {{g.knobLeft}}; width: 22px; height: 22px; border-radius: 11px; background: {{g.knob}}; transition: left 0.15s"></span>
+          </button>
+        </div>
+      </sc-for>
+      <button type="button" style="margin: 0 16px; height: 56px; border: 0; padding: 0; background: transparent; color: {{t.text}}; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; cursor: pointer">
+        <span style="font-size: 15px; line-height: 20px; font-weight: 600">First day of the week</span>
+        <span style="display: flex; align-items: center; gap: 2px; font-size: 14px; line-height: 20px; font-weight: 500; color: {{t.text3}}">
+          Sunday
+          <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; margin-right: -6px">chevron_right</span>
+        </span>
+      </button>
+    </section>
+
+    <section aria-label="Pockets" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center; gap: 8px">
+        <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; color: {{t.accent}}">account_balance_wallet</span>
+        <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">Pockets</h2>
+      </div>
+      <a href="PocketList.dc.html" style="margin: 0 16px; height: 68px; border: 0; padding: 0; background: transparent; color: {{t.text}}; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; cursor: pointer; text-decoration: none">
+        <span style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 15px; line-height: 20px; font-weight: 600">Manage pockets</span>
+          <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Add, edit, delete</span>
+        </span>
+        <span style="flex-shrink: 0; display: flex; align-items: center; gap: 6px">
+          <span aria-hidden="true" style="display: flex; align-items: center; gap: 4px">
+            <span style="width: 28px; height: 28px; border-radius: 9px; background: {{t.tile}}; display: flex; align-items: center; justify-content: center"><span class="em" style="font-size: 15px">👛</span></span>
+            <span style="width: 28px; height: 28px; border-radius: 9px; background: {{t.tile}}; display: flex; align-items: center; justify-content: center"><span class="em" style="font-size: 15px">💼</span></span>
+            <span style="width: 28px; height: 28px; border-radius: 9px; background: {{t.tile}}; display: flex; align-items: center; justify-content: center"><span class="em" style="font-size: 15px">🏖️</span></span>
+          </span>
+          <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; margin-right: -6px; color: {{t.text3}}">chevron_right</span>
+        </span>
+      </a>
+    </section>
+
+    <section aria-label="Categories" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center; gap: 8px">
+        <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; color: {{t.accent}}">category</span>
+        <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">Categories</h2>
+      </div>
+      <a href="NewCategories.dc.html" style="margin: 0 16px; height: 68px; border: 0; padding: 0; background: transparent; color: {{t.text}}; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; cursor: pointer; text-decoration: none">
+        <span style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 15px; line-height: 20px; font-weight: 600">Manage categories</span>
+          <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Add, edit, delete, reorder</span>
+        </span>
+        <span style="flex-shrink: 0; display: flex; align-items: center; gap: 6px">
+          <span aria-hidden="true" style="display: flex; align-items: center">
+            <sc-for list="{{catPeek}}" as="p" hint-placeholder-count="3">
+              <span style="width: 28px; height: 28px; margin-right: 4px; border-radius: 9px; background: {{t.tile}}; display: flex; align-items: center; justify-content: center"><span class="em" style="font-size: 15px">{{p.emoji}}</span></span>
+            </sc-for>
+            <span style="width: 28px; height: 28px; border-radius: 9px; background: {{t.tile}}; display: flex; align-items: center; justify-content: center; font-size: 10.5px; line-height: 14px; font-weight: 800; color: {{t.text2}}">+13</span>
+          </span>
+          <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; margin-right: -6px; color: {{t.text3}}">chevron_right</span>
+        </span>
+      </a>
+    </section>
+
+    <section aria-label="Numbers" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center; gap: 8px">
+        <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; color: {{t.accent}}">calculate</span>
+        <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">Numbers</h2>
+      </div>
+      <button type="button" style="margin: 0 16px; height: 56px; border: 0; padding: 0; background: transparent; box-shadow: inset 0 -1px 0 {{t.line}}; color: {{t.text}}; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; cursor: pointer">
+        <span style="font-size: 15px; line-height: 20px; font-weight: 600">Number format</span>
+        <span style="display: flex; align-items: center; gap: 2px; font-size: 14px; line-height: 20px; font-weight: 500; color: {{t.text3}}; font-variant-numeric: tabular-nums">
+          {{numberSample}}
+          <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; margin-right: -6px">chevron_right</span>
+        </span>
+      </button>
+      <sc-for list="{{numToggles}}" as="g" hint-placeholder-count="1">
+        <div style="margin: 0 16px; height: 56px; box-shadow: inset 0 -1px 0 {{t.line}}; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+          <span style="font-size: 15px; line-height: 20px; font-weight: 600">{{g.label}}</span>
+          <button type="button" role="switch" aria-checked="{{g.on}}" aria-label="{{g.label}}" onClick="{{g.flip}}" style="position: relative; width: 48px; height: 28px; flex-shrink: 0; border: 0; border-radius: 14px; padding: 0; background: {{g.track}}; cursor: pointer; transition: background 0.15s">
+            <span style="position: absolute; top: 3px; left: {{g.knobLeft}}; width: 22px; height: 22px; border-radius: 11px; background: {{g.knob}}; transition: left 0.15s"></span>
+          </button>
+        </div>
+      </sc-for>
+      <button type="button" style="margin: 0 16px; height: 56px; border: 0; padding: 0; background: transparent; color: {{t.text}}; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; cursor: pointer">
+        <span style="font-size: 15px; line-height: 20px; font-weight: 600">Calculator keys</span>
+        <span style="display: flex; align-items: center; gap: 2px; font-size: 14px; line-height: 20px; font-weight: 500; color: {{t.text3}}">
+          Plus and minus
+          <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; margin-right: -6px">chevron_right</span>
+        </span>
+      </button>
+    </section>
+
+    <section aria-label="Your data" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center; gap: 8px">
+        <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; color: {{t.accent}}">folder</span>
+        <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">Your data</h2>
+      </div>
+      <a href="NewExport.dc.html" style="margin: 0 16px; height: 68px; border: 0; padding: 0; background: transparent; box-shadow: inset 0 -1px 0 {{t.line}}; color: {{t.text}}; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; cursor: pointer; text-decoration: none">
+        <span style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 15px; line-height: 20px; font-weight: 600">Export</span>
+          <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Excel or CSV, for any date range</span>
+        </span>
+        <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; margin-right: -6px; color: {{t.text3}}">chevron_right</span>
+      </a>
+      <a href="NewImport.dc.html" style="margin: 0 16px; height: 68px; border: 0; padding: 0; background: transparent; box-shadow: inset 0 -1px 0 {{t.line}}; color: {{t.text}}; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; cursor: pointer; text-decoration: none">
+        <span style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 15px; line-height: 20px; font-weight: 600">Import</span>
+          <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">From a CSV, Excel or JSON file</span>
+        </span>
+        <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; margin-right: -6px; color: {{t.text3}}">chevron_right</span>
+      </a>
+      <div aria-disabled="true" style="margin: 0 16px; height: 68px; box-shadow: inset 0 -1px 0 {{t.line}}; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+        <span style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 15px; line-height: 20px; font-weight: 600; color: {{t.text3}}">Automatic backup</span>
+          <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Phone and Google Drive</span>
+        </span>
+        <span style="height: 24px; flex-shrink: 0; padding: 0 10px; border-radius: 12px; background: {{t.surface2}}; color: {{t.text2}}; font-size: 12px; line-height: 24px; font-weight: 600; white-space: nowrap">Coming later</span>
+      </div>
+      <button type="button" style="margin: 0 16px; height: 68px; border: 0; padding: 0; background: transparent; box-shadow: inset 0 -1px 0 {{t.line}}; color: {{t.text}}; display: flex; flex-direction: column; justify-content: center; gap: 2px; text-align: left; cursor: pointer">
+        <span style="font-size: 15px; line-height: 20px; font-weight: 600">Clear cache</span>
+        <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">Frees up space. Your expenses stay.</span>
+      </button>
+      <button type="button" style="margin: 0 16px; height: 68px; border: 0; padding: 0; background: transparent; color: {{t.bad}}; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; cursor: pointer">
+        <span style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 15px; line-height: 20px; font-weight: 700">Delete all data</span>
+          <span style="font-size: 12.5px; line-height: 16px; font-weight: 500; color: {{t.text3}}">This can’t be undone</span>
+        </span>
+        <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; margin-right: -2px">delete</span>
+      </button>
+    </section>
+  </main>
+
+  <nav aria-label="Main" style="height: 72px; flex-shrink: 0; position: relative; background: {{t.nav}}; box-shadow: inset 0 1px 0 {{t.line}}; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center">
+    <a href="MoodAqua.dc.html" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{t.text2}}; text-decoration: none; font-size: 11.5px; line-height: 14px; font-weight: 600">
+      <span style="width: 48px; height: 28px; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px">home</span>
+      </span>
+      Home
+    </a>
+    <a href="NewCharts.dc.html" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{t.text2}}; text-decoration: none; font-size: 11.5px; line-height: 14px; font-weight: 600">
+      <span style="width: 48px; height: 28px; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px">donut_small</span>
+      </span>
+      Charts
+    </a>
+    <a href="NewAdd.dc.html" aria-label="Add expense" style="height: 72px; display: flex; align-items: flex-start; justify-content: center; text-decoration: none">
+      <span style="margin-top: -16px; width: 58px; height: 58px; border-radius: 29px; background: {{t.accent}}; color: {{t.onAccent}}; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 22px -2px {{t.accentGlow}}, 0 2px 6px rgba(0, 0, 0, 0.35)">
+        <span class="ms" aria-hidden="true" style="font-size: 30px; width: 30px; height: 30px">add</span>
+      </span>
+    </a>
+    <a href="NewReports.dc.html" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{t.text2}}; text-decoration: none; font-size: 11.5px; line-height: 14px; font-weight: 600">
+      <span style="width: 48px; height: 28px; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px">bar_chart</span>
+      </span>
+      Reports
+    </a>
+    <a href="NewSettings.dc.html" aria-current="page" style="height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: {{t.accent}}; text-decoration: none; font-size: 11.5px; line-height: 14px; font-weight: 700">
+      <span style="width: 48px; height: 28px; border-radius: 14px; background: {{t.accentSoft}}; display: flex; align-items: center; justify-content: center">
+        <span class="ms" aria-hidden="true" style="font-size: 24px; width: 24px; height: 24px; font-variation-settings: 'FILL' 1">tune</span>
+      </span>
+      Settings
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mood":{"editor":"enum","options":["coral","aqua","iris"],"default":"aqua"},"$preview":{"width":360,"height":780}}'>
+class Component extends DCLogic {
+  theme(mood) {
+    const MOODS = {
+      coral: { bg: '#0F1320', nav: '#151A2A', surface: '#1A2033', line: '#2B3350', text: '#FFFFFF', text2: '#D3D8E8', text3: '#A2ABC4', accent: '#FF7A5F', onAccent: '#2A0F0A', ink: '#171B2B' },
+      aqua: { bg: '#0B1517', nav: '#101D20', surface: '#152528', line: '#24383C', text: '#FFFFFF', text2: '#CBDADC', text3: '#9BB0B3', accent: '#4FD1C5', onAccent: '#04231F', ink: '#0F1E21' },
+      iris: { bg: '#100F1C', nav: '#171527', surface: '#1D1B30', line: '#33304D', text: '#FFFFFF', text2: '#D4D1EC', text3: '#A9A6CA', accent: '#A898FF', onAccent: '#150F33', ink: '#17132B' }
+    };
+    const t = Object.assign({}, MOODS[mood] || MOODS.coral);
+    // mix(a, b, w): w parts of colour a, the rest colour b.
+    const mix = (a, b, w) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(a.slice(i, i + 2), 16) * w + parseInt(b.slice(i, i + 2), 16) * (1 - w)).toString(16).padStart(2, '0')).join('');
+    t.accentSoft = t.accent + '2E';
+    t.surface2 = { coral: '#232A42', aqua: '#1C3034', iris: '#27243E' }[mood] || '#232A42';
+    t.tile = '#' + [1, 3, 5].map((i) => Math.round(parseInt(t.surface.slice(i, i + 2), 16) * 0.87 + 33).toString(16).padStart(2, '0')).join('');
+    t.accentGlow = t.accent + '59';
+    t.wash = t.accent + '29';
+    // Chart colours that follow the theme. Category colours do not: they are fixed per category.
+    t.other = mix(t.text3, t.surface, 0.5);
+    t.barSoft = mix(t.accent, t.surface, 0.6);
+    t.barDim = mix(t.accent, t.surface, 0.36);
+    t.ramp = [1, 0.86, 0.72, 0.58, 0.44].map((w) => mix(t.accent, t.surface, w));
+    t.tip = mix('#FFFFFF', t.surface2, 0.1);
+    t.stub = mix(t.text3, t.surface, 0.28);
+    t.track = mix(t.bg, t.surface, 0.5);
+    // Shared by the other boards: text on accent, the calendar heat ramp, a dim text tone, and the mixer itself.
+    t.onAccentDim = t.onAccent + 'D9';
+    t.heat = [0.4, 0.56, 0.74, 0.94].map((w) => mix(t.accent, t.bg, w));
+    t.dim = mix(t.text3, t.bg, 0.55);
+    t.good = '#5BD49B';
+    t.bad = '#FF8C9A';
+    t.mix = mix;
+    return t;
+  }
+
+  renderVals() {
+    const st = this.state || {};
+    // Picking a colour theme here re-themes this screen straight away.
+    const mood = st.mood || (this.props.mood ?? 'aqua');
+    const t = this.theme(mood);
+    const NAMES = { aqua: 'Aqua', coral: 'Coral', iris: 'Iris' };
+    const moods = ['aqua', 'coral', 'iris'].map((key) => {
+      const m = this.theme(key);
+      const on = key === mood;
+      return {
+        name: NAMES[key],
+        on,
+        bg: m.surface2,
+        accent: m.accent,
+        onAccent: m.onAccent,
+        soft: m.barSoft,
+        ring: on ? 'inset 0 0 0 2px ' + m.accent : 'inset 0 0 0 1px ' + m.line,
+        fw: on ? '800' : '600',
+        fg: on ? t.text : t.text2,
+        pick: () => this.setState({ mood: key })
+      };
+    });
+    const theme = st.theme || 'dark';
+    const themeBtns = [['dark', 'Dark'], ['light', 'Light'], ['system', 'System']].map(([key, label]) => {
+      const on = key === theme;
+      return { label, on, bg: on ? t.accent : 'transparent', fg: on ? t.onAccent : t.text2, fw: on ? '800' : '600', pick: () => this.setState({ theme: key }) };
+    });
+    const FONT_NAMES = ['Smallest', 'Small', 'Default', 'Large', 'Largest'];
+    const FONT_PX = ['13px', '14px', '15px', '17px', '19px'];
+    const fontIdx = st.font != null ? st.font : 2;
+    const tg = (key, label, sub, def) => {
+      const on = st[key] != null ? st[key] : def;
+      return {
+        label,
+        sub,
+        on,
+        track: on ? t.accent : t.mix(t.text3, t.surface, 0.4),
+        knob: on ? t.onAccent : t.text,
+        knobLeft: on ? '23px' : '3px',
+        flip: () => this.setState({ [key]: !on })
+      };
+    };
+    const sep = st.sep != null ? st.sep : true;
+    return {
+      t,
+      moods,
+      moodName: NAMES[mood],
+      themeBtns,
+      fontIdx,
+      fontFrac: fontIdx / 4,
+      fontStops: [0, 1, 2, 3, 4].map((i) => ({ frac: i / 4, bg: i <= fontIdx ? t.onAccentDim : t.dim })),
+      fontName: FONT_NAMES[fontIdx],
+      previewSize: FONT_PX[fontIdx],
+      previewAmount: sep ? '34,555' : '34555',
+      onFont: (ev) => this.setState({ font: Number(ev.target.value) }),
+      homeToggles: [
+        tg('showTotal', 'Monthly total on Home', 'The big number at the top of Home', true),
+        tg('privacy', 'Privacy hide', 'Mask the total until you tap the eye', false),
+        tg('calBtn', 'Calendar button', 'Shortcut to the calendar on Home', true),
+        tg('calAmt', 'Amounts in calendar days', 'Show each day’s total in its cell', true)
+      ],
+      numToggles: [tg('sep', 'Thousands separator', '', true)],
+      catPeek: [{ emoji: '\uD83E\uDD66' }, { emoji: '\uD83C\uDF57' }],
+      numberSample: sep ? '1,234,567.89' : '1234567.89'
+    };
+  }
+}
+</script>
+</body>
+</html>

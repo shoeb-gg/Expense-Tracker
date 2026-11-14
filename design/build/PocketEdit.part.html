@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Edit pocket</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!--@HELMET keyboard-->
+<div style="width: 360px; height: 780px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: {{t.bg}}; color: {{t.text}}; font-family: 'Plus Jakarta Sans', system-ui, sans-serif">
+  <header style="height: 60px; flex-shrink: 0; padding: 0 16px; display: grid; grid-template-columns: 88px minmax(0, 1fr) 88px; align-items: center">
+    <a href="PocketList.dc.html" style="justify-self: start; width: 80px; height: 36px; border-radius: 18px; background: {{t.surface}}; color: {{t.text}}; font-size: 14px; line-height: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; text-decoration: none">Cancel</a>
+    <h1 style="margin: 0; text-align: center; font-size: 17px; line-height: 24px; font-weight: 800; letter-spacing: -0.2px">{{screenTitle}}</h1>
+    <a href="PocketList.dc.html" style="justify-self: end; width: 80px; height: 36px; border-radius: 18px; background: {{saveBg}}; color: {{saveFg}}; pointer-events: {{savePe}}; font-size: 14px; line-height: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; text-decoration: none">Save</a>
+  </header>
+
+  <main style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 2px 16px 24px; display: flex; flex-direction: column; gap: 12px">
+    <section aria-label="Name" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; padding: 16px; display: flex; align-items: center; gap: 12px">
+      <span style="width: 56px; height: 56px; flex-shrink: 0; border-radius: 18px; background: {{t.tile}}; display: flex; align-items: center; justify-content: center">
+        <span class="em" aria-hidden="true" style="font-size: 28px">{{emoji}}</span>
+      </span>
+      <input type="text" aria-label="Pocket name" placeholder="Pocket name" value="{{name}}" onChange="{{onName}}" style="flex: 1; min-width: 0; height: 56px; box-sizing: border-box; border: 0; border-radius: 16px; padding: 0 16px; background: {{t.bg}}; color: {{t.text}}; font-size: 16px; line-height: 24px; font-weight: 700; outline: none">
+    </section>
+
+    <section aria-label="Emoji" style="flex-shrink: 0; border-radius: 20px; background: {{t.surface}}; overflow: hidden; display: flex; flex-direction: column">
+      <div style="height: 48px; flex-shrink: 0; padding: 0 16px; background: {{t.surface2}}; display: flex; align-items: center">
+        <h2 style="margin: 0; font-size: 15px; line-height: 20px; font-weight: 800">Emoji</h2>
+      </div>
+      <div style="padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 12px">
+        <sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 12.5px; line-height: 16px; font-weight: 600; color: {{t.text3}}">{{g.title}}</span>
+            <div style="display: grid; grid-template-columns: repeat(6, 44px); justify-content: space-between">
+              <sc-for list="{{g.items}}" as="e" hint-placeholder-count="6">
+                <button type="button" aria-pressed="{{e.on}}" onClick="{{e.pick}}" style="width: 44px; height: 44px; border: 0; border-radius: 14px; padding: 0; background: {{e.bg}}; box-shadow: {{e.ring}}; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: box-shadow 0.15s">
+                  <span class="em" aria-hidden="true" style="font-size: 22px">{{e.ch}}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+        <button type="button" style="margin-top: 4px; height: 44px; border: 0; border-radius: 14px; padding: 0; background: {{t.surface2}}; color: {{t.text2}}; font-size: 13.5px; line-height: 20px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer">
+          <span class="ms" aria-hidden="true" style="font-size: 20px; width: 20px; height: 20px; color: {{t.text3}}">keyboard</span>
+          Pick any emoji from your keyboard
+        </button>
+      </div>
+    </section>
+
+    <sc-if value="{{isAdd}}" hint-placeholder-val="{{ false }}">
+      <p style="flex-shrink: 0; margin: 0; border-radius: 20px; background: {{t.surface}}; padding: 14px 16px; font-size: 13px; line-height: 20px; font-weight: 500; color: {{t.text2}}">A new pocket starts empty. Your categories and settings are already in it.</p>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mode":{"editor":"enum","options":["edit","add"],"default":"edit"},"mood":{"editor":"enum","options":["coral","aqua","iris"],"default":"aqua"},"$preview":{"width":360,"height":780}}'>
+class Component extends DCLogic {
+  /*@THEME*/
+
+  renderVals() {
+    const st = this.state || {};
+    const t = this.theme(this.props.mood ?? 'aqua');
+    const mode = this.props.mode ?? 'edit';
+    // Edit opens with the pocket's current name and emoji; Add opens empty with a starter emoji no pocket uses yet.
+    const start = mode === 'edit' ? { name: 'Business', emoji: '💼' } : { name: '', emoji: '💰' };
+    const name = st.name != null ? st.name : start.name;
+    const emoji = st.emoji || start.emoji;
+    const GROUPS = [
+      ['Everyday', ['👛', '💰', '🏠', '🛒', '🧺', '❤️']],
+      ['Work', ['💼', '🏢', '💻', '🛠️', '🏪', '📦']],
+      ['Trips and events', ['✈️', '🏖️', '🎉', '💍', '🕌', '🎓']],
+      ['Everything else', ['🚗', '🐶', '🌱', '📚', '🎮', '⭐']]
+    ];
+    return {
+      t,
+      screenTitle: mode === 'edit' ? 'Edit pocket' : 'Add pocket',
+      isAdd: mode === 'add',
+      name,
+      emoji,
+      groups: GROUPS.map(([title, list]) => ({
+        title,
+        items: list.map((ch) => {
+          const on = ch === emoji;
+          return { ch, on, bg: on ? t.accentSoft : t.tile, ring: on ? 'inset 0 0 0 2px ' + t.accent : 'none', pick: () => this.setState({ emoji: ch }) };
+        })
+      })),
+      saveBg: name.trim() ? t.accent : t.surface2,
+      saveFg: name.trim() ? t.onAccent : t.text3,
+      savePe: name.trim() ? 'auto' : 'none',
+      onName: (ev) => this.setState({ name: ev.target.value })
+    };
+  }
+}
+</script>
+</body>
+</html>

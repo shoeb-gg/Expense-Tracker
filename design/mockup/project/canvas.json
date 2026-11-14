@@ -329,6 +329,94 @@
       "w": 360,
       "x": 880,
       "y": -2760
+    },
+    "PocketHome.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Home: the pocket switch",
+      "w": 360,
+      "x": 0,
+      "y": -5320
+    },
+    "PocketSwitch.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Home: switch pocket",
+      "w": 360,
+      "x": 440,
+      "y": -5320
+    },
+    "PocketAddExpense.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Add expense: which pocket",
+      "w": 360,
+      "x": 880,
+      "y": -5320
+    },
+    "PocketPick.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Add expense: choose the pocket",
+      "w": 360,
+      "x": 1320,
+      "y": -5320
+    },
+    "PocketEditExpense.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Edit expense: which pocket",
+      "w": 360,
+      "x": 1760,
+      "y": -5320
+    },
+    "PocketMove.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Edit expense: move to another pocket",
+      "w": 360,
+      "x": 2200,
+      "y": -5320
+    },
+    "PocketList.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Pockets",
+      "w": 360,
+      "x": 2640,
+      "y": -5320
+    },
+    "PocketAdd.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Add pocket",
+      "w": 360,
+      "x": 3080,
+      "y": -5320
+    },
+    "PocketEdit.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Edit pocket",
+      "w": 360,
+      "x": 3520,
+      "y": -5320
+    },
+    "PocketDelete.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Pockets: delete a pocket",
+      "w": 360,
+      "x": 3960,
+      "y": -5320
+    },
+    "PocketSettings.dc.html": {
+      "h": 780,
+      "is_interactive": true,
+      "title": "Settings: the Pockets row",
+      "w": 360,
+      "x": 4400,
+      "y": -5320
     }
   },
   "createdOnFiles": {
@@ -344,7 +432,8 @@
     "rowT",
     "row1",
     "row2",
-    "rowP"
+    "rowP",
+    "rowK"
   ],
   "notes": {
     "row0": {
@@ -386,6 +475,14 @@
       "w": 240,
       "x": 0,
       "y": -1680
+    },
+    "rowK": {
+      "kind": "title1",
+      "maxW": 4760,
+      "text": "Pockets",
+      "w": 240,
+      "x": 0,
+      "y": -5620
     }
   },
   "order": [
@@ -429,7 +526,18 @@
     "NewImport.dc.html",
     "NewImportMatch.dc.html",
     "NewImportReview.dc.html",
-    "PopDeleteAll.dc.html"
+    "PopDeleteAll.dc.html",
+    "PocketHome.dc.html",
+    "PocketSwitch.dc.html",
+    "PocketAddExpense.dc.html",
+    "PocketPick.dc.html",
+    "PocketEditExpense.dc.html",
+    "PocketMove.dc.html",
+    "PocketList.dc.html",
+    "PocketAdd.dc.html",
+    "PocketEdit.dc.html",
+    "PocketDelete.dc.html",
+    "PocketSettings.dc.html"
   ],
   "pages": [],
   "title": "Expense Tracker Mockup"
