@@ -36,9 +36,12 @@ void main() {
     await boardHeight(tester, 1580);
     await tester.tap(find.text('2025'));
     await settle(tester);
-    // "December 2025" and "11% more than November" do not fit side by
-    // side, so the pill keeps the short form.
-    expect(find.text('11% more'), findsOneWidget);
+    // Like the board: the pill keeps its full copy and "December 2025"
+    // wraps to two lines beside it.
+    expect(find.text('11% more than November'), findsOneWidget);
+    expect(tester.getSize(find.text('December 2025')).height, 32);
+    // The amount (also in Month by month, further down) stays on one line.
+    expect(tester.getSize(find.text('54,085').first).height, 28);
     expect(
       find.text('Dashed line = 2025 monthly average 49,729'),
       findsOneWidget,
@@ -47,6 +50,8 @@ void main() {
     await tester.tap(find.text('June'));
     await settle(tester);
     expect(find.text('June 2025'), findsOneWidget);
+    expect(tester.getSize(find.text('June 2025')).height, 16);
+    expect(find.text('1% more than May'), findsOneWidget);
     await takeShot(tester, 'reports_2025_june');
     await closeApp(tester, db);
   });

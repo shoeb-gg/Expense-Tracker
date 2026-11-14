@@ -65,47 +65,54 @@ class YearCard extends ConsumerWidget {
                   final long = delta.trend == Trend.flat
                       ? 'Same as $prevName'
                       : '$short than $prevName';
-                  // Keep the month readable: drop "than November" when the
-                  // two do not fit side by side.
+                  // Like the board, the pill keeps its full copy and the
+                  // month label wraps ("December / 2025"). Only when even
+                  // the amount (or one word of the label) cannot sit beside
+                  // it (a huge amount, the largest text size) does the pill
+                  // drop "than November".
                   final scaler = MediaQuery.textScalerOf(context);
                   final left = [
-                    _textWidth(label, labelStyle, scaler),
+                    for (final word in label.split(' '))
+                      _textWidth(word, labelStyle, scaler),
                     _textWidth(value, ReportText.big, scaler),
                   ].reduce((a, b) => a > b ? a : b);
                   final pillStyle = _DeltaPill.style(c, delta);
                   final need =
                       left +
                       8 +
-                      8 +
-                      18 +
-                      6 +
-                      12 +
+                      _DeltaPill.chrome +
                       _textWidth(long, pillStyle, scaler);
                   pill = need <= box.maxWidth ? long : short;
                 }
-                return Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            label,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: labelStyle,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(value, maxLines: 1, style: ReportText.big),
-                        ],
+                // A two-line label makes the block taller than the 46 px
+                // row; as on the board it stays centred and overflows the
+                // row evenly into the card's padding and the gap below.
+                return OverflowBox(
+                  maxHeight: double.infinity,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(label, maxLines: 2, style: labelStyle),
+                            const SizedBox(height: 2),
+                            Text(
+                              value,
+                              maxLines: 1,
+                              softWrap: false,
+                              style: ReportText.big,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    if (delta != null && pill != null) ...[
-                      const SizedBox(width: 8),
-                      _DeltaPill(delta: delta, text: pill),
+                      if (delta != null && pill != null) ...[
+                        const SizedBox(width: 8),
+                        _DeltaPill(delta: delta, text: pill),
+                      ],
                     ],
-                  ],
+                  ),
                 );
               },
             ),
@@ -148,6 +155,9 @@ class _DeltaPill extends StatelessWidget {
 
   final Delta delta;
   final String text;
+
+  /// Width of everything but the text: padding 8 + 12, icon 18, gap 6.
+  static const double chrome = 8 + 18 + 6 + 12;
 
   static TextStyle style(AppColors c, Delta delta) => AppText.sub.copyWith(
     fontWeight: FontWeight.w700,
