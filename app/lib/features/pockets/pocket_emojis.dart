@@ -24,6 +24,8 @@ String firstUnusedEmoji(Iterable<String> used) {
 }
 
 final RegExp _pictographic = RegExp(
+  // Valid with unicode: true (covered by tests); the lint doesn't know these properties.
+  // ignore: valid_regexps
   r'\p{Extended_Pictographic}|\p{Regional_Indicator}',
   unicode: true,
 );
