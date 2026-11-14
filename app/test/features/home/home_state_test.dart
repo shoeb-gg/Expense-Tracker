@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/core/days.dart';
 import 'package:spill_the_bills/data/db.dart';
+import 'package:spill_the_bills/features/add/add_events.dart';
 import 'package:spill_the_bills/features/home/home_state.dart';
 import 'package:spill_the_bills/state/providers.dart';
 
@@ -73,6 +74,37 @@ void main() {
       expect(container.read(homeShownMonthProvider), (year: 2026, month: 10));
       container.read(homeMonthProvider.notifier).showDay(dayOf(2025, 3, 14));
       expect(container.read(homeShownMonthProvider), (year: 2025, month: 3));
+    });
+
+    ProviderContainer savingContainer() => ProviderContainer.test(
+      overrides: [
+        clockProvider.overrideWithValue(Clock.fixed(mockupNow)),
+        currentPocketIdProvider.overrideWithValue(1),
+      ],
+    );
+
+    test('saving an expense switches Home to its month', () {
+      final container = savingContainer();
+      container.listen(homeShownMonthProvider, (_, _) {});
+      final events = container.read(lastSavedExpenseProvider.notifier);
+
+      events.saved((id: 8, pocketId: 1, day: dayOf(2026, 9, 12)));
+      expect(container.read(homeShownMonthProvider), (year: 2026, month: 9));
+
+      // Saved in another pocket: not on this Home, the month stays.
+      events.saved((id: 9, pocketId: 2, day: dayOf(2026, 8, 3)));
+      expect(container.read(homeShownMonthProvider), (year: 2026, month: 9));
+
+      events.saved((id: 10, pocketId: 1, day: dayOf(2025, 12, 31)));
+      expect(container.read(homeShownMonthProvider), (year: 2025, month: 12));
+    });
+
+    test('an expense saved before Home was first shown', () {
+      final container = savingContainer();
+      container
+          .read(lastSavedExpenseProvider.notifier)
+          .saved((id: 8, pocketId: 1, day: dayOf(2026, 7, 2)));
+      expect(container.read(homeShownMonthProvider), (year: 2026, month: 7));
     });
   });
 

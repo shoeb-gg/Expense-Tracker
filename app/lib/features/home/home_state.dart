@@ -3,15 +3,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/days.dart';
 import '../../data/db.dart';
 import '../../state/providers.dart';
+import '../add/add_events.dart';
 
 /// The month Home shows. Null means "the month of today", so Home follows
 /// the clock until the user picks or swipes to another month.
 ///
-/// Other screens may set it too: Add expense's "save and jump to that month"
-/// calls `ref.read(homeMonthProvider.notifier).showDay(day)`.
+/// "Saving switches Home to that expense's month": whenever Add or Edit
+/// expense saves ([lastSavedExpenseProvider]), Home shows that expense's
+/// month, unless it was saved in another pocket (then it is not on Home).
 class HomeMonthNotifier extends Notifier<YearMonth?> {
   @override
-  YearMonth? build() => null;
+  YearMonth? build() {
+    ref.listen(lastSavedExpenseProvider, (_, saved) {
+      if (saved != null && _inPocketInUse(saved)) showDay(saved.day);
+    });
+    // Saved before Home was first shown (Add opened straight from a link).
+    final saved = ref.read(lastSavedExpenseProvider);
+    if (saved != null && _inPocketInUse(saved)) {
+      return yearMonthOfDay(saved.day);
+    }
+    return null;
+  }
+
+  bool _inPocketInUse(SavedExpense saved) {
+    final current = ref.read(currentPocketIdProvider);
+    return current == null || current == saved.pocketId;
+  }
 
   /// Shows [month] on Home.
   void show(YearMonth month) => state = month;
