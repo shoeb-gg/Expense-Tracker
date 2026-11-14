@@ -241,7 +241,12 @@ class PrimaryButton extends StatelessWidget {
 }
 
 /// The 48 px Cancel + action pair at the bottom of pop-ups (two equal
-/// columns, gap 12, radius 16). Cancel sits on `tile`.
+/// columns, gap 12, radius 16, as on every board). Cancel sits on `tile`.
+///
+/// Long labels and large text sizes never clip: a label keeps at least
+/// [minSidePadding] on each side. When one does not fit its half, the
+/// buttons share the row by need (the room left over split evenly); when
+/// the two cannot share a row, they stack, full width, the action on top.
 class PopupButtons extends StatelessWidget {
   const PopupButtons({
     super.key,
@@ -262,6 +267,11 @@ class PopupButtons extends StatelessWidget {
   /// Action in `bad` with dark text (Delete).
   final bool destructive;
 
+  /// Least room between a label and its button's sides.
+  static const double minSidePadding = 12;
+  static const double _gap = 12;
+  static const double _height = 48;
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -271,43 +281,80 @@ class PopupButtons extends StatelessWidget {
             ? (c.bad, c.onBad)
             : (mix(c.bad, c.surface2, 0.14), mix(c.bad, c.surface2, 0.5)))
         : (enabled ? (c.accent, c.onAccent) : (c.tile, c.text3));
-    return Row(
-      children: [
-        Expanded(
-          child: SizedBox(
-            height: 48,
-            child: Pressable(
-              onTap: onCancel,
-              color: c.tile,
-              borderRadius: BorderRadius.circular(16),
+    final cancelStyle = AppText.buttonQuiet.copyWith(color: c.text);
+    final actionStyle = AppText.button.copyWith(color: fg);
+    final scaler = MediaQuery.textScalerOf(context);
+
+    Widget button(String label, TextStyle style, Color color, VoidCallback? onTap) =>
+        ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: _height),
+          child: Pressable(
+            onTap: onTap,
+            color: color,
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              // Only a label too long even for the full width wraps; then
+              // the button grows instead of clipping it.
+              padding: const EdgeInsets.symmetric(
+                horizontal: minSidePadding,
+                vertical: 8,
+              ),
               child: Center(
-                child: Text(
-                  cancelLabel,
-                  style: AppText.buttonQuiet.copyWith(color: c.text),
-                ),
+                widthFactor: 1,
+                heightFactor: 1,
+                child: Text(label, textAlign: TextAlign.center, style: style),
               ),
             ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: SizedBox(
-            height: 48,
-            child: Pressable(
-              onTap: onAction,
-              color: bg,
-              borderRadius: BorderRadius.circular(16),
-              child: Center(
-                child: Text(
-                  actionLabel,
-                  style: AppText.button.copyWith(color: fg),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
+        );
+
+    return LayoutBuilder(
+      builder: (context, box) {
+        final width = box.maxWidth;
+        final half = (width - _gap) / 2;
+        final needCancel =
+            _labelWidth(cancelLabel, cancelStyle, scaler) + 2 * minSidePadding;
+        final needAction =
+            _labelWidth(actionLabel, actionStyle, scaler) + 2 * minSidePadding;
+        final cancel = button(cancelLabel, cancelStyle, c.tile, onCancel);
+        final action = button(actionLabel, actionStyle, bg, onAction);
+        if (needCancel + _gap + needAction > width) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [action, const SizedBox(height: _gap), cancel],
+          );
+        }
+        final double cancelWidth;
+        final double actionWidth;
+        if (needCancel <= half && needAction <= half) {
+          cancelWidth = half;
+          actionWidth = half;
+        } else {
+          final spare = (width - _gap - needCancel - needAction) / 2;
+          cancelWidth = needCancel + spare;
+          actionWidth = needAction + spare;
+        }
+        return Row(
+          children: [
+            SizedBox(width: cancelWidth, height: _height, child: cancel),
+            const SizedBox(width: _gap),
+            SizedBox(width: actionWidth, height: _height, child: action),
+          ],
+        );
+      },
     );
+  }
+
+  static double _labelWidth(String text, TextStyle style, TextScaler scaler) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: TextDirection.ltr,
+      textScaler: scaler,
+      maxLines: 1,
+    )..layout();
+    final w = painter.width;
+    painter.dispose();
+    return w.ceilToDouble();
   }
 }
 

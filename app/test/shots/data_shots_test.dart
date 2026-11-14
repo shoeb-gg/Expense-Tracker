@@ -4,10 +4,13 @@ library;
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/features/data/data_providers.dart';
 import 'package:spill_the_bills/router.dart';
+import 'package:spill_the_bills/state/settings.dart';
+import 'package:spill_the_bills/widgets/kit.dart';
 
 import '../support/board.dart';
 import '../support/import_files.dart';
@@ -55,7 +58,44 @@ void main() {
     await tester.tap(find.text('Choose a file').last);
     await settle(tester);
     expect(find.text("Can't use this file"), findsOneWidget);
+    // "Choose another" gets the room it needs beside Cancel.
+    final cancel = tester.getRect(find.widgetWithText(Pressable, 'Cancel'));
+    final again = tester.getRect(
+      find.widgetWithText(Pressable, 'Choose another'),
+    );
+    expect(again.top, cancel.top);
+    expect(again.width, greaterThan(cancel.width));
     await takeShot(tester, 'data_import_bad_file');
+    await closeApp(tester, db);
+  });
+
+  testWidgets('import step 1: a file that cannot be used, largest text', (
+    tester,
+  ) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(
+      tester,
+      db: db,
+      location: Routes.importStart,
+      settings: AppSettings(textScale: textScaleSteps.last),
+      overrides: picking('receipt.pdf', Uint8List(4)),
+    );
+    await tester.tap(find.text('Choose a file').last);
+    await settle(tester);
+    expect(find.text("Can't use this file"), findsOneWidget);
+    // Too wide to share a row: stacked, action on top, nothing clipped.
+    final cancel = tester.getRect(find.widgetWithText(Pressable, 'Cancel'));
+    final again = tester.getRect(
+      find.widgetWithText(Pressable, 'Choose another'),
+    );
+    expect(cancel.top, greaterThan(again.bottom));
+    for (final label in ['Cancel', 'Choose another']) {
+      expect(
+        tester.renderObject<RenderParagraph>(find.text(label)).didExceedMaxLines,
+        isFalse,
+      );
+    }
+    await takeShot(tester, 'data_import_bad_file_largest');
     await closeApp(tester, db);
   });
 

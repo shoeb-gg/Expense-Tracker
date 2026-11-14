@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:spill_the_bills/core/days.dart';
@@ -109,6 +110,109 @@ void main() {
     expect(tile.size, const Size(44, 44));
     expect(tile.center.dx, card.center.dx);
     expect(tile.top, card.top + 24);
+  });
+
+  group('pop-up buttons', () {
+    /// Pumps an empty app whose text is scaled by [scale] (the app's Text
+    /// size setting does the same) and opens a dialog with [action].
+    Future<void> open(WidgetTester tester, String action, double scale) async {
+      tester.view.physicalSize = const Size(720, 1560);
+      tester.view.devicePixelRatio = 2;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            theme: buildAppTheme(Mood.aqua),
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.linear(scale)),
+              child: child!,
+            ),
+            home: const Scaffold(body: SizedBox.expand(key: Key('home'))),
+          ),
+        ),
+      );
+      unawaited(
+        showAppDialog(
+          tester.element(find.byKey(const Key('home'))),
+          title: "Can't use this file",
+          boldLine: 'receipt.pdf',
+          actionLabel: action,
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Rect button(WidgetTester tester, String label) => tester.getRect(
+      find.ancestor(of: find.text(label), matching: find.byType(Pressable)).first,
+    );
+
+    /// The label is on one line, inside its button with at least 12 px on
+    /// each side.
+    void fits(WidgetTester tester, String label) {
+      final text = find.text(label);
+      expect(tester.renderObject<RenderParagraph>(text).didExceedMaxLines,
+          isFalse);
+      final box = button(tester, label);
+      final ink = tester.getRect(text);
+      expect(ink.left - box.left, greaterThanOrEqualTo(12), reason: label);
+      expect(box.right - ink.right, greaterThanOrEqualTo(12), reason: label);
+      expect(ink.height, lessThan(box.height), reason: label);
+    }
+
+    testWidgets('two equal columns when both labels fit (the boards)', (
+      tester,
+    ) async {
+      await open(tester, 'Delete pocket', 1);
+      final cancel = button(tester, 'Cancel');
+      final action = button(tester, 'Delete pocket');
+      expect(cancel.width, 130);
+      expect(action.width, 130);
+      expect(action.top, cancel.top);
+      expect(action.height, 48);
+      expect(action.left - cancel.right, 12);
+      fits(tester, 'Delete pocket');
+    });
+
+    testWidgets('a long label gets the room it needs on the same row', (
+      tester,
+    ) async {
+      await open(tester, 'Choose another', 1);
+      final cancel = button(tester, 'Cancel');
+      final action = button(tester, 'Choose another');
+      expect(action.top, cancel.top);
+      expect(action.height, 48);
+      expect(action.width, greaterThan(cancel.width));
+      expect(cancel.left, 44);
+      expect(action.right, 316);
+      expect(action.left - cancel.right, 12);
+      fits(tester, 'Choose another');
+      fits(tester, 'Cancel');
+    });
+
+    testWidgets('largest text size: nothing is clipped', (tester) async {
+      await open(tester, 'Choose another', 19 / 15);
+      // Too wide for one row: the action goes on top, Cancel under it.
+      final cancel = button(tester, 'Cancel');
+      final action = button(tester, 'Choose another');
+      expect(action.width, 272);
+      expect(cancel.width, 272);
+      expect(cancel.top - action.bottom, 12);
+      fits(tester, 'Choose another');
+      fits(tester, 'Cancel');
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      // A shorter pair still shares the row, by need.
+      await open(tester, 'Delete pocket', 19 / 15);
+      expect(
+        button(tester, 'Delete pocket').top,
+        button(tester, 'Cancel').top,
+      );
+      fits(tester, 'Delete pocket');
+      fits(tester, 'Cancel');
+    });
   });
 
   group('dialog bold line', () {

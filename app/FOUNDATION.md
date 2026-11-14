@@ -132,7 +132,7 @@ green, violet, amber, cyan, pink, orange, coral with `.label`, `.color`,
 | `BackRoundButton` | `({VoidCallback? onTap, semanticLabel = 'Back'})` pops by default |
 | `Pill` | `({required String label, required VoidCallback? onTap, PillTone tone = neutral, double? width, Widget? leading, Widget? trailing, height = 36})` tones: neutral, accent, soft |
 | `PrimaryButton` | `({required String label, required VoidCallback? onPressed, IconData? icon, ButtonTone tone = accent, bool glow = false, height = 52, radius = 18, fontSize = 15, iconSize = 20})` tones: accent, quiet, danger (rose text), destructive (rose fill) |
-| `PopupButtons` | `({required onCancel, required VoidCallback? onAction, cancelLabel = 'Cancel', actionLabel = 'Confirm', destructive = false})` 48 px pair |
+| `PopupButtons` | `({required onCancel, required VoidCallback? onAction, cancelLabel = 'Cancel', actionLabel = 'Confirm', destructive = false})` 48 px pair, equal halves; a label keeps 12 px each side, so a long one gets a wider button, and a pair too wide for one row stacks (action on top) |
 | `RowValue` / `RowChevron` | `RowValue(String text, {chevron = true, tabular = false})` "Sunday ›" |
 | `BandCard` | `({required String title, IconData? icon, String? trailingText, Widget? trailing, Widget? child, bandHeight = 48, bodyPadding = EdgeInsets.zero, Widget? titleWidget})`; `BandCard.tallBand` = 56, `BandCard.listPadding` = 4 px top/bottom |
 | `EmojiTile` | `({required String emoji, size = 44, radius = 14, emojiSize = 22, Color? background, Color? dotColor, Color? ringColor, BoxBorder? border, List<BoxShadow>? shadows})` dot = category colour |
