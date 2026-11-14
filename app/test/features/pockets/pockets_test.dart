@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/core/days.dart';
 import 'package:spill_the_bills/data/db.dart';
 import 'package:spill_the_bills/data/expenses_repo.dart';
+import 'package:spill_the_bills/features/data/export_screen.dart';
 import 'package:spill_the_bills/features/home/home_screen.dart';
 import 'package:spill_the_bills/features/pockets/pocket_emojis.dart';
 import 'package:spill_the_bills/features/pockets/pocket_form_screen.dart';
@@ -141,6 +142,30 @@ void main() {
       expect(find.text('2 pockets'), findsOneWidget);
       expect(await _expensesIn(tester, db, ids.business), 0);
       expect(await _expensesIn(tester, db, ids.trip), 37);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('"Save a copy first" exports that pocket and deletes nothing', (
+      tester,
+    ) async {
+      final db = await sampleDatabase(tester);
+      final ids = (await tester.runAsync(() => addMockupPockets(db)))!;
+      await _open(tester, db, Routes.pockets);
+      await tester.tap(find.bySemanticsLabel('Delete Business'));
+      await settle(tester);
+      await tester.tap(find.text('Export'));
+      await settle(tester);
+      expect(
+        _container(tester).read(routerProvider).state.uri.toString(),
+        exportLocation(pocketId: ids.business),
+      );
+      expect(find.byType(ExportScreen), findsOneWidget);
+      // The warning closed without deleting; Back returns to Pockets.
+      expect(find.byType(AppDialog), findsNothing);
+      await tester.binding.handlePopRoute();
+      await settle(tester);
+      expect(find.text('Business'), findsOneWidget);
+      expect(await _expensesIn(tester, db, ids.business), 214);
       await closeApp(tester, db);
     });
 

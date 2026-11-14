@@ -12,6 +12,7 @@ import '../../state/providers.dart';
 import '../../theme/text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/kit.dart';
+import '../data/export_screen.dart' show exportLocation;
 import '../home/pocket_switch.dart' show InUseBadge;
 
 /// Pockets (`/pockets`), the PocketList board: every pocket with its emoji,
@@ -28,6 +29,7 @@ class PocketsScreen extends ConsumerWidget {
     int count,
   ) async {
     final c = context.colors;
+    final router = GoRouter.of(context);
     final fmt = ref.read(amountFormatProvider);
     final expenses = expenseCount(count, fmt);
     final empty = count == 0;
@@ -55,12 +57,21 @@ class PocketsScreen extends ConsumerWidget {
           : 'Also deletes $expenses and photos',
       boldTabular: true,
       quietLine: empty ? 'It will simply be removed.' : 'This can’t be undone.',
+      // "Save a copy first" closes the warning (nothing is deleted) and
+      // exports this pocket, like Delete all data's link does.
       extra: empty
           ? null
-          : DialogLinkRow(
-              label: 'Save a copy first',
-              actionLabel: 'Export',
-              onTap: () => unawaited(context.push(Routes.export)),
+          : Builder(
+              builder: (dialog) => DialogLinkRow(
+                label: 'Save a copy first',
+                actionLabel: 'Export',
+                onTap: () {
+                  Navigator.of(dialog).pop(false);
+                  unawaited(
+                    router.push<Object?>(exportLocation(pocketId: pocket.id)),
+                  );
+                },
+              ),
             ),
       tickLabel: empty ? null : 'Yes, delete $expenses',
       actionLabel: 'Delete pocket',
