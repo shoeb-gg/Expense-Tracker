@@ -59,6 +59,18 @@ void main() {
     await closeApp(tester, db);
   });
 
+  testWidgets('the name placeholder is text3, like Add pocket', (
+    tester,
+  ) async {
+    final db = openTestDatabase();
+    await pumpApp(tester, db: db, location: Routes.newCategory);
+    final field = find.byType(TextField).first;
+    final decoration = tester.widget<TextField>(field).decoration!;
+    expect(decoration.hintText, 'Category name');
+    expect(decoration.hintStyle!.color, tester.element(field).colors.text3);
+    await closeApp(tester, db);
+  });
+
   testWidgets('a name already in use is refused', (tester) async {
     final db = openTestDatabase();
     await pumpApp(tester, db: db, location: Routes.newCategory);

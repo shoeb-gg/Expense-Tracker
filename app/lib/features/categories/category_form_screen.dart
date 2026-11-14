@@ -230,7 +230,8 @@ class _NameCard extends StatelessWidget {
                 cursorColor: c.text,
                 decoration: InputDecoration.collapsed(
                   hintText: 'Category name',
-                  hintStyle: style.copyWith(color: const Color(0xFF757575)),
+                  // text3, like "Pocket name" on Add pocket.
+                  hintStyle: style.copyWith(color: c.text3),
                 ).copyWith(counterText: ''),
               ),
             ),
