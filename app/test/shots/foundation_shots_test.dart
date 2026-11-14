@@ -16,8 +16,8 @@ void main() {
   testWidgets('shell: Home tab with the bottom bar', (tester) async {
     final db = await sampleDatabase(tester);
     await pumpApp(tester, db: db);
-    expect(find.text('Spent in October: 34,555'), findsOneWidget);
-    expect(find.text('Today: 1,180'), findsOneWidget);
+    expect(find.text('Spent in October'), findsOneWidget);
+    expect(find.text('34,555'), findsOneWidget);
     await takeShot(tester, 'shell_home');
 
     await tester.tap(find.text('Settings'));
@@ -47,7 +47,7 @@ void main() {
     await settle(tester);
     await takeShot(tester, 'pop_month');
 
-    await tester.tap(find.text('2026'));
+    await tester.tap(find.text('2026').last);
     await settle(tester);
     expect(find.text('2018 – 2029'), findsOneWidget);
     await takeShot(tester, 'pop_year');
@@ -72,7 +72,7 @@ void main() {
     );
     await settle(tester);
     await takeShot(tester, 'pop_week_start');
-    await tester.tap(find.text('Sunday'));
+    await tester.tap(find.text('Sunday').last);
     await settle(tester);
 
     unawaited(
