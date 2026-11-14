@@ -20,6 +20,21 @@ void main() {
     expect(oct18.note, 'Doctor visit');
   });
 
+  test("yesterday's snack has no title, like the Home boards", () {
+    // The boards' kit() picks "Chips & soda", then Home draws Oct 17's
+    // snack "as saved without a title, to demonstrate that row style".
+    final rows = generateSampleExpenses();
+    final oct17 = rows.where((x) => x.day == dayOf(2026, 10, 17)).toList();
+    final snack = oct17.singleWhere((x) => x.catId == 'snacks');
+    expect(snack.note, '');
+    expect(snack.amount, 135);
+    // Other days keep their titles.
+    expect(
+      rows.where((x) => x.catId == 'snacks' && x.note == 'Chips & soda'),
+      isNotEmpty,
+    );
+  });
+
   test('fills a database with the same totals', () async {
     final db = openTestDatabase();
     addTearDown(db.close);

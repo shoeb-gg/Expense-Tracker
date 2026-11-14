@@ -402,7 +402,8 @@ shadows are on. Today is 18 Oct 2026 10:18. Compare with the mockup render:
 JSON: `node measure_pop.js PopDeleteAll ticked '{"popOk":true}'`).
 Sample data (`test/support/sample_data.dart`): `fillSampleData(db, {pocketId})`,
 `generateSampleExpenses()`, `sampleToday`, `MockupRandom`. October 2026 =
-34,555; Oct 18 = 1,180 (Health, "Doctor visit"); 1266 expenses; notes kept.
+34,555; Oct 18 = 1,180 (Health, "Doctor visit"); 1266 expenses; notes kept,
+except Oct 17's snack (135), which has no title as on the Home boards.
 
 Unit tests of repositories: `openTestDatabase()` (in-memory, seeded).
 Provider tests: `ProviderContainer.test(retry: (_, _) => null, overrides: [databaseProvider.overrideWithValue(db), clockProvider.overrideWithValue(Clock.fixed(mockupNow))])`.

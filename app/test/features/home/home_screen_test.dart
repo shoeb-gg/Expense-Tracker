@@ -53,6 +53,7 @@ void main() {
     expect(find.text('Yesterday'), findsOneWidget);
     // Oct 17 has no title: the category stands alone.
     expect(find.text('Snacks'), findsWidgets);
+    expect(find.text('Chips & soda'), findsNothing);
     await closeApp(tester, db);
   });
 

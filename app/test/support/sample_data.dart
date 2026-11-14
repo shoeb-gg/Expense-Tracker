@@ -2,7 +2,8 @@
 /// design/mockup/project/NewCharts.dc.html (seeded random 20261018, today
 /// 18 Oct 2026, 1 Jan 2025 to 18 Oct 2026). Screens filled with it show the
 /// same numbers as the mockup boards: October 2026 = 34,555; Oct 18 = 1,180
-/// (one Health expense, "Doctor visit"); 1266 expenses in all.
+/// (one Health expense, "Doctor visit"); 1266 expenses in all. Oct 17's
+/// snack (135) has no title, as the Home boards draw it.
 library;
 
 import 'package:drift/drift.dart';
@@ -86,7 +87,9 @@ List<SampleExpense> generateSampleExpenses() {
       catId: catId,
       amount: amount,
       day: day,
-      note: note,
+      // The Home boards draw yesterday's snack "as saved without a title,
+      // to demonstrate that row style" (kit() itself picks "Chips & soda").
+      note: catId == 'snacks' && day == sampleToday - 1 ? '' : note,
       hour: hour,
       minute: minute,
     ));
