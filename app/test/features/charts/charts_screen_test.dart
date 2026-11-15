@@ -259,6 +259,86 @@ void main() {
       await closeApp(tester, db);
     });
 
+    testWidgets('a future week, month or year says it has not started, not '
+        '"Nothing earlier to compare with"', (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: Routes.charts);
+      final notStarted = find.text("Hasn't started yet");
+      final nothingEarlier = find.text('Nothing earlier to compare with');
+      for (final kind in ['Week', 'Month', 'Year']) {
+        await tester.tap(find.text(kind));
+        await settle(tester);
+        // This period has started: it compares with the one before.
+        expect(notStarted, findsNothing, reason: '$kind now');
+        expect(nothingEarlier, findsNothing, reason: '$kind now');
+        for (var i = 1; i <= 3; i++) {
+          await _swipe(tester, const Offset(-200, 0));
+          expect(notStarted, findsOneWidget, reason: '$kind, $i ahead');
+          expect(nothingEarlier, findsNothing, reason: '$kind, $i ahead');
+        }
+        // And back: the chip goes with the period.
+        for (var i = 0; i < 3; i++) {
+          await _swipe(tester, const Offset(200, 0));
+        }
+        expect(notStarted, findsNothing, reason: '$kind back');
+      }
+      await closeApp(tester, db);
+    });
+
+    testWidgets('the "not started yet" chip looks like the other chips', (
+      tester,
+    ) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: Routes.charts);
+      // A year before the first expense: nothing earlier to compare with.
+      await tester.tap(find.text('Year'));
+      await settle(tester);
+      await _swipe(tester, const Offset(200, 0));
+      await _swipe(tester, const Offset(200, 0));
+      final earlier = find.ancestor(
+        of: find.text('Nothing earlier to compare with'),
+        matching: find.byType(Container),
+      );
+      expect(earlier, findsWidgets);
+      final past = tester.getRect(earlier.first);
+      final pastStyle = tester.widget<Text>(find.text('Nothing earlier to compare with')).style;
+      for (var i = 0; i < 3; i++) {
+        await _swipe(tester, const Offset(-200, 0));
+      }
+      await _swipe(tester, const Offset(-200, 0));
+      final future = find.ancestor(
+        of: find.text("Hasn't started yet"),
+        matching: find.byType(Container),
+      );
+      final now = tester.getRect(future.first);
+      // Same chip: same place, height and colours; only the text differs.
+      expect(now.left, past.left);
+      expect(now.top, past.top);
+      expect(now.height, past.height);
+      final style = tester.widget<Text>(find.text("Hasn't started yet")).style;
+      expect(style, pastStyle);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('past periods keep their chip: the change, or nothing earlier', (
+      tester,
+    ) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: Routes.charts);
+      // This month: compared with September.
+      expect(find.textContaining('than Sep'), findsOneWidget);
+      expect(find.text("Hasn't started yet"), findsNothing);
+      // Years before the first expense have nothing earlier.
+      await tester.tap(find.text('Year'));
+      await settle(tester);
+      for (var i = 0; i < 3; i++) {
+        await _swipe(tester, const Offset(200, 0));
+      }
+      expect(find.text('Nothing earlier to compare with'), findsOneWidget);
+      expect(find.text("Hasn't started yet"), findsNothing);
+      await closeApp(tester, db);
+    });
+
     testWidgets('a future week, month or year has no average: "—", not 0',
         (tester) async {
       final db = await sampleDatabase(tester);

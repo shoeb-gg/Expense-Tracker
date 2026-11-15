@@ -278,6 +278,10 @@ Delta? deltaOf(int total, Comparison? cmp) {
 /// Text shown when there is nothing earlier to compare with.
 const String nothingToCompare = 'Nothing earlier to compare with';
 
+/// Text shown instead of [nothingToCompare] for a period that has not
+/// started: there is nothing to compare yet, whatever came before it.
+const String notStartedYet = "Hasn't started yet";
+
 /// Average spending of a period in minor units, or null when it cannot be
 /// worked out ("not available", shown as "—").
 ///
@@ -327,6 +331,7 @@ class PeriodSummary {
     required this.average,
     required this.averageLabel,
     required this.delta,
+    required this.hasStarted,
   });
 
   /// Total spent so far, minor units.
@@ -340,6 +345,10 @@ class PeriodSummary {
 
   /// The more/less note; null when there is nothing earlier.
   final Delta? delta;
+
+  /// Whether the period has started (its first day is today or before). A
+  /// period still to come has no note, and says so ([notStartedYet]).
+  final bool hasStarted;
 }
 
 /// The summary of [p].
@@ -355,6 +364,7 @@ PeriodSummary summaryOf(
     average: periodAverage(p, today, index, firstDay: firstDay),
     averageLabel: p.byMonth ? 'Monthly average' : 'Daily average',
     delta: deltaOf(total, comparisonOf(p, today, index)),
+    hasStarted: p.from <= today,
   );
 }
 

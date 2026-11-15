@@ -260,11 +260,38 @@ void main() {
       expect(empty.total, 0);
       expect(empty.average, 0);
       expect(empty.delta, isNull);
+      expect(empty.hasStarted, isTrue, reason: 'long ago, but it has happened');
       final future = summaryOf(customPeriod(today + 1, today + 5), today, index);
       expect(future.total, 0);
       // No day of it has happened: there is nothing to average.
       expect(future.average, isNull);
       expect(future.delta, isNull);
+      expect(future.hasStarted, isFalse);
+    });
+
+    test('a period has started from its first day on, not before', () {
+      final started = <ChartPeriod>[
+        weekPeriod(today, monday, 0),
+        weekPeriod(today, monday, 3),
+        monthPeriod(today, 0),
+        monthPeriod(today, 40),
+        yearPeriod(today, 0),
+        yearPeriod(today, 5),
+        customPeriod(today - 29, today),
+        customPeriod(today, today + 3),
+      ];
+      for (final p in started) {
+        expect(summaryOf(p, today, index).hasStarted, isTrue, reason: '$p');
+      }
+      // The first day of next week, month or year is the first day to come.
+      for (final p in [
+        weekPeriod(today, monday, -1),
+        monthPeriod(today, -1),
+        yearPeriod(today, -1),
+        customPeriod(today + 1, today + 1),
+      ]) {
+        expect(summaryOf(p, today, index).hasStarted, isFalse, reason: '$p');
+      }
     });
 
     test('a future week, month or year has no average, never 0 or NaN', () {
@@ -281,6 +308,7 @@ void main() {
         expect(s.total, 0, reason: '$p');
         expect(s.average, isNull, reason: '$p');
         expect(s.delta, isNull, reason: '$p');
+        expect(s.hasStarted, isFalse, reason: '$p');
         // The chart columns of a future period are all "still to come".
         expect(
           periodColumns(p, today, index).every((c) => c.value == null),

@@ -531,7 +531,7 @@ class _SummaryCard extends ConsumerWidget {
           children: [
             Flexible(
               child: Text(
-                nothingToCompare,
+                summary.hasStarted ? nothingToCompare : notStartedYet,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppText.overline.copyWith(color: c.text2),
