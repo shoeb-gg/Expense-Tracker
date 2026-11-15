@@ -1,7 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/core/days.dart';
 import 'package:spill_the_bills/features/add/add_screen.dart';
 import 'package:spill_the_bills/router.dart';
+import 'package:spill_the_bills/state/providers.dart';
 import 'package:spill_the_bills/state/settings.dart';
 
 import '../../support/shots.dart';
@@ -149,6 +151,70 @@ void main() {
     expect(find.text('February 2027'), findsOneWidget);
     expect(find.text('February 1, 2027'), findsOneWidget);
     await closeApp(tester, db);
+  });
+
+  group('scrolling', () {
+    // The largest text size and a six-week month (Aug 2026): the most the
+    // pinned part can take of a 360 x 780 screen.
+    final big = AppSettings(textScale: textScaleSteps.last);
+    final aug = Routes.calendar(day: dayOf(2026, 8, 31));
+
+    ScrollableState page(WidgetTester tester) => tester.state<ScrollableState>(
+          find.descendant(
+            of: find.byType(SingleChildScrollView),
+            matching: find.byType(Scrollable),
+          ),
+        );
+
+    testWidgets('a drag below the grid scrolls the page; the month bar, '
+        'weekdays and grid stay put', (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: aug, settings: big);
+      final bar = tester.getTopLeft(find.text('August 2026')).dy;
+      final weekdays = tester.getTopLeft(find.text('Sun')).dy;
+      final grid = tester.getTopLeft(find.text('31').first).dy;
+      expect(page(tester).position.pixels, 0);
+
+      await tester.dragFrom(
+        tester.getCenter(find.text('Less')),
+        const Offset(0, -150),
+      );
+      await settle(tester);
+      expect(page(tester).position.pixels, greaterThan(0));
+      expect(tester.getTopLeft(find.text('August 2026')).dy, bar);
+      expect(tester.getTopLeft(find.text('Sun')).dy, weekdays);
+      expect(tester.getTopLeft(find.text('31').first).dy, grid);
+      expect(find.text('August 2026'), findsOneWidget);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('a vertical swipe on the grid changes the month and does '
+        'not scroll the page', (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: aug, settings: big);
+      final grid = tester.getCenter(find.text('15'));
+      await tester.dragFrom(grid, const Offset(0, 120));
+      await settle(tester);
+      expect(find.text('July 2026'), findsOneWidget);
+      expect(page(tester).position.pixels, 0);
+      await tester.dragFrom(grid, const Offset(0, -120));
+      await settle(tester);
+      expect(find.text('August 2026'), findsOneWidget);
+      expect(page(tester).position.pixels, 0);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('the day card keeps room under the grid', (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: aug, settings: big);
+      final viewport = tester.getRect(find.byType(SingleChildScrollView));
+      final legend = tester.getRect(find.text('Less'));
+      final header = tester.getRect(find.text('Monday'));
+      debugPrint('viewport $viewport legend $legend header $header');
+      expect(legend.bottom, lessThanOrEqualTo(viewport.bottom));
+      expect(header.bottom, lessThanOrEqualTo(viewport.bottom));
+      await closeApp(tester, db);
+    });
   });
 
   testWidgets('tapping a day shows its card; a swipe never picks a day',

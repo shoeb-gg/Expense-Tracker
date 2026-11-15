@@ -125,36 +125,40 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 onLabel: () => unawaited(_pickMonth()),
               ),
             ),
+            // The weekdays and the grid stay in place: a vertical swipe on
+            // the grid changes the month, so the page must not scroll from
+            // there. Only what is below them scrolls.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _WeekdayRow(first: settings.firstDayOfWeek),
+                  const SizedBox(height: 8),
+                  SwipeArea(
+                    onSwipe: (e) => _step(e.next, e.axis),
+                    child: SlideSwitcher(
+                      pageKey: key,
+                      forward: _forward,
+                      axis: _axis,
+                      child: _MonthGrid(
+                        key: ValueKey(key),
+                        ym: _ym,
+                        index: index,
+                        selected: _sel,
+                        onPick: (d) => setState(() => _sel = d),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(16, 16, 16, 24 + bottom),
+                padding: EdgeInsets.fromLTRB(16, 12, 16, 24 + bottom),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _WeekdayRow(first: settings.firstDayOfWeek),
-                    const SizedBox(height: 8),
-                    SwipeArea(
-                      onSwipe: (e) => _step(e.next, e.axis),
-                      // Keeps a vertical drag on the grid from also scrolling
-                      // the page: on the grid it changes the month.
-                      child: GestureDetector(
-                        onVerticalDragStart: (_) {},
-                        onVerticalDragUpdate: (_) {},
-                        child: SlideSwitcher(
-                          pageKey: key,
-                          forward: _forward,
-                          axis: _axis,
-                          child: _MonthGrid(
-                            key: ValueKey(key),
-                            ym: _ym,
-                            index: index,
-                            selected: _sel,
-                            onPick: (d) => setState(() => _sel = d),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
                     _Legend(
                       // "K = thousand" only when a cell of this month uses K.
                       amounts: settings.calendarAmounts &&
