@@ -459,11 +459,15 @@ class _MonthByMonth extends ConsumerWidget {
       fontWeight: FontWeight.w600,
       color: c.text3,
     );
+    // "vs previous" is 80 px wide at the default text size and grows with
+    // the text, so the heading stays on one line (the month name keeps the
+    // rest, and is never shortened).
+    final deltaWidth = MediaQuery.textScalerOf(context).scale(80);
     Widget grid(Widget a, Widget b, Widget d) => Row(
       children: [
         Expanded(child: a),
         SizedBox(width: 88, child: b),
-        SizedBox(width: 80, child: d),
+        SizedBox(width: deltaWidth, child: d),
       ],
     );
     if (months.isEmpty) {
@@ -553,32 +557,37 @@ class _MonthRow extends StatelessWidget {
             : null,
         alignment: Alignment.center,
         child: grid(
-          Row(
+          // The month name is never shortened. The "so far" chip sits
+          // beside it, or under it when the two do not fit on one line.
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 2,
             children: [
-              Flexible(
-                child: Text(
-                  monthName(cell.month),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppText.rowTitle,
-                ),
+              Text(
+                monthName(cell.month),
+                maxLines: 1,
+                softWrap: false,
+                style: AppText.rowTitle,
               ),
-              if (cell.partial) ...[
-                const SizedBox(width: 8),
+              if (cell.partial)
                 Container(
                   height: 20,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: c.bg,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Text(
-                    'so far',
-                    style: AppText.navLabel.copyWith(color: c.text2),
+                  // widthFactor: the chip is as wide as its text, also
+                  // when it wraps onto its own line.
+                  child: Center(
+                    widthFactor: 1,
+                    child: Text(
+                      'so far',
+                      style: AppText.navLabel.copyWith(color: c.text2),
+                    ),
                   ),
                 ),
-              ],
             ],
           ),
           Text(

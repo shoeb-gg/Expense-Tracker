@@ -342,73 +342,15 @@ class _Body extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ChartCard(
-            child: Table(
-              columnWidths: const {
-                0: FlexColumnWidth(),
-                1: IntrinsicColumnWidth(),
-                2: IntrinsicColumnWidth(),
-              },
-              defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                TableRow(
-                  children: [
-                    Text(
-                      'Spent on ${category.name}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: ChartText.label(c),
-                    ),
-                    _cell(
-                      Text(
-                        byYear ? 'Monthly average' : 'Daily average',
-                        textAlign: TextAlign.right,
-                        style: ChartText.label(c),
-                      ),
-                    ),
-                    _cell(
-                      Text(
-                        'Entries',
-                        textAlign: TextAlign.right,
-                        style: ChartText.label(c),
-                      ),
-                    ),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(
-                        fmt.format(total),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: ChartText.total,
-                      ),
-                    ),
-                    _cell(
-                      Text(
-                        average == null
-                            ? '—'
-                            : fmt.formatWhole(average.round()),
-                        textAlign: TextAlign.right,
-                        style: average == null
-                            ? ChartText.stat.copyWith(color: c.text3)
-                            : ChartText.stat,
-                      ),
-                      top: 2,
-                    ),
-                    _cell(
-                      Text(
-                        fmt.count(expenses.length),
-                        textAlign: TextAlign.right,
-                        style: ChartText.stat,
-                      ),
-                      top: 2,
-                    ),
-                  ],
-                ),
-              ],
+            child: _SummaryTable(
+              label: 'Spent on ${category.name}',
+              averageLabel: byYear ? 'Monthly average' : 'Daily average',
+              total: fmt.format(total),
+              average: average == null
+                  ? '—'
+                  : fmt.formatWhole(average.round()),
+              averageIsNa: average == null,
+              entries: fmt.count(expenses.length),
             ),
           ),
           const SizedBox(height: 12),
@@ -517,6 +459,114 @@ class _Body extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// The summary card's table: "Spent on X", the average and the entries over
+/// the total, the average and the entry count. The first column takes what
+/// the other two leave; a long category name wraps there instead of being
+/// cut off, and when even its longest word does not fit, the average's label
+/// wraps ("Daily / average") to give the name room.
+class _SummaryTable extends StatelessWidget {
+  const _SummaryTable({
+    required this.label,
+    required this.averageLabel,
+    required this.total,
+    required this.average,
+    required this.averageIsNa,
+    required this.entries,
+  });
+
+  final String label;
+  final String averageLabel;
+  final String total;
+  final String average;
+
+  /// The average is "—" (not available).
+  final bool averageIsNa;
+  final String entries;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final scaler = MediaQuery.textScalerOf(context);
+    final labelStyle = ChartText.label(c);
+    double width(String text, TextStyle style) {
+      final painter = TextPainter(
+        text: TextSpan(text: text, style: style),
+        textDirection: TextDirection.ltr,
+        textScaler: scaler,
+        maxLines: 1,
+      )..layout();
+      final w = painter.width;
+      painter.dispose();
+      return w;
+    }
+
+    return LayoutBuilder(
+      builder: (context, box) {
+        // The other two columns are as wide as their label or value, plus a
+        // 16 px gap; the first has the rest.
+        double column(String head, String value) =>
+            16 + math.max(width(head, labelStyle), width(value, ChartText.stat));
+        final room = box.maxWidth -
+            column(averageLabel, average) -
+            column('Entries', entries);
+        final widest = label
+            .split(' ')
+            .fold<double>(0, (m, word) => math.max(m, width(word, labelStyle)));
+        final head = widest > room
+            ? averageLabel.replaceFirst(' ', '\n')
+            : averageLabel;
+        return Table(
+          columnWidths: const {
+            0: FlexColumnWidth(),
+            1: IntrinsicColumnWidth(),
+            2: IntrinsicColumnWidth(),
+          },
+          defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            TableRow(
+              children: [
+                Text(label, style: labelStyle),
+                _cell(Text(head, textAlign: TextAlign.right, style: labelStyle)),
+                _cell(
+                  Text('Entries', textAlign: TextAlign.right, style: labelStyle),
+                ),
+              ],
+            ),
+            TableRow(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    total,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: ChartText.total,
+                  ),
+                ),
+                _cell(
+                  Text(
+                    average,
+                    textAlign: TextAlign.right,
+                    style: averageIsNa
+                        ? ChartText.stat.copyWith(color: c.text3)
+                        : ChartText.stat,
+                  ),
+                  top: 2,
+                ),
+                _cell(
+                  Text(entries, textAlign: TextAlign.right, style: ChartText.stat),
+                  top: 2,
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Widget _cell(Widget child, {double top = 0}) => Padding(
         padding: EdgeInsets.only(left: 16, top: top),
@@ -616,7 +666,9 @@ class _ExpenseRow extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     SizedBox(
-                      height: 16,
+                      // 16 px; larger with larger text, so the share is
+                      // not cut off.
+                      height: MediaQuery.textScalerOf(context).scale(16),
                       child: Row(
                         children: [
                           Expanded(
