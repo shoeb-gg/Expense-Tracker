@@ -260,6 +260,18 @@ void main() {
       expect(find.text('September 2026'), findsOneWidget);
       expect(find.text('Tuesday'), findsOneWidget);
       expect(find.text('Add expense on Sep 1'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Back'));
+      await settle(tester);
+
+      // A month still to come (Home goes on forever): the calendar opens on
+      // that month, not on this one.
+      await _swipe(tester, -200);
+      await _swipe(tester, -200);
+      expect(find.text('Spent in November'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Calendar'));
+      await settle(tester);
+      expect(find.text('November 2026'), findsOneWidget);
+      expect(find.text('Add expense on Nov 1'), findsOneWidget);
       await closeApp(tester, db);
     });
   });

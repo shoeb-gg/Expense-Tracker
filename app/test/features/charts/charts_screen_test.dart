@@ -61,9 +61,6 @@ void main() {
       await _swipe(tester, const Offset(-200, 0));
       expect(_total('34,555'), findsWidgets, reason: 'This month');
 
-      // Nothing after the current period.
-      await _swipe(tester, const Offset(-200, 0));
-      expect(_total('34,555'), findsWidgets);
       // A vertical drag scrolls; it does not change the period.
       await _swipe(tester, const Offset(0, 200));
       await _swipe(tester, const Offset(0, -200));
@@ -72,8 +69,8 @@ void main() {
       await closeApp(tester, db);
     });
 
-    testWidgets('a swipe stops at the first period with expenses',
-        (tester) async {
+    testWidgets('swipes never stop: past the first expense and into the '
+        'future', (tester) async {
       final db = await sampleDatabase(tester);
       await pumpApp(tester, db: db, location: Routes.charts);
       await tester.tap(find.text('Year'));
@@ -82,8 +79,72 @@ void main() {
       await _swipe(tester, const Offset(200, 0));
       expect(_total('596,750'), findsWidgets, reason: '2025');
       await _swipe(tester, const Offset(200, 0));
-      expect(_total('596,750'), findsWidgets, reason: 'no data before 2025');
-      expect(find.text('2024'), findsNothing);
+      expect(find.text('2024'), findsOneWidget, reason: 'before the data');
+      expect(_total('596,750'), findsNothing);
+      await _swipe(tester, const Offset(200, 0));
+      expect(find.text('2023'), findsOneWidget);
+
+      // Forward again: this year, then the years still to come.
+      for (var i = 0; i < 3; i++) {
+        await _swipe(tester, const Offset(-200, 0));
+      }
+      expect(find.text('This year'), findsOneWidget);
+      expect(_total('493,610'), findsWidgets);
+      await _swipe(tester, const Offset(-200, 0));
+      expect(find.text('2027'), findsOneWidget);
+      expect(find.text('This year'), findsOneWidget);
+      expect(_total('493,610'), findsNothing);
+      await _swipe(tester, const Offset(-200, 0));
+      expect(find.text('2028'), findsOneWidget);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('months and weeks go on into the future', (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: Routes.charts);
+      await _swipe(tester, const Offset(-200, 0));
+      expect(find.text('Nov 2026'), findsOneWidget);
+      expect(find.text('This month'), findsOneWidget);
+      expect(find.text('Last month'), findsOneWidget);
+      expect(find.text('Nothing spent in this period.'), findsOneWidget);
+      await _swipe(tester, const Offset(-200, 0));
+      expect(find.text('Dec 2026'), findsOneWidget);
+      await _swipe(tester, const Offset(200, 0));
+      await _swipe(tester, const Offset(200, 0));
+      expect(_total('34,555'), findsWidgets, reason: 'back on this month');
+      expect(find.text('Nov 2026'), findsNothing);
+
+      await tester.tap(find.text('Week'));
+      await settle(tester);
+      await _swipe(tester, const Offset(-200, 0));
+      expect(find.text('Oct 25 – Oct 31'), findsOneWidget);
+      expect(find.text('This week'), findsOneWidget);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('a future week, month or year shows every chart empty, '
+        'never an error or an odd number', (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: Routes.charts);
+      for (final kind in ['Week', 'Month', 'Year']) {
+        await tester.tap(find.text(kind));
+        await settle(tester);
+        for (var i = 0; i < 3; i++) {
+          await _swipe(tester, const Offset(-200, 0));
+        }
+        for (final (view, empty) in [
+          ('Categories', 'Nothing spent'),
+          ('Top days', 'Nothing spent'),
+          ('Over time', 'Nothing spent in this period.'),
+        ]) {
+          await tester.tap(find.text(view));
+          await settle(tester);
+          expect(tester.takeException(), isNull, reason: '$kind, $view');
+          expect(find.textContaining('NaN'), findsNothing);
+          expect(find.textContaining('Infinity'), findsNothing);
+          expect(find.text(empty), findsWidgets, reason: '$kind, $view');
+        }
+      }
       await closeApp(tester, db);
     });
 
@@ -269,6 +330,64 @@ void main() {
       await tester.tap(find.text('Confirm'));
       await settle(tester);
       expect(_total('596,750'), findsWidgets);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('the pop-ups pick any week, month or year, past or future',
+        (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: Routes.charts);
+
+      // Month: March 2027 is still to come.
+      await tester.tap(find.text('This month'));
+      await settle(tester);
+      await tester.tap(find.bySemanticsLabel('Next year'));
+      await settle(tester);
+      await tester.tap(find.text('Mar'));
+      await settle(tester);
+      await tester.tap(find.text('Confirm'));
+      await settle(tester);
+      expect(find.text('Mar 2027'), findsOneWidget);
+      expect(find.text('Nothing spent in this period.'), findsOneWidget);
+
+      // March 2024 is before the first expense.
+      await tester.tap(find.text('Mar 2027'));
+      await settle(tester);
+      for (var i = 0; i < 3; i++) {
+        await tester.tap(find.bySemanticsLabel('Previous year'));
+        await settle(tester);
+      }
+      await tester.tap(find.text('Mar'));
+      await settle(tester);
+      await tester.tap(find.text('Confirm'));
+      await settle(tester);
+      expect(find.text('Mar 2024'), findsOneWidget);
+
+      // Week: the week of Nov 11, 2026.
+      await tester.tap(find.text('Week'));
+      await settle(tester);
+      await tester.tap(find.text('This week'));
+      await settle(tester);
+      expect(find.text('Week to show'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Next month'));
+      await settle(tester);
+      await tester.tap(find.bySemanticsLabel('Wednesday, November 11'));
+      await settle(tester);
+      await tester.tap(find.text('Confirm'));
+      await settle(tester);
+      expect(find.text('Nov 8 – Nov 14'), findsOneWidget);
+
+      // Year: 2028.
+      await tester.tap(find.text('Year'));
+      await settle(tester);
+      await tester.tap(find.text('This year'));
+      await settle(tester);
+      await tester.tap(find.text('2028'));
+      await settle(tester);
+      await tester.tap(find.text('Confirm'));
+      await settle(tester);
+      expect(find.text('2028'), findsOneWidget);
+      expect(find.text('This year'), findsOneWidget);
       await closeApp(tester, db);
     });
 

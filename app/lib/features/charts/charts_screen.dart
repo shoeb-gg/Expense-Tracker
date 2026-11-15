@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,13 +62,11 @@ class _ChartsScreenState extends ConsumerState<ChartsScreen> {
         custom: _customRange(s, today),
       );
 
-  int _maxOffset(PeriodKind kind, SpendIndex index, int today, AppSettings s) {
-    final first = index.firstDay;
-    final data = first == null
-        ? 0
-        : offsetOfDay(kind, first, today: today, first: s.firstDayOfWeek);
-    return math.max(tabCount(kind) - 1, data);
-  }
+  /// The offsets the period tabs show. A period still to come (offset below
+  /// 0) takes the first tab, where an old period goes too.
+  List<int> _tabOffsets(PeriodKind kind, int selected) => selected < 0
+      ? [selected, for (var o = tabCount(kind) - 2; o >= 0; o--) o]
+      : tabOffsets(kind, selected);
 
   void _select(PeriodKind kind, int offset, {required bool forward}) =>
       setState(() {
@@ -80,19 +77,14 @@ class _ChartsScreenState extends ConsumerState<ChartsScreen> {
         _pinned = null;
       });
 
-  void _onSwipe(SwipeEvent e, SpendIndex index) {
+  void _onSwipe(SwipeEvent e) {
     if (e.axis != Axis.horizontal) return;
     // A drag along the columns pins amounts; it does not change the period.
     if (_chartPointer != null && _chartPointer == _downPointer) return;
     if (_kind == PeriodKind.custom) return;
-    final today = ref.read(todayProvider);
-    final s = ref.read(settingsProvider);
+    // No end, back or forward: the first expense and today are not limits.
     final o = _offsets[_kind]!;
-    if (e.next) {
-      if (o > 0) _select(_kind, o - 1, forward: true);
-    } else if (o < _maxOffset(_kind, index, today, s)) {
-      _select(_kind, o + 1, forward: false);
-    }
+    _select(_kind, e.next ? o - 1 : o + 1, forward: e.next);
   }
 
   void _onKind(PeriodKind kind) {
@@ -168,9 +160,8 @@ class _ChartsScreenState extends ConsumerState<ChartsScreen> {
         return;
     }
     if (offset == null || !mounted) return;
-    final o = math.max(0, offset);
-    if (o == _offsets[_kind]) return;
-    _select(_kind, o, forward: o < _offsets[_kind]!);
+    if (offset == _offsets[_kind]) return;
+    _select(_kind, offset, forward: offset < _offsets[_kind]!);
   }
 
   void _toggle(String key) => setState(() => _sel = _sel == key ? null : key);
@@ -187,7 +178,7 @@ class _ChartsScreenState extends ConsumerState<ChartsScreen> {
     final period = _period(today, settings);
 
     final tabs = [
-      for (final o in tabOffsets(_kind, _offsets[_kind]!))
+      for (final o in _tabOffsets(_kind, _offsets[_kind]!))
         () {
           final p = _kind == PeriodKind.custom
               ? period
@@ -213,9 +204,7 @@ class _ChartsScreenState extends ConsumerState<ChartsScreen> {
         child: Listener(
           onPointerDown: (e) => _downPointer = e.pointer,
           child: SwipeArea(
-            onSwipe: (e) {
-              if (index != null) _onSwipe(e, index);
-            },
+            onSwipe: _onSwipe,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

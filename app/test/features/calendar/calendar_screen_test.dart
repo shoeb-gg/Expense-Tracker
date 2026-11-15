@@ -45,9 +45,14 @@ void main() {
     expect(find.text('September 2026'), findsOneWidget);
     await _swipe(tester, const Offset(-200, 0));
     expect(find.text('October 2026'), findsOneWidget);
-    // This month is the last one.
+    // This month is not the last one: the future is endless too.
     await _swipe(tester, const Offset(-200, 0));
-    expect(find.text('October 2026'), findsOneWidget);
+    expect(find.text('November 2026'), findsOneWidget);
+    expect(find.text('0 spent'), findsOneWidget);
+    await _swipe(tester, const Offset(-200, 0));
+    expect(find.text('December 2026'), findsOneWidget);
+    await _swipe(tester, const Offset(-200, 0));
+    expect(find.text('January 2027'), findsOneWidget);
     await closeApp(tester, db);
   });
 
@@ -62,12 +67,14 @@ void main() {
     await _swipe(tester, const Offset(0, -150));
     expect(find.text('September 2026'), findsOneWidget);
     await _swipe(tester, const Offset(0, -150));
-    await _swipe(tester, const Offset(0, -150));
     expect(find.text('October 2026'), findsOneWidget);
+    await _swipe(tester, const Offset(0, -150));
+    expect(find.text('November 2026'), findsOneWidget);
     await closeApp(tester, db);
   });
 
-  testWidgets('the first month with expenses is the earliest', (tester) async {
+  testWidgets('the first month with expenses is not the earliest',
+      (tester) async {
     final db = await sampleDatabase(tester);
     await pumpApp(
       tester,
@@ -76,14 +83,71 @@ void main() {
     );
     expect(find.text('January 2025'), findsOneWidget);
     expect(find.text('January 10, 2025'), findsOneWidget);
+    // Before the first month with expenses: swipes and arrows keep going.
     await _swipe(tester, const Offset(200, 0));
-    expect(find.text('January 2025'), findsOneWidget);
+    expect(find.text('December 2024'), findsOneWidget);
+    expect(find.text('0 spent'), findsOneWidget);
+    expect(find.text('December 1, 2024'), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('Previous month'));
     await settle(tester);
-    expect(find.text('January 2025'), findsOneWidget);
+    expect(find.text('November 2024'), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('Next month'));
     await settle(tester);
-    expect(find.text('February 2025'), findsOneWidget);
+    expect(find.text('December 2024'), findsOneWidget);
+    await closeApp(tester, db);
+  });
+
+  testWidgets('this month has no last month: the next arrow goes on',
+      (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(tester, db: db, location: Routes.calendar());
+    await tester.tap(find.bySemanticsLabel('Next month'));
+    await settle(tester);
+    expect(find.text('November 2026'), findsOneWidget);
+    // A month still to come: its days cannot be chosen, the 1st shows.
+    expect(find.text('November 1'), findsOneWidget);
+    expect(find.text('Nothing spent on this day.'), findsOneWidget);
+    await tester.tap(find.text('20'));
+    await settle(tester);
+    expect(find.text('November 1'), findsOneWidget);
+    await closeApp(tester, db);
+  });
+
+  testWidgets('the month pop-up honours a month before the first expense',
+      (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(tester, db: db, location: Routes.calendar());
+    await tester.tap(find.text('October 2026'));
+    await settle(tester);
+    expect(find.text('Month to show'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Previous year'));
+    await settle(tester);
+    await tester.tap(find.bySemanticsLabel('Previous year'));
+    await settle(tester);
+    await tester.tap(find.text('Mar'));
+    await settle(tester);
+    await tester.tap(find.text('Confirm'));
+    await settle(tester);
+    // The first expense is in January 2025; March 2024 still opens.
+    expect(find.text('March 2024'), findsOneWidget);
+    expect(find.text('March 1, 2024'), findsOneWidget);
+    await closeApp(tester, db);
+  });
+
+  testWidgets('the month pop-up honours a month still to come',
+      (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(tester, db: db, location: Routes.calendar());
+    await tester.tap(find.text('October 2026'));
+    await settle(tester);
+    await tester.tap(find.bySemanticsLabel('Next year'));
+    await settle(tester);
+    await tester.tap(find.text('Feb'));
+    await settle(tester);
+    await tester.tap(find.text('Confirm'));
+    await settle(tester);
+    expect(find.text('February 2027'), findsOneWidget);
+    expect(find.text('February 1, 2027'), findsOneWidget);
     await closeApp(tester, db);
   });
 

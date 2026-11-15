@@ -22,9 +22,8 @@ import 'calendar_data.dart';
 /// and arrows, a month grid whose cells get brighter with spending, and the
 /// chosen day's card with its expenses and "Add expense on Oct 18". Swiping
 /// the grid changes the month: finger left to right or top to bottom shows
-/// the previous month, right to left or bottom to top the next one, within
-/// the same limits as the arrows (the first month with expenses to this
-/// month).
+/// the previous month, right to left or bottom to top the next one. Arrows,
+/// swipes and the month pop-up have no limit, back or forward.
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key, this.day});
 
@@ -37,7 +36,6 @@ class CalendarScreen extends ConsumerStatefulWidget {
 class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   late YearMonth _ym;
   late int _sel;
-  late int _initialKey;
   bool _forward = true;
   Axis _axis = Axis.horizontal;
 
@@ -45,21 +43,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   void initState() {
     super.initState();
     final today = ref.read(todayProvider);
-    final day = math.min(widget.day ?? today, today);
+    final day = widget.day ?? today;
     _ym = yearMonthOfDay(day);
     _sel = day;
-    _initialKey = monthKey(_ym.year, _ym.month);
-  }
-
-  int _earliest(SpendIndex? index, int today) {
-    final now = yearMonthOfDay(today);
-    var key = math.min(monthKey(now.year, now.month), _initialKey);
-    final first = index?.firstDay;
-    if (first != null) {
-      final ym = yearMonthOfDay(first);
-      key = math.min(key, monthKey(ym.year, ym.month));
-    }
-    return key;
   }
 
   void _go(YearMonth ym, {required bool forward, required Axis axis, int? day}) {
@@ -72,9 +58,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     });
   }
 
-  void _step(bool next, Axis axis, int earliest, int latest) {
-    final key = monthKey(_ym.year, _ym.month);
-    if (next ? key >= latest : key <= earliest) return;
+  void _step(bool next, Axis axis) {
     _go(
       addMonths(_ym.year, _ym.month, next ? 1 : -1),
       forward: next,
@@ -82,14 +66,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     );
   }
 
-  Future<void> _pickMonth(int earliest, int latest) async {
+  Future<void> _pickMonth() async {
     final ym = await showMonthPicker(context, year: _ym.year, month: _ym.month);
     if (ym == null || !mounted) return;
-    final key = monthKey(ym.$1, ym.$2).clamp(earliest, latest);
+    final key = monthKey(ym.$1, ym.$2);
     final cur = monthKey(_ym.year, _ym.month);
     if (key == cur) return;
     _go(
-      (year: key ~/ 12, month: key % 12 + 1),
+      (year: ym.$1, month: ym.$2),
       forward: key > cur,
       axis: Axis.horizontal,
     );
@@ -106,7 +90,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         ? null
         : ref.watch(spendIndexProvider(pocketId)).value;
     final now = yearMonthOfDay(today);
-    final earliest = _earliest(index, today);
     final latest = monthKey(now.year, now.month);
     final key = monthKey(_ym.year, _ym.month);
     final first = monthStart(_ym.year, _ym.month);
@@ -137,13 +120,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               child: _MonthBar(
                 label: monthYear(_ym.year, _ym.month),
                 total: '${fmt.format(monthTotal)} spent',
-                onPrev: key > earliest
-                    ? () => _step(false, Axis.horizontal, earliest, latest)
-                    : null,
-                onNext: key < latest
-                    ? () => _step(true, Axis.horizontal, earliest, latest)
-                    : null,
-                onLabel: () => unawaited(_pickMonth(earliest, latest)),
+                onPrev: () => _step(false, Axis.horizontal),
+                onNext: () => _step(true, Axis.horizontal),
+                onLabel: () => unawaited(_pickMonth()),
               ),
             ),
             Expanded(
@@ -155,7 +134,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     _WeekdayRow(first: settings.firstDayOfWeek),
                     const SizedBox(height: 8),
                     SwipeArea(
-                      onSwipe: (e) => _step(e.next, e.axis, earliest, latest),
+                      onSwipe: (e) => _step(e.next, e.axis),
                       // Keeps a vertical drag on the grid from also scrolling
                       // the page: on the grid it changes the month.
                       child: GestureDetector(
@@ -234,8 +213,8 @@ class _MonthBar extends StatelessWidget {
 
   final String label;
   final String total;
-  final VoidCallback? onPrev;
-  final VoidCallback? onNext;
+  final VoidCallback onPrev;
+  final VoidCallback onNext;
   final VoidCallback onLabel;
 
   @override
@@ -303,23 +282,20 @@ class _Arrow extends StatelessWidget {
 
   final IconData icon;
   final String label;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return Opacity(
-      opacity: onTap == null ? 0.35 : 1,
-      child: Pressable(
-        onTap: onTap,
-        color: c.onAccent,
-        borderRadius: BorderRadius.circular(20),
-        semanticLabel: label,
-        child: SizedBox(
-          width: 40,
-          height: 40,
-          child: Icon(icon, size: 24, color: c.accent),
-        ),
+    return Pressable(
+      onTap: onTap,
+      color: c.onAccent,
+      borderRadius: BorderRadius.circular(20),
+      semanticLabel: label,
+      child: SizedBox(
+        width: 40,
+        height: 40,
+        child: Icon(icon, size: 24, color: c.accent),
       ),
     );
   }
