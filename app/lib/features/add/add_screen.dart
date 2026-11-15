@@ -91,6 +91,7 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
         TweenSequenceItem(tween: Tween<double>(begin: 1, end: 0), weight: 1),
       ],
     ]).animate(_flash);
+    _noteFocus.addListener(_onNoteFocus);
     _day = widget.day ?? ref.read(todayProvider);
     if (_isEdit) {
       _loading = true;
@@ -127,12 +128,18 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
         if (name != keep) unawaited(_quietly(store.delete(name)));
       }
     }
+    _noteFocus.removeListener(_onNoteFocus);
     _flash.dispose();
     _note.dispose();
     _typed.dispose();
     _noteFocus.dispose();
     _typedFocus.dispose();
     super.dispose();
+  }
+
+  /// The title field gained or lost focus: the keys fold away or come back.
+  void _onNoteFocus() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -191,7 +198,15 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
     final mq = MediaQuery.of(context);
     final keyboard = mq.viewInsets.bottom;
     final navInset = keyboard > 0 ? 0.0 : mq.viewPadding.bottom;
-    final reserve = (keypadMode ? 376.0 : (hint == null ? 162.0 : 198.0)) + navInset + keyboard;
+    // Typing the title on the keypad: the keys fold away, so the panel sits
+    // on the keyboard without covering the header.
+    final typingTitle = keypadMode && keyboard > 0 && _noteFocus.hasFocus;
+    double reserveFor(double collapse) =>
+        (keypadMode
+            ? KeypadPanel.height - KeypadPanel.keysHeight * collapse
+            : (hint == null ? 162.0 : 198.0)) +
+        navInset +
+        keyboard;
 
     final grid = AnimatedBuilder(
       animation: _flashLevel,
@@ -207,7 +222,7 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
       },
     );
 
-    final content = LayoutBuilder(
+    Widget buildContent(double reserve) => LayoutBuilder(
       builder: (context, box) {
         final rows = ((categories.length + 1) / CategoryGrid.columns).ceil();
         final height = 8 + rows * 84 + (unknown ? 82 : 0);
@@ -232,11 +247,10 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
       },
     );
 
-    final Widget bottom;
-    if (keypadMode) {
-      bottom = KeypadPanel(
+    Widget buildKeypad(ExpenseCategory category, double collapse) {
+      return KeypadPanel(
         key: const ValueKey('keypad'),
-        category: keypadCategory,
+        category: category,
         view: keypadView(_expr, fmt),
         note: _note,
         noteFocus: _noteFocus,
@@ -267,105 +281,113 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
         onDate: () => unawaited(_pickDate()),
         onSave: () => unawaited(_saveKeypad()),
         bottomInset: navInset,
-      );
-    } else {
-      final Widget card = switch (quick.stage) {
-        QuickStage.empty => const GuideCard(
-          icon: Symbols.touch_app_rounded,
-          title: 'Select a category',
-          subtitle: 'Tap one above, or just type below',
-        ),
-        QuickStage.wordOnly => GuideCard(
-          icon: Symbols.dialpad_rounded,
-          title: 'Now add the amount',
-          subtitle: 'Like “${_typed.text.trim()} 120”',
-        ),
-        QuickStage.matched || QuickStage.unknown => PreviewCard(
-          category: quickCategory,
-          subtitle: parsed.title.isEmpty ? dateLabel : '${parsed.title} · $dateLabel',
-          amount: fmt.format(parsed.amount ?? 0),
-          onCategoryTap: _pointAtGrid,
-          hint: hint,
-        ),
-      };
-      bottom = QuickArea(
-        key: const ValueKey('quick'),
-        card: card,
-        bottomInset: navInset,
-        bar: TypingBar(
-          controller: _typed,
-          focusNode: _typedFocus,
-          onChanged: _onTyped,
-          photoButton: _photo == null
-              ? RoundIconButton(
-                  icon: Symbols.photo_camera_rounded,
-                  semanticLabel: 'Take a receipt photo',
-                  background: c.surface2,
-                  color: c.text2,
-                  onTap: () => unawaited(_pickPhoto(PhotoSource.camera)),
-                )
-              : _thumbButton(c.surface2),
-          addState: _typed.text.trim().isEmpty
-              ? AddButtonState.hidden
-              : quick.stage == QuickStage.matched
-              ? AddButtonState.ready
-              : AddButtonState.waiting,
-          onAdd: () => unawaited(_addTyped(quick)),
-        ),
+        collapse: collapse,
       );
     }
+
+    final Widget card = switch (quick.stage) {
+      QuickStage.empty => const GuideCard(
+        icon: Symbols.touch_app_rounded,
+        title: 'Select a category',
+        subtitle: 'Tap one above, or just type below',
+      ),
+      QuickStage.wordOnly => GuideCard(
+        icon: Symbols.dialpad_rounded,
+        title: 'Now add the amount',
+        subtitle: 'Like “${_typed.text.trim()} 120”',
+      ),
+      QuickStage.matched || QuickStage.unknown => PreviewCard(
+        category: quickCategory,
+        subtitle: parsed.title.isEmpty ? dateLabel : '${parsed.title} · $dateLabel',
+        amount: fmt.format(parsed.amount ?? 0),
+        onCategoryTap: _pointAtGrid,
+        hint: hint,
+      ),
+    };
+    final Widget quickBottom = QuickArea(
+      key: const ValueKey('quick'),
+      card: card,
+      bottomInset: navInset,
+      bar: TypingBar(
+        controller: _typed,
+        focusNode: _typedFocus,
+        onChanged: _onTyped,
+        photoButton: _photo == null
+            ? RoundIconButton(
+                icon: Symbols.photo_camera_rounded,
+                semanticLabel: 'Take a receipt photo',
+                background: c.surface2,
+                color: c.text2,
+                onTap: () => unawaited(_pickPhoto(PhotoSource.camera)),
+              )
+            : _thumbButton(c.surface2),
+        addState: _typed.text.trim().isEmpty
+            ? AddButtonState.hidden
+            : quick.stage == QuickStage.matched
+            ? AddButtonState.ready
+            : AddButtonState.waiting,
+        onAdd: () => unawaited(_addTyped(quick)),
+      ),
+    );
 
     return Scaffold(
       backgroundColor: c.bg,
       resizeToAvoidBottomInset: false,
       body: SafeArea(
         bottom: false,
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                _EditorHeader(
-                  title: title,
-                  onCancel: _close,
-                  pill: pill == null
-                      ? null
-                      : PocketPill(
-                          pocket: pill,
-                          semanticLabel: _isEdit
-                              ? 'This expense is in the pocket ${pill.name}. '
-                                    'Tap to move it to another pocket'
-                              : 'This expense will be saved in the pocket ${pill.name}. '
-                                    'Tap to choose another pocket',
-                          onTap: () => unawaited(_choosePocket(pockets, pill.id)),
-                        ),
-                ),
-                Expanded(child: content),
-              ],
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: keyboard,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                switchInCurve: Curves.easeOutCubic,
-                switchOutCurve: Curves.easeInCubic,
-                layoutBuilder: (current, previous) =>
-                    Stack(alignment: Alignment.bottomCenter, children: [...previous, ?current]),
-                transitionBuilder: (child, animation) => FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0, 0.12),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: child,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween<double>(end: typingTitle ? 1 : 0),
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          builder: (context, collapse, _) => Stack(
+            children: [
+              Column(
+                children: [
+                  _EditorHeader(
+                    title: title,
+                    onCancel: _close,
+                    pill: pill == null
+                        ? null
+                        : PocketPill(
+                            pocket: pill,
+                            semanticLabel: _isEdit
+                                ? 'This expense is in the pocket ${pill.name}. '
+                                      'Tap to move it to another pocket'
+                                : 'This expense will be saved in the pocket ${pill.name}. '
+                                      'Tap to choose another pocket',
+                            onTap: () => unawaited(_choosePocket(pockets, pill.id)),
+                          ),
                   ),
-                ),
-                child: bottom,
+                  Expanded(child: buildContent(reserveFor(collapse))),
+                ],
               ),
-            ),
-          ],
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: keyboard,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  layoutBuilder: (current, previous) =>
+                      Stack(alignment: Alignment.bottomCenter, children: [...previous, ?current]),
+                  transitionBuilder: (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0, 0.12),
+                        end: Offset.zero,
+                      ).animate(animation),
+                      child: child,
+                    ),
+                  ),
+                  child: keypadCategory == null
+                      ? quickBottom
+                      : buildKeypad(keypadCategory, collapse),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

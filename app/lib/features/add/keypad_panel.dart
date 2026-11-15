@@ -18,6 +18,10 @@ const String keyEquals = '=';
 
 /// The keypad panel of Add and Edit expense: the chosen category and the
 /// amount, the title field with the photo buttons, and the keys.
+///
+/// With [collapse] the keys fold away and only the category and amount row
+/// and the title field are left (the panel is short enough to sit on the
+/// soft keyboard without covering the header).
 class KeypadPanel extends StatelessWidget {
   const KeypadPanel({
     super.key,
@@ -34,7 +38,15 @@ class KeypadPanel extends StatelessWidget {
     required this.onDate,
     required this.onSave,
     required this.bottomInset,
+    this.collapse = 0,
   });
+
+  /// Height of the whole panel with the keys showing (a little more than it
+  /// draws, as the screen's scroll padding wants).
+  static const double height = 376;
+
+  /// Height of the keys and the gap above them: what [collapse] folds away.
+  static const double keysHeight = 228;
 
   final ExpenseCategory category;
   final KeypadView view;
@@ -55,6 +67,9 @@ class KeypadPanel extends StatelessWidget {
 
   /// Extra space under the keys (the phone's navigation bar).
   final double bottomInset;
+
+  /// How far the keys are folded away: 0 shows them, 1 hides them.
+  final double collapse;
 
   @override
   Widget build(BuildContext context) {
@@ -98,16 +113,33 @@ class KeypadPanel extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 _TitleField(controller: note, focusNode: noteFocus, buttons: photoButtons),
-                const SizedBox(height: 12),
-                _Keys(
-                  fourKeys: fourKeys,
-                  view: view,
-                  dateLabel: dateLabel,
-                  onKey: onKey,
-                  onClear: onClear,
-                  onDate: onDate,
-                  onSave: onSave,
-                ),
+                if (collapse < 1)
+                  // Clipped, so a key never takes a tap or a screen reader's
+                  // attention while it is folded away.
+                  ClipRect(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      heightFactor: 1 - collapse,
+                      child: ExcludeSemantics(
+                        excluding: collapse > 0,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const SizedBox(height: 12),
+                            _Keys(
+                              fourKeys: fourKeys,
+                              view: view,
+                              dateLabel: dateLabel,
+                              onKey: onKey,
+                              onClear: onClear,
+                              onDate: onDate,
+                              onSave: onSave,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

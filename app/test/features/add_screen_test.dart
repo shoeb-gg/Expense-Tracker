@@ -98,6 +98,99 @@ void main() {
     await closeApp(tester, db);
   });
 
+  group('typing a title on the keypad', () {
+    // 28 px status bar + the 60 px header.
+    const headerBottom = 88.0;
+    final panel = find.byKey(const ValueKey('keypad'));
+
+    for (final keyboard in [300.0, 360.0]) {
+      testWidgets('keeps the header visible with a ${keyboard.round()} px keyboard', (
+        tester,
+      ) async {
+        final db = await emptyDb(tester);
+        await pumpApp(tester, db: db, location: Routes.add());
+        await tap(tester, find.text('Snacks'));
+        await keys(tester, '1 2 0');
+        showSoftKeyboard(tester, height: keyboard);
+        await tester.tap(find.byType(EditableText).first);
+        await settle(tester);
+
+        // Cancel and the title can be tapped, nothing lies over them.
+        expect(find.text('Cancel').hitTestable(), findsOneWidget);
+        expect(find.text('Add expense').hitTestable(), findsOneWidget);
+        expect(tester.getTopLeft(panel).dy, greaterThanOrEqualTo(headerBottom));
+        // The panel sits right on the keyboard and shows the category and
+        // amount row and the title field, not the keys.
+        expect(tester.getBottomLeft(panel).dy, 780 - keyboard);
+        expect(find.bySemanticsLabel('Category: Snacks'), findsOneWidget);
+        expect(find.text('120'), findsOneWidget);
+        expect(find.byType(EditableText), findsOneWidget);
+        expect(find.text('7'), findsNothing);
+        expect(find.text('Save'), findsNothing);
+        await closeApp(tester, db);
+      });
+    }
+
+    testWidgets('the keys come back with the keyboard, and fold away smoothly', (tester) async {
+      final db = await emptyDb(tester);
+      await pumpApp(tester, db: db, location: Routes.add());
+      await tap(tester, find.text('Snacks'));
+      await keys(tester, '1 2 0');
+      final full = tester.getSize(panel).height;
+      expect(find.text('7'), findsOneWidget);
+
+      showSoftKeyboard(tester);
+      await tester.tap(find.byType(EditableText).first);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 80));
+      // Part way: the keys are still folding.
+      final mid = tester.getSize(panel).height;
+      expect(mid, lessThan(full));
+      await settle(tester);
+      final folded = tester.getSize(panel).height;
+      expect(mid, greaterThan(folded));
+      expect(folded, lessThan(full - 200));
+
+      // Keyboard down (Done): the keys unfold again.
+      hideSoftKeyboard(tester);
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 80));
+      expect(tester.getSize(panel).height, greaterThan(folded));
+      await settle(tester);
+      expect(tester.getSize(panel).height, full);
+      expect(find.text('7'), findsOneWidget);
+      expect(find.text('Save'), findsOneWidget);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('the keys stay when the keyboard is down, even with the title focused', (
+      tester,
+    ) async {
+      final db = await emptyDb(tester);
+      await pumpApp(tester, db: db, location: Routes.add());
+      await tap(tester, find.text('Snacks'));
+      await keys(tester, '1 2 0');
+      // Back closed the keyboard but the field kept its focus.
+      await tester.tap(find.byType(EditableText).first);
+      await settle(tester);
+      expect(find.text('7'), findsOneWidget);
+      expect(find.text('Save'), findsOneWidget);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('the typing bar of the opening state is not folded', (tester) async {
+      final db = await emptyDb(tester);
+      await pumpApp(tester, db: db, location: Routes.add());
+      showSoftKeyboard(tester);
+      await tester.tap(find.byType(EditableText).last);
+      await settle(tester);
+      expect(find.text('Cancel').hitTestable(), findsOneWidget);
+      expect(find.text('Select a category'), findsOneWidget);
+      await closeApp(tester, db);
+    });
+  });
+
   testWidgets('four keys: × before +, divide by zero gives no result', (tester) async {
     final db = await emptyDb(tester);
     await pumpApp(

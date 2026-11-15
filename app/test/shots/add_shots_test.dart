@@ -7,6 +7,7 @@ import 'package:spill_the_bills/data/learned_words_repo.dart';
 import 'package:spill_the_bills/features/add/photo_picker.dart';
 import 'package:spill_the_bills/router.dart';
 import 'package:spill_the_bills/state/providers.dart';
+import 'package:spill_the_bills/state/settings.dart';
 import 'package:spill_the_bills/theme/symbols.dart';
 
 import '../support/add_support.dart';
@@ -103,6 +104,30 @@ void main() {
     await takeShot(tester, 'add_quick_picked');
     await closeApp(tester, db);
   });
+
+  for (final (suffix, settings) in <(String, AppSettings)>[
+    ('', const AppSettings()),
+    ('_large', AppSettings(textScale: textScaleSteps.last)),
+  ]) {
+    testWidgets('Keypad: typing a title keeps the header visible$suffix', (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: Routes.add(), settings: settings);
+      await tapText(tester, 'Snacks');
+      await keys(tester, '1 2 0');
+      showSoftKeyboard(tester, height: 300);
+      await tester.tap(find.byType(EditableText).first);
+      await tester.enterText(find.byType(EditableText).first, 'Coffee with Sam');
+      await takeShot(tester, 'add_title_keyboard$suffix');
+
+      showSoftKeyboard(tester, height: 360);
+      await takeShot(tester, 'add_title_keyboard_tall$suffix');
+
+      hideSoftKeyboard(tester);
+      await hideKeyboard(tester);
+      await takeShot(tester, 'add_title_keys_back$suffix');
+      await closeApp(tester, db);
+    });
+  }
 
   testWidgets('Pockets: pill and the pick sheet (PocketAddExpense, PocketPick)', (tester) async {
     final db = await sampleDatabase(tester);

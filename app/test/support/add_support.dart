@@ -100,3 +100,23 @@ Future<void> closeAppWithFiles(WidgetTester tester, AppDatabase db) async {
     await tester.pump();
   }
 }
+
+/// Pretends the soft keyboard is up: [height] logical px of keyboard under a
+/// 28 px status bar (the phone's real shape, so the header sits below it).
+/// `pumpApp` resets the view when the test ends.
+void showSoftKeyboard(WidgetTester tester, {double height = 300}) {
+  const bar = FakeViewPadding(top: 56);
+  tester.view
+    ..padding = bar
+    ..viewPadding = bar
+    ..viewInsets = FakeViewPadding(bottom: height * 2);
+}
+
+/// Takes the pretend keyboard down again (the status bar stays).
+void hideSoftKeyboard(WidgetTester tester) {
+  const bar = FakeViewPadding(top: 56);
+  tester.view
+    ..padding = bar
+    ..viewPadding = bar
+    ..viewInsets = FakeViewPadding.zero;
+}
