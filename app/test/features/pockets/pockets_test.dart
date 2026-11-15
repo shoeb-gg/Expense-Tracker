@@ -9,8 +9,10 @@ import 'package:spill_the_bills/data/db.dart';
 import 'package:spill_the_bills/data/expenses_repo.dart';
 import 'package:spill_the_bills/features/data/export_screen.dart';
 import 'package:spill_the_bills/features/home/home_screen.dart';
+import 'package:spill_the_bills/features/home/pocket_button.dart';
 import 'package:spill_the_bills/features/pockets/pocket_emojis.dart';
 import 'package:spill_the_bills/features/pockets/pocket_form_screen.dart';
+import 'package:spill_the_bills/features/pockets/pockets_screen.dart';
 import 'package:spill_the_bills/data/pockets_repo.dart';
 import 'package:spill_the_bills/router.dart';
 import 'package:spill_the_bills/state/providers.dart';
@@ -303,6 +305,9 @@ void main() {
       await settle(tester);
       await tester.tap(find.text('Save'));
       await settle(tester);
+      expect(find.text('Switch to 🎉 Holiday fund now?'), findsOneWidget);
+      await tester.tap(find.text('Stay in Personal'));
+      await settle(tester);
       final pockets = await _pockets(tester, db);
       expect(pockets.length, 2);
       expect(pockets.last.name, 'Holiday fund');
@@ -310,20 +315,215 @@ void main() {
       await closeApp(tester, db);
     });
 
-    testWidgets('a new pocket is not switched to', (tester) async {
+    testWidgets('Save asks whether to switch; the pocket is saved already', (
+      tester,
+    ) async {
       final db = await sampleDatabase(tester);
       await _open(tester, db, Routes.newPocket);
       await tester.enterText(find.byType(TextField).first, 'Savings');
       await settle(tester);
       await tester.tap(find.text('Save'));
       await settle(tester);
+      expect(find.byType(AppDialog), findsOneWidget);
+      expect(find.text('Pocket added'), findsOneWidget);
+      expect(find.text('Switch to 💰 Savings now?'), findsOneWidget);
+      expect(find.text('Stay in Personal'), findsOneWidget);
+      expect(find.text('Switch to Savings'), findsOneWidget);
       final pockets = await _pockets(tester, db);
+      expect(pockets.last.name, 'Savings');
       expect(pockets.last.emoji, '💰');
+      expect(
+        _container(tester).read(currentPocketIdProvider),
+        pockets.first.id,
+        reason: 'nothing switches before the user chooses',
+      );
+      // The form waits behind the prompt.
+      expect(find.byType(PocketFormScreen), findsOneWidget);
+      await tester.tap(find.text('Stay in Personal'));
+      await settle(tester);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('"Switch to" moves to the new pocket and says so', (
+      tester,
+    ) async {
+      final db = await sampleDatabase(tester);
+      await _open(tester, db, Routes.newPocket);
+      await tester.enterText(find.byType(TextField).first, 'Savings');
+      await settle(tester);
+      await tester.tap(find.text('Save'));
+      await settle(tester);
+      await tester.tap(find.text('Switch to Savings'));
+      await settle(tester);
+      final pockets = await _pockets(tester, db);
+      expect(
+        _container(tester).read(currentPocketIdProvider),
+        pockets.last.id,
+      );
+      expect(
+        _container(tester).read(settingsProvider).currentPocketId,
+        pockets.last.id,
+      );
+      expect(find.byType(PocketFormScreen), findsNothing);
+      expect(find.byType(AppDialog), findsNothing);
+      expect(find.text('Switched to Savings'), findsOneWidget);
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(find.text('Nothing in Savings yet'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 5));
+      await closeApp(tester, db);
+    });
+
+    testWidgets('"Stay in" keeps the pocket in use and leaves the form', (
+      tester,
+    ) async {
+      final db = await sampleDatabase(tester);
+      await _open(tester, db, Routes.newPocket);
+      await tester.enterText(find.byType(TextField).first, 'Savings');
+      await settle(tester);
+      await tester.tap(find.text('Save'));
+      await settle(tester);
+      await tester.tap(find.text('Stay in Personal'));
+      await settle(tester);
+      final pockets = await _pockets(tester, db);
+      expect(pockets.length, 2);
       expect(
         _container(tester).read(currentPocketIdProvider),
         pockets.first.id,
       );
       expect(find.byType(PocketFormScreen), findsNothing);
+      expect(find.byType(AppDialog), findsNothing);
+      expect(find.textContaining('Switched to'), findsNothing);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('the prompt names the pocket in use, not the first one', (
+      tester,
+    ) async {
+      final db = await sampleDatabase(tester);
+      final ids = (await tester.runAsync(() => addMockupPockets(db)))!;
+      await _open(
+        tester,
+        db,
+        Routes.newPocket,
+        settings: AppSettings(currentPocketId: ids.business),
+      );
+      await tester.enterText(find.byType(TextField).first, 'Savings');
+      await settle(tester);
+      await tester.tap(find.text('Save'));
+      await settle(tester);
+      expect(find.text('Stay in Business'), findsOneWidget);
+      await tester.tap(find.text('Stay in Business'));
+      await settle(tester);
+      expect(_container(tester).read(currentPocketIdProvider), ids.business);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('closing the prompt (outside tap or Back) counts as Stay', (
+      tester,
+    ) async {
+      for (final byBack in [false, true]) {
+        final db = await sampleDatabase(tester);
+        await _open(tester, db, Routes.newPocket);
+        await tester.enterText(find.byType(TextField).first, 'Savings');
+        await settle(tester);
+        await tester.tap(find.text('Save'));
+        await settle(tester);
+        expect(find.byType(AppDialog), findsOneWidget);
+        if (byBack) {
+          await tester.binding.handlePopRoute();
+        } else {
+          await tester.tapAt(const Offset(8, 8));
+        }
+        await settle(tester);
+        final pockets = await _pockets(tester, db);
+        expect(pockets.length, 2, reason: 'saved either way');
+        expect(
+          _container(tester).read(currentPocketIdProvider),
+          pockets.first.id,
+        );
+        expect(find.byType(AppDialog), findsNothing);
+        expect(find.byType(PocketFormScreen), findsNothing);
+        expect(find.textContaining('Switched to'), findsNothing);
+        await closeApp(tester, db);
+      }
+    });
+
+    testWidgets('a name that is already taken saves nothing and asks nothing', (
+      tester,
+    ) async {
+      final db = await sampleDatabase(tester);
+      await _open(tester, db, Routes.newPocket);
+      await tester.enterText(find.byType(TextField).first, 'Personal');
+      await settle(tester);
+      await tester.tap(find.text('Save'));
+      await settle(tester);
+      expect(find.byType(AppDialog), findsNothing);
+      expect(find.byType(PocketFormScreen), findsOneWidget);
+      await tester.pump(const Duration(seconds: 5));
+      await closeApp(tester, db);
+    });
+
+    testWidgets('Pockets, Add pocket: the same prompt; Switch stays on the list', (
+      tester,
+    ) async {
+      final db = await sampleDatabase(tester);
+      await _open(tester, db, Routes.pockets);
+      await tester.tap(find.text('Add pocket'));
+      await settle(tester);
+      await tester.enterText(find.byType(TextField).first, 'Savings');
+      await settle(tester);
+      await tester.tap(find.text('Save'));
+      await settle(tester);
+      expect(find.text('Pocket added'), findsOneWidget);
+      await tester.tap(find.text('Switch to Savings'));
+      await settle(tester);
+      final pockets = await _pockets(tester, db);
+      expect(
+        _container(tester).read(currentPocketIdProvider),
+        pockets.last.id,
+      );
+      expect(find.byType(PocketFormScreen), findsNothing);
+      expect(find.byType(PocketsScreen), findsOneWidget);
+      expect(find.text('Switched to Savings'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 5));
+      await closeApp(tester, db);
+    });
+
+    testWidgets('Home pocket menu, Add pocket: the same prompt', (
+      tester,
+    ) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db);
+      await tester.tap(find.byType(PocketButton));
+      await settle(tester);
+      await tester.tap(find.text('Add pocket'));
+      await settle(tester);
+      expect(find.byType(PocketFormScreen), findsOneWidget);
+      await tester.enterText(find.byType(TextField).first, 'Savings');
+      await settle(tester);
+      await tester.tap(find.text('Save'));
+      await settle(tester);
+      expect(find.text('Pocket added'), findsOneWidget);
+      await tester.tap(find.text('Switch to Savings'));
+      await settle(tester);
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(find.text('Savings'), findsOneWidget, reason: 'pocket button');
+      expect(find.text('Switched to Savings'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 5));
+      await closeApp(tester, db);
+    });
+
+    testWidgets('editing a pocket asks nothing', (tester) async {
+      final db = await sampleDatabase(tester);
+      final ids = (await tester.runAsync(() => addMockupPockets(db)))!;
+      await _open(tester, db, Routes.editPocket(ids.business));
+      await tester.enterText(find.byType(TextField).first, 'Work');
+      await settle(tester);
+      await tester.tap(find.text('Save'));
+      await settle(tester);
+      expect(find.byType(AppDialog), findsNothing);
+      expect(find.byType(PocketFormScreen), findsNothing);
+      expect(find.textContaining('Switched to'), findsNothing);
       await closeApp(tester, db);
     });
 

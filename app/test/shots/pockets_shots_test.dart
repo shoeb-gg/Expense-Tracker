@@ -1,10 +1,14 @@
 @Tags(['shots'])
 library;
 
-import 'package:flutter/widgets.dart';
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/data/pockets_repo.dart';
 import 'package:spill_the_bills/router.dart';
+import 'package:spill_the_bills/state/providers.dart';
 
 import '../support/pocket_samples.dart';
 import '../support/shots.dart';
@@ -82,6 +86,52 @@ void main() {
     await takeShot(tester, 'pockets_add_named');
     await closeApp(tester, db);
   });
+
+  // Not in the boards: the prompt after saving a new pocket, and the toast
+  // after switching. Default size and the largest, with a long name.
+  for (final (:name, :scale, :pocket, :from) in [
+    (name: 'default', scale: 1.0, pocket: 'Holiday fund', from: Routes.home),
+    (
+      name: 'largest',
+      scale: textScaleSteps.last,
+      pocket: 'Test trip',
+      from: Routes.home,
+    ),
+    (
+      name: 'long_largest',
+      scale: textScaleSteps.last,
+      pocket: 'Weekend in the mountains with the cousins',
+      from: Routes.pockets,
+    ),
+  ]) {
+    testWidgets('Pockets, the prompt after adding ($name)', (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(
+        tester,
+        db: db,
+        location: from,
+        settings: AppSettings(textScale: scale),
+      );
+      unawaited(
+        ProviderScope.containerOf(tester.element(find.byType(Scaffold).first))
+            .read(routerProvider)
+            .push<Object?>(Routes.newPocket),
+      );
+      await settle(tester);
+      await tester.enterText(find.byType(EditableText).first, pocket);
+      await tester.tap(find.bySemanticsLabel('🎉'));
+      FocusManager.instance.primaryFocus?.unfocus();
+      await settle(tester);
+      await tester.tap(find.text('Save'));
+      await settle(tester);
+      await takeShot(tester, 'pockets_added_prompt_$name');
+      await tester.tap(find.textContaining('Switch to ').last);
+      await settle(tester);
+      await takeShot(tester, 'pockets_added_switched_$name');
+      await tester.pump(const Duration(seconds: 5));
+      await closeApp(tester, db);
+    });
+  }
 
   // Not drawn: Edit pocket for a pocket that is gone.
   testWidgets('Pockets, pocket not found', (tester) async {

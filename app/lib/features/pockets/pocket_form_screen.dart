@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -102,7 +104,12 @@ class _PocketFormScreenState extends ConsumerState<PocketFormScreen> {
         return;
       }
       if (editing == null) {
-        await repo.add(name: name, emoji: emoji);
+        final id = await repo.add(name: name, emoji: emoji);
+        if (!mounted) return;
+        if (await _askToSwitch(name: name, emoji: emoji)) {
+          await _leaveAndSwitch(id, name);
+          return;
+        }
       } else {
         await repo.update(editing.copyWith(name: name, emoji: emoji));
       }
@@ -110,6 +117,37 @@ class _PocketFormScreenState extends ConsumerState<PocketFormScreen> {
     } finally {
       _saving = false;
     }
+  }
+
+  /// The new pocket is saved; asks whether to move to it. True for "Switch
+  /// to"; "Stay in" and closing the pop-up (outside tap or Back) are false.
+  Future<bool> _askToSwitch({
+    required String name,
+    required String emoji,
+  }) async {
+    final current = ref.read(currentPocketProvider)?.name;
+    // Put the keyboard away so it does not cover the pop-up's buttons.
+    FocusManager.instance.primaryFocus?.unfocus();
+    final switchNow = await showAppDialog(
+      context,
+      title: 'Pocket added',
+      boldLine: 'Switch to $emoji $name now?',
+      cancelLabel: current == null ? 'Stay' : 'Stay in $current',
+      actionLabel: 'Switch to $name',
+    );
+    return switchNow && mounted;
+  }
+
+  /// Leaves the form, then makes the new pocket the one in use. The switch
+  /// waits for the screen underneath to wake up (one frame): changing what
+  /// it watches while it sleeps under this form would make it rebuild its
+  /// providers in the middle of the route transition.
+  Future<void> _leaveAndSwitch(int id, String name) async {
+    final actions = ref.read(dataActionsProvider);
+    showToast(context, 'Switched to $name');
+    unawaited(Navigator.of(context).maybePop());
+    await WidgetsBinding.instance.endOfFrame;
+    await actions.switchPocket(id);
   }
 
   @override
