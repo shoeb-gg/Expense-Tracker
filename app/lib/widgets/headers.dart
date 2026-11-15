@@ -148,16 +148,7 @@ class SubHeader extends StatelessWidget {
                 children: [
                   // A title too wide for its column (large text) scales
                   // down instead of ending in "...".
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      softWrap: false,
-                      style: titleStyle,
-                    ),
-                  ),
+                  FitTitle(title, style: titleStyle),
                   if (subtitle != null)
                     Text(
                       subtitle!,
@@ -177,6 +168,47 @@ class SubHeader extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// A one-line, centred title that scales down to fit its width instead of
+/// ending in "..." (large text). While it fits it is a plain [Text], so
+/// nothing about it changes at the default size.
+class FitTitle extends StatelessWidget {
+  const FitTitle(this.text, {super.key, required this.style});
+
+  final String text;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final scaler = MediaQuery.textScalerOf(context);
+    final direction = Directionality.of(context);
+    return LayoutBuilder(
+      builder: (context, box) {
+        final painter = TextPainter(
+          text: TextSpan(text: text, style: style),
+          textDirection: direction,
+          textScaler: scaler,
+          maxLines: 1,
+        )..layout();
+        final natural = painter.width;
+        painter.dispose();
+        if (!box.maxWidth.isFinite || natural <= box.maxWidth) {
+          return Text(
+            text,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: style,
+          );
+        }
+        return FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(text, maxLines: 1, softWrap: false, style: style),
+        );
+      },
     );
   }
 }

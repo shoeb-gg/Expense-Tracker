@@ -788,16 +788,7 @@ class _EditorHeader extends StatelessWidget {
                   // Room between the title and Cancel or the pill when
                   // large text makes the title scale down to fit.
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      softWrap: false,
-                      style: AppText.screenTitle,
-                    ),
-                  ),
+                  child: FitTitle(title, style: AppText.screenTitle),
                 ),
               ),
             ),
