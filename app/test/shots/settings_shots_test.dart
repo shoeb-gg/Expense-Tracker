@@ -19,7 +19,8 @@ void main() {
     final db = await sampleDatabase(tester);
     await addMockupPockets(tester, db);
     await pumpApp(tester, db: db, location: Routes.settings);
-    await boardHeight(tester, 1740 + 128);
+    // The board minus its Theme row (68 px): that choice is hidden for now.
+    await boardHeight(tester, 1740 + 128 - 68);
     expect(find.text('34,555'), findsOneWidget);
     expect(find.text('+13'), findsOneWidget);
     await takeShot(tester, 'settings_default');
@@ -30,6 +31,18 @@ void main() {
     final db = await sampleDatabase(tester);
     await pumpApp(tester, db: db, location: Routes.settings);
     await takeShot(tester, 'settings_top');
+    await closeApp(tester, db);
+  });
+
+  testWidgets('settings: Appearance at the largest text size', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(
+      tester,
+      db: db,
+      location: Routes.settings,
+      settings: AppSettings(textScale: textScaleSteps.last),
+    );
+    await takeShot(tester, 'settings_top_largest');
     await closeApp(tester, db);
   });
 
@@ -45,7 +58,7 @@ void main() {
         thousandsSeparator: false,
       ),
     );
-    await boardHeight(tester, 1960);
+    await boardHeight(tester, 1960 - 68);
     expect(find.text('1234567.89'), findsOneWidget);
     await takeShot(tester, 'settings_coral_large');
     await closeApp(tester, db);

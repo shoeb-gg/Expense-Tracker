@@ -122,9 +122,7 @@ void main() {
     await closeApp(tester, db);
   });
 
-  testWidgets('colour theme, theme and text size apply at once', (
-    tester,
-  ) async {
+  testWidgets('colour theme and text size apply at once', (tester) async {
     final db = await openSettings(tester);
     await tester.tap(find.bySemanticsLabel('Coral'));
     await settle(tester);
@@ -133,10 +131,6 @@ void main() {
       tester.element(find.byType(SettingsScreen)).colors.bg,
       AppColors.of(Mood.coral).bg,
     );
-
-    await tester.tap(find.text('Light'));
-    await settle(tester);
-    expect(settingsOf(tester).themeMode, AppThemeMode.light);
 
     final slider = find.descendant(
       of: find.byType(TextSizeSlider),
@@ -148,6 +142,39 @@ void main() {
     expect(settingsOf(tester).textSizeIndex, 4);
     expect(find.text('Largest'), findsOneWidget);
     await closeApp(tester, db);
+  });
+
+  testWidgets('there is no Light / System / Dark choice until Light exists', (
+    tester,
+  ) async {
+    final db = await openSettings(tester);
+    expect(find.text('Appearance'), findsOneWidget);
+    expect(find.text('Color theme'), findsOneWidget, reason: 'mood stays');
+    expect(find.text('Text size'), findsOneWidget);
+    expect(find.text('Theme'), findsNothing);
+    expect(find.text('Light'), findsNothing);
+    expect(find.text('System'), findsNothing);
+    expect(find.text('Dark'), findsNothing);
+    expect(find.byType(AppSegmented<AppThemeMode>), findsNothing);
+    await closeApp(tester, db);
+  });
+
+  testWidgets('a stored Light or System choice still renders dark', (
+    tester,
+  ) async {
+    for (final mode in [AppThemeMode.light, AppThemeMode.system]) {
+      final db = await openSettings(
+        tester,
+        settings: AppSettings(themeMode: mode),
+      );
+      final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
+      expect(app.themeMode, ThemeMode.dark);
+      expect(
+        tester.element(find.byType(SettingsScreen)).colors.bg,
+        AppColors.of(Mood.aqua).bg,
+      );
+      await closeApp(tester, db);
+    }
   });
 
   testWidgets('delete all data needs the tick, then starts again', (
