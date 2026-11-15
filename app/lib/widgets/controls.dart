@@ -86,13 +86,16 @@ class AppSegmented<T> extends StatelessWidget {
             onTap: () => onChanged(s.value),
             selected: on,
             borderRadius: BorderRadius.circular(segR),
+            // A label wider than the segment less 6 px each side (the bold
+            // one of the chosen segment, in large text) scales down a little
+            // instead of touching the edges.
             child: Center(
-              child: Text(
-                s.label,
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.fade,
-                style: style,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(s.label, maxLines: 1, softWrap: false, style: style),
+                ),
               ),
             ),
           ),

@@ -175,33 +175,46 @@ class SubHeader extends StatelessWidget {
 /// A one-line, centred title that scales down to fit its width instead of
 /// ending in "..." (large text). While it fits it is a plain [Text], so
 /// nothing about it changes at the default size.
+///
+/// [minScale] is the smallest scale it may shrink to (0: any). A title that
+/// would need less is drawn at [minScale] and ends in "...". [textAlign] is
+/// how the plain text is aligned in its box.
 class FitTitle extends StatelessWidget {
-  const FitTitle(this.text, {super.key, required this.style});
+  const FitTitle(
+    this.text, {
+    super.key,
+    required this.style,
+    this.minScale = 0,
+    this.textAlign = TextAlign.center,
+  });
 
   final String text;
   final TextStyle style;
+  final double minScale;
+  final TextAlign textAlign;
 
   @override
   Widget build(BuildContext context) {
-    final scaler = MediaQuery.textScalerOf(context);
-    final direction = Directionality.of(context);
     return LayoutBuilder(
       builder: (context, box) {
-        final painter = TextPainter(
-          text: TextSpan(text: text, style: style),
-          textDirection: direction,
-          textScaler: scaler,
-          maxLines: 1,
-        )..layout();
-        final natural = painter.width;
-        painter.dispose();
+        final natural = titleWidth(context, text, style);
         if (!box.maxWidth.isFinite || natural <= box.maxWidth) {
           return Text(
             text,
-            textAlign: TextAlign.center,
+            textAlign: textAlign,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: style,
+          );
+        }
+        if (box.maxWidth / natural < minScale) {
+          // Too long even at [minScale]: that scale, and the end cut.
+          return FittedBox(
+            fit: BoxFit.scaleDown,
+            child: SizedBox(
+              width: box.maxWidth / minScale,
+              child: Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: style),
+            ),
           );
         }
         return FittedBox(
@@ -211,4 +224,17 @@ class FitTitle extends StatelessWidget {
       },
     );
   }
+}
+
+/// The width [text] takes on one line in [style] at the current text size.
+double titleWidth(BuildContext context, String text, TextStyle style) {
+  final painter = TextPainter(
+    text: TextSpan(text: text, style: style),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+    maxLines: 1,
+  )..layout();
+  final width = painter.width;
+  painter.dispose();
+  return width;
 }

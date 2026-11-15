@@ -129,6 +129,31 @@ void main() {
     await closeApp(tester, db);
   });
 
+  for (final big in [false, true]) {
+    final size = big ? 'largest' : 'default';
+    testWidgets('charts: category header and sort segment, $size text', (tester) async {
+      final db = await sampleDatabase(tester);
+      for (final name in ['Online Subscriptions', 'Miscellaneous', 'Transportation']) {
+        final rows = await tester.runAsync(
+          () => (db.select(db.categories)..where((c) => c.name.equals(name))).get(),
+        );
+        await pumpApp(
+          tester,
+          db: db,
+          location: Routes.category(
+            rows!.single.id,
+            from: dayOf(2026, 10, 1),
+            to: dayOf(2026, 10, 31),
+          ),
+          settings: big ? AppSettings(textScale: textScaleSteps.last) : const AppSettings(),
+        );
+        await _tall(tester, 834);
+        await takeShot(tester, 'charts_category_${name.split(' ').first.toLowerCase()}_$size');
+      }
+      await closeApp(tester, db);
+    });
+  }
+
   testWidgets('charts: 2025 and the year pop-up', (tester) async {
     final db = await sampleDatabase(tester);
     await pumpApp(tester, db: db, location: Routes.charts);

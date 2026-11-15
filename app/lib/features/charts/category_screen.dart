@@ -186,6 +186,11 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
   }
 }
 
+/// The smallest the category name in the header is scaled to before it ends
+/// in "...". "Online Subscriptions" at the largest text size needs 0.68 even
+/// without the emoji tile, so 0.65 keeps every default name whole.
+const double _minTitleScale = 0.65;
+
 class _Header extends StatelessWidget {
   const _Header({
     required this.category,
@@ -210,29 +215,40 @@ class _Header extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: LayoutBuilder(
-                builder: (context, box) => Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // The tile goes when there is no room for it.
-                    if (box.maxWidth >= 64) ...[
-                      EmojiTile(
-                        emoji: category.emoji,
-                        size: 28,
-                        radius: 9,
-                        emojiSize: 15,
+                builder: (context, box) {
+                  // The name scales down to fit (to _minTitleScale at the most). The
+                  // tile goes first when the name would need less than that
+                  // with it, and altogether when there is no room for it.
+                  const tileRoom = 28 + 8;
+                  final natural = titleWidth(context, category.name, AppText.screenTitle);
+                  var tile = box.maxWidth >= 64;
+                  if (tile && (box.maxWidth - tileRoom) / natural < _minTitleScale) {
+                    tile = false;
+                  }
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (tile) ...[
+                        EmojiTile(
+                          emoji: category.emoji,
+                          size: 28,
+                          radius: 9,
+                          emojiSize: 15,
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Flexible(
+                        child: FitTitle(
+                          category.name,
+                          style: AppText.screenTitle,
+                          minScale: _minTitleScale,
+                          // As it was: the text is its own width here.
+                          textAlign: TextAlign.start,
+                        ),
                       ),
-                      const SizedBox(width: 8),
                     ],
-                    Flexible(
-                      child: Text(
-                        category.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppText.screenTitle,
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
             const SizedBox(width: 12),
