@@ -61,14 +61,14 @@ void main() {
     expect(_location(tester), Routes.calendar());
     expect(find.byType(CalendarScreen), findsOneWidget);
 
-    // Finger left to right: the previous month, opened on its last day.
+    // Finger left to right: the previous month, opened on its 1st.
     await tester.dragFrom(const Offset(180, 300), const Offset(200, 0));
     await settle(tester);
     expect(find.text('September 2026'), findsOneWidget);
-    final sep30 = dayOf(2026, 9, 30);
-    await _tap(tester, find.text('Add expense on Sep 30'));
-    expect(_location(tester), Routes.add(day: sep30));
-    expect(tester.widget<AddScreen>(find.byType(AddScreen)).day, sep30);
+    final sep1 = dayOf(2026, 9, 1);
+    await _tap(tester, find.text('Add expense on Sep 1'));
+    expect(_location(tester), Routes.add(day: sep1));
+    expect(tester.widget<AddScreen>(find.byType(AddScreen)).day, sep1);
 
     await _tap(tester, find.text('Gifts'));
     for (final k in ['5', '0', '0']) {

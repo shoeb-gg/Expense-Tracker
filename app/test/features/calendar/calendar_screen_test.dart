@@ -36,9 +36,9 @@ void main() {
     await _swipe(tester, const Offset(200, 0));
     expect(find.text('September 2026'), findsOneWidget);
     expect(find.text('45,220 spent'), findsOneWidget);
-    // Another month opens on its last day.
-    expect(find.text('Wednesday'), findsOneWidget);
-    expect(find.text('September 30'), findsOneWidget);
+    // Another month opens on its 1st.
+    expect(find.text('Tuesday'), findsOneWidget);
+    expect(find.text('September 1'), findsOneWidget);
     await _swipe(tester, const Offset(200, 0));
     expect(find.text('August 2026'), findsOneWidget);
     await _swipe(tester, const Offset(-200, 0));
@@ -107,7 +107,7 @@ void main() {
     await tester.dragFrom(tester.getCenter(find.text('9')), const Offset(0, 80));
     await settle(tester);
     expect(find.text('September 2026'), findsOneWidget);
-    expect(find.text('September 30'), findsOneWidget);
+    expect(find.text('September 1'), findsOneWidget);
     await closeApp(tester, db);
   });
 

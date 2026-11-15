@@ -238,6 +238,30 @@ void main() {
       expect(_location(tester), Routes.calendar());
       await closeApp(tester, db);
     });
+
+    testWidgets('the calendar lands on today, or on the 1st of another month',
+        (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db);
+      // This month: today is chosen.
+      await tester.tap(find.bySemanticsLabel('Calendar'));
+      await settle(tester);
+      expect(find.text('October 2026'), findsOneWidget);
+      expect(find.text('Sunday'), findsOneWidget);
+      expect(find.text('Add expense on Oct 18'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Back'));
+      await settle(tester);
+
+      // Another month: its 1st is chosen.
+      await _swipe(tester, 200);
+      expect(find.text('Spent in September'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Calendar'));
+      await settle(tester);
+      expect(find.text('September 2026'), findsOneWidget);
+      expect(find.text('Tuesday'), findsOneWidget);
+      expect(find.text('Add expense on Sep 1'), findsOneWidget);
+      await closeApp(tester, db);
+    });
   });
 
   group('rows', () {

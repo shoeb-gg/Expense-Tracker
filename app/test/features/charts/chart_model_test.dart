@@ -324,7 +324,10 @@ void main() {
 
     test('default day and short amounts', () {
       expect(defaultDay(2026, 10, today), today);
-      expect(defaultDay(2026, 9, today), dayOf(2026, 9, 30));
+      // Any other month opens on its 1st, earlier or later.
+      expect(defaultDay(2026, 9, today), dayOf(2026, 9, 1));
+      expect(defaultDay(2026, 11, today), dayOf(2026, 11, 1));
+      expect(defaultDay(2024, 2, today), dayOf(2024, 2, 1));
       expect(fmt.short(1509000), '15K');
       expect(fmt.short(166500), '1.7K');
       expect(fmt.short(83500), '835');

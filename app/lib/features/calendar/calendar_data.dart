@@ -36,10 +36,10 @@ List<int?> monthCells(int year, int month, FirstDayOfWeek first) {
 }
 
 /// The day chosen when a month opens: today in the current month, else the
-/// month's last day.
+/// month's 1st (an earlier month and a later one alike).
 int defaultDay(int year, int month, int today) {
-  final e = monthEnd(year, month);
-  return today <= e && today >= monthStart(year, month) ? today : e;
+  final s = monthStart(year, month);
+  return today >= s && today <= monthEnd(year, month) ? today : s;
 }
 
 /// A month as one number (year * 12 + month - 1), for limits and keys.
