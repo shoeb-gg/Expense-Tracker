@@ -63,12 +63,6 @@ class _ChartsScreenState extends ConsumerState<ChartsScreen> {
         custom: _customRange(s, today),
       );
 
-  /// The offsets the period tabs show. A period still to come (offset below
-  /// 0) takes the first tab, where an old period goes too.
-  List<int> _tabOffsets(PeriodKind kind, int selected) => selected < 0
-      ? [selected, for (var o = tabCount(kind) - 2; o >= 0; o--) o]
-      : tabOffsets(kind, selected);
-
   void _select(PeriodKind kind, int offset, {required bool forward}) =>
       setState(() {
         _forward = forward;
@@ -194,7 +188,7 @@ class _ChartsScreenState extends ConsumerState<ChartsScreen> {
     final nowWord = _nowWord(_kind);
 
     final tabs = [
-      for (final o in _tabOffsets(_kind, _offsets[_kind]!))
+      for (final o in tabOffsets(_kind, _offsets[_kind]!))
         () {
           final p = _kind == PeriodKind.custom
               ? period

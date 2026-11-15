@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/core/days.dart';
+import 'package:spill_the_bills/data/db.dart';
 import 'package:spill_the_bills/data/expenses_repo.dart';
 import 'package:spill_the_bills/data/pockets_repo.dart';
 import 'package:spill_the_bills/features/charts/category_screen.dart';
@@ -129,6 +130,107 @@ void main() {
       expect(find.text('Oct 25 – Oct 31'), findsOneWidget);
       expect(find.text('This week'), findsNWidgets(2), reason: 'tab and pill');
       await closeApp(tester, db);
+    });
+
+    group('the period tabs read in time order, left to right', () {
+      /// The tab strip's labels in the order they are laid out, with the
+      /// tabs' common line (the "This month" pill sits above it).
+      List<String> tabsLeftToRight(WidgetTester tester, List<String> expected) {
+        final seen = <(double, String)>[];
+        for (final label in expected) {
+          final rect = tester.getRect(find.text(label).last);
+          seen.add((rect.left, label));
+          // All the tabs are on one line, under the segment.
+          expect(rect.top, greaterThan(100), reason: label);
+        }
+        final byLeft = [...seen]..sort((a, b) => a.$1.compareTo(b.$1));
+        return [for (final (_, label) in byLeft) label];
+      }
+
+      Future<AppDatabase> openCharts(WidgetTester tester, {String? kind}) async {
+        final db = await sampleDatabase(tester);
+        await pumpApp(tester, db: db, location: Routes.charts);
+        if (kind != null) {
+          await tester.tap(find.text(kind));
+          await settle(tester);
+        }
+        return db;
+      }
+
+      Future<void> ahead(WidgetTester tester, int n) async {
+        for (var i = 0; i < n; i++) {
+          await _swipe(tester, const Offset(-200, 0));
+        }
+      }
+
+      testWidgets('Month, one ahead: the chosen month is the last tab', (
+        tester,
+      ) async {
+        final db = await openCharts(tester);
+        await ahead(tester, 1);
+        const order = ['Last month', 'This month', 'Nov 2026'];
+        expect(tabsLeftToRight(tester, order), order);
+        await closeApp(tester, db);
+      });
+
+      testWidgets('Month, two and three ahead: the window slides', (tester) async {
+        final db = await openCharts(tester);
+        await ahead(tester, 2);
+        const two = ['This month', 'Nov 2026', 'Dec 2026'];
+        expect(tabsLeftToRight(tester, two), two);
+        expect(find.text('Last month'), findsNothing);
+        await ahead(tester, 1);
+        const three = ['Nov 2026', 'Dec 2026', 'Jan 2027'];
+        expect(tabsLeftToRight(tester, three), three);
+        await closeApp(tester, db);
+      });
+
+      testWidgets('Year: "This year | 2027", then "2027 | 2028"', (tester) async {
+        final db = await openCharts(tester, kind: 'Year');
+        await ahead(tester, 1);
+        const one = ['This year', '2027'];
+        expect(tabsLeftToRight(tester, one), one);
+        await ahead(tester, 1);
+        const two = ['2027', '2028'];
+        expect(tabsLeftToRight(tester, two), two);
+        await closeApp(tester, db);
+      });
+
+      testWidgets('Week, one ahead: the chosen week is the last tab', (tester) async {
+        final db = await openCharts(tester, kind: 'Week');
+        await ahead(tester, 1);
+        const order = ['Last week', 'This week', 'Oct 25 – Oct 31'];
+        expect(tabsLeftToRight(tester, order), order);
+        await closeApp(tester, db);
+      });
+
+      testWidgets('past periods keep their tabs: the older one first', (tester) async {
+        final db = await openCharts(tester);
+        const now = ['Aug 2026', 'Last month', 'This month'];
+        expect(tabsLeftToRight(tester, now), now);
+        for (var i = 0; i < 3; i++) {
+          await _swipe(tester, const Offset(200, 0));
+        }
+        const back = ['Jul 2026', 'Last month', 'This month'];
+        expect(tabsLeftToRight(tester, back), back);
+        await closeApp(tester, db);
+      });
+
+      testWidgets('tapping a tab chooses that period, past or future', (tester) async {
+        final db = await openCharts(tester);
+        await ahead(tester, 2);
+        // Nov 2026 is the middle tab now; This month is on the left.
+        await tester.tap(find.text('Nov 2026').last);
+        await settle(tester);
+        const order = ['Last month', 'This month', 'Nov 2026'];
+        expect(tabsLeftToRight(tester, order), order);
+        await tester.tap(find.text('This month').last);
+        await settle(tester);
+        const now = ['Aug 2026', 'Last month', 'This month'];
+        expect(tabsLeftToRight(tester, now), now);
+        expect(_total('34,555'), findsWidgets);
+        await closeApp(tester, db);
+      });
     });
 
     testWidgets('a future week, month or year shows every chart empty, '
@@ -490,7 +592,8 @@ void main() {
       await tester.tap(find.text('Confirm'));
       await settle(tester);
       expect(find.text('2028'), findsOneWidget);
-      expect(find.text('This year'), findsNWidgets(2), reason: 'tab and pill');
+      // The pill; the tabs show 2027 and 2028, the chosen year last.
+      expect(find.text('This year'), findsOneWidget);
       await closeApp(tester, db);
     });
 

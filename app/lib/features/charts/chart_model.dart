@@ -155,9 +155,15 @@ int tabCount(PeriodKind kind) => switch (kind) {
 
 /// The offsets the tabs show, left to right, while [selected] is chosen. The
 /// first tab shows the chosen period once it is older than the quick tabs.
+///
+/// The tabs always read in time order, oldest first. A period still to come
+/// (offset below 0) is the last tab, after the ones before it: "Last month,
+/// This month, Dec 2026"; two or more ahead the window slides, "This month,
+/// Dec 2026, Jan 2027".
 List<int> tabOffsets(PeriodKind kind, int selected) {
   final n = tabCount(kind);
   if (n == 1) return const [0];
+  if (selected < 0) return [for (var o = selected + n - 1; o >= selected; o--) o];
   final quick = n - 1; // offsets 0 .. quick-1 have their own tabs
   final browse = math.max(quick, selected);
   return [browse, for (var o = quick - 1; o >= 0; o--) o];

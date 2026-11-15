@@ -133,6 +133,33 @@ void main() {
       expect(tabOffsets(PeriodKind.custom, 0), [0]);
     });
 
+    test('tab offsets read in time order, also for a period still to come',
+        () {
+      // One ahead: the quick tabs, then the chosen period last.
+      expect(tabOffsets(PeriodKind.month, -1), [1, 0, -1]);
+      expect(tabOffsets(PeriodKind.week, -1), [1, 0, -1]);
+      expect(tabOffsets(PeriodKind.year, -1), [0, -1]);
+      // Further ahead the window slides, the chosen period staying last.
+      expect(tabOffsets(PeriodKind.month, -2), [0, -1, -2]);
+      expect(tabOffsets(PeriodKind.month, -3), [-1, -2, -3]);
+      expect(tabOffsets(PeriodKind.year, -2), [-1, -2]);
+      expect(tabOffsets(PeriodKind.year, -5), [-4, -5]);
+      // A custom range is one tab.
+      expect(tabOffsets(PeriodKind.custom, -1), [0]);
+      // Every window is strictly older to newer, and has the chosen one.
+      for (final kind in PeriodKind.values) {
+        for (var o = -6; o <= 6; o++) {
+          final tabs = tabOffsets(kind, o);
+          if (kind == PeriodKind.custom) continue;
+          expect(tabs, contains(o), reason: '$kind $o');
+          expect(tabs.length, tabCount(kind), reason: '$kind $o');
+          for (var i = 1; i < tabs.length; i++) {
+            expect(tabs[i], lessThan(tabs[i - 1]), reason: '$kind $o');
+          }
+        }
+      }
+    });
+
     test('offset of a day', () {
       expect(
         offsetOfDay(PeriodKind.month, dayOf(2025, 1, 1),
