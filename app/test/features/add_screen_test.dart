@@ -697,6 +697,99 @@ void main() {
       await closeApp(tester, db);
     });
 
+    /// Whether the soft keyboard would be open: a text field has focus.
+    bool aFieldHasFocus(WidgetTester tester) => tester
+        .widgetList<EditableText>(find.byType(EditableText))
+        .any((field) => field.focusNode.hasFocus);
+
+    /// The phone's steps: the title field is tapped (keyboard up), Back
+    /// closes the keyboard but the field keeps its focus.
+    Future<void> focusTitleThenCloseKeyboard(WidgetTester tester) async {
+      await tap(tester, find.text('Snacks'));
+      await keys(tester, '5');
+      showSoftKeyboard(tester);
+      await tester.tap(find.byType(EditableText).first);
+      await settle(tester);
+      hideSoftKeyboard(tester);
+      await settle(tester);
+      expect(aFieldHasFocus(tester), isTrue, reason: 'the title keeps focus after Back');
+    }
+
+    testWidgets('Cancel, then Keep editing: the keyboard stays down, the keys show', (
+      tester,
+    ) async {
+      final db = await emptyDb(tester);
+      await pumpApp(tester, db: db, location: Routes.add());
+      await focusTitleThenCloseKeyboard(tester);
+
+      await tap(tester, find.text('Cancel'));
+      expect(dialog, findsOneWidget);
+      await tap(tester, find.text('Keep editing'));
+      expect(dialog, findsNothing);
+
+      // The screen is as it was before Cancel: no field has focus (so the
+      // keyboard does not open again) and the keys are showing.
+      expect(aFieldHasFocus(tester), isFalse);
+      expect(find.text('7'), findsOneWidget);
+      expect(find.text('Save'), findsOneWidget);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('system Back, then Keep editing: the keyboard stays down too', (tester) async {
+      final db = await emptyDb(tester);
+      await pumpApp(tester, db: db, location: Routes.add());
+      await focusTitleThenCloseKeyboard(tester);
+
+      await tester.binding.handlePopRoute();
+      await settle(tester);
+      expect(dialog, findsOneWidget);
+      await tap(tester, find.text('Keep editing'));
+      expect(dialog, findsNothing);
+      expect(aFieldHasFocus(tester), isFalse);
+      expect(find.text('7'), findsOneWidget);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('Cancel with the keyboard still open: Keep editing leaves it closed', (
+      tester,
+    ) async {
+      final db = await emptyDb(tester);
+      await pumpApp(tester, db: db, location: Routes.add());
+      await tap(tester, find.text('Snacks'));
+      await keys(tester, '5');
+      showSoftKeyboard(tester);
+      await tester.tap(find.byType(EditableText).first);
+      await settle(tester);
+      expect(aFieldHasFocus(tester), isTrue);
+
+      await tap(tester, find.text('Cancel'));
+      expect(dialog, findsOneWidget);
+      hideSoftKeyboard(tester);
+      await tap(tester, find.text('Keep editing'));
+      expect(dialog, findsNothing);
+      expect(aFieldHasFocus(tester), isFalse);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('the typing bar of the opening state is not refocused either', (tester) async {
+      final db = await emptyDb(tester);
+      await pumpApp(tester, db: db, location: Routes.add());
+      showSoftKeyboard(tester);
+      await tester.tap(find.byType(EditableText).last);
+      await settle(tester);
+      await typeInBar(tester, 'coffee 5');
+      hideSoftKeyboard(tester);
+      await settle(tester);
+      expect(aFieldHasFocus(tester), isTrue);
+
+      await tap(tester, find.text('Cancel'));
+      expect(dialog, findsOneWidget);
+      await tap(tester, find.text('Keep editing'));
+      expect(aFieldHasFocus(tester), isFalse);
+      expect(find.text('coffee 5'), findsOneWidget);
+      await closeApp(tester, db);
+    });
+
     testWidgets('after Save nothing is asked', (tester) async {
       final db = await emptyDb(tester);
       await pumpApp(tester, db: db);

@@ -700,10 +700,22 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
     }
   }
 
+  /// Takes focus off the text field that has it, and makes the screen forget
+  /// that it had it.
+  ///
+  /// `FocusScope.of(context).unfocus()` would not do: it only clears the
+  /// history of the scope above this screen's, so when a dialog or sheet
+  /// closes again the screen's own scope puts focus back on the field, and
+  /// the keyboard opens again.
+  void _dropFocus() => FocusManager.instance.primaryFocus?.unfocus();
+
   /// Cancel and Back: asks first when something was entered or changed (a
   /// saved expense never asks).
+  ///
+  /// Focus goes before the question, so "Keep editing" brings the screen back
+  /// exactly as it was, with the keyboard down.
   Future<void> _close() async {
-    FocusScope.of(context).unfocus();
+    _dropFocus();
     if (_saved || !_dirty) {
       _leave();
       return;
