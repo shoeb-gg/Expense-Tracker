@@ -72,7 +72,7 @@ void main() {
       expect(cs.first.color, CategoryColor.green.argb);
       expect(cs[1].emoji, '\u{1F357}');
       expect(cs[4].color, CategoryColor.blue.argb);
-      expect(cs.last.color, CategoryColor.violet.argb);
+      expect(cs.last.color, CategoryColor.slate.argb);
     });
   });
 

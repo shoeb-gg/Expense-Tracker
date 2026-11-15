@@ -10,7 +10,8 @@ import '../../widgets/kit.dart';
 import 'category_parts.dart';
 
 /// Add category / Edit category (boards "Add category", "Edit category"):
-/// a name with a live preview tile, eight chart colours and an emoji
+/// a name with a live preview tile, every chart color (those other
+/// categories already use are marked, and a line says who) and an emoji
 /// picker in six groups, plus the phone keyboard for any other emoji.
 class CategoryFormScreen extends ConsumerStatefulWidget {
   const CategoryFormScreen({super.key, this.categoryId});
@@ -27,7 +28,14 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   final _nameFocus = FocusNode();
   final _emojiFocus = FocusNode();
   String _emoji = newCategoryEmoji;
-  int _color = newCategoryColor.argb;
+
+  /// The color the user picked, or (edit) the category's own. Null on Add
+  /// until they pick: then [_newColor] applies.
+  int? _picked;
+
+  /// A new category's starting color: the first no category has, fixed once
+  /// the categories have loaded so it does not move under the user.
+  int? _newColor;
   ExpenseCategory? _editing;
   bool _seeded = false;
   bool _saving = false;
@@ -53,8 +61,28 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
     _editing = cat;
     _name.text = cat.name;
     _emoji = cat.emoji;
-    _color = cat.color;
+    _picked = cat.color;
     _seeded = true;
+  }
+
+  /// The color shown and saved.
+  int _colorFor(List<ExpenseCategory>? all) {
+    final picked = _picked;
+    if (picked != null) return picked;
+    if (all == null) return CategoryColor.values.first.argb;
+    return _newColor ??= CategoryColor.firstFree([
+      for (final c in all) c.color,
+    ]).argb;
+  }
+
+  /// Who has each color, leaving out the category being edited.
+  Map<int, List<ExpenseCategory>> _takenBy(List<ExpenseCategory>? all) {
+    final taken = <int, List<ExpenseCategory>>{};
+    for (final c in all ?? const <ExpenseCategory>[]) {
+      if (c.id == _editing?.id) continue;
+      taken.putIfAbsent(c.color, () => []).add(c);
+    }
+    return taken;
   }
 
   Future<void> _save() async {
@@ -70,11 +98,12 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
         return;
       }
       final editing = _editing;
+      final color = _colorFor(ref.read(categoriesProvider).value);
       if (editing == null) {
-        await repo.add(name: name, emoji: _emoji, color: _color);
+        await repo.add(name: name, emoji: _emoji, color: color);
       } else {
         await repo.update(
-          editing.copyWith(name: name, emoji: _emoji, color: _color),
+          editing.copyWith(name: name, emoji: _emoji, color: color),
         );
       }
       if (mounted) await Navigator.of(context).maybePop();
@@ -99,6 +128,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
       }
     }
     final canSave = _name.text.trim().isNotEmpty && !_saving;
+    final all = ref.watch(categoriesProvider).value;
+    final color = _colorFor(all);
     return Scaffold(
       backgroundColor: c.bg,
       body: SafeArea(
@@ -127,17 +158,18 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                       controller: _name,
                       focusNode: _nameFocus,
                       emoji: _emoji,
-                      color: Color(_color),
+                      color: Color(color),
                       onSubmit: _save,
                     ),
                     const SizedBox(height: 12),
                     BandCard(
                       title: 'Color on charts',
-                      trailingText: colorName(_color),
-                      bodyPadding: const EdgeInsets.all(16),
+                      trailingText: colorName(color),
+                      bodyPadding: const EdgeInsets.fromLTRB(16, 11, 16, 16),
                       child: ColorSwatches(
-                        value: _color,
-                        onChanged: (v) => setState(() => _color = v.argb),
+                        value: color,
+                        takenBy: _takenBy(all),
+                        onChanged: (v) => setState(() => _picked = v.argb),
                       ),
                     ),
                     const SizedBox(height: 12),

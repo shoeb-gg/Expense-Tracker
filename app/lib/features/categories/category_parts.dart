@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../data/db.dart' show ExpenseCategory;
 import '../../theme/symbols.dart';
 import '../../theme/text.dart';
 import '../../theme/tokens.dart';
@@ -65,12 +66,29 @@ const List<EmojiGroup> categoryEmojiGroups = [
   ),
 ];
 
-/// A new category starts with the label emoji and amber.
+/// A new category starts with the label emoji, and on the first color no
+/// category has yet ([CategoryColor.firstFree]).
 const String newCategoryEmoji = '\u{1F3F7}️';
-const CategoryColor newCategoryColor = CategoryColor.amber;
 
-/// "Amber", or "Custom" for a colour outside the eight.
+/// "Amber", or "Custom" for a color outside the palette.
 String colorName(int argb) => CategoryColor.fromArgb(argb)?.label ?? 'Custom';
+
+/// What the line under the swatches says when nobody else has the color.
+const String colorFreeLine = 'No other category uses this color';
+
+/// "Also used by Shopping", "... by Shopping and Gifts", "... by Shopping,
+/// Gifts and Gym"; with more than three, the first three and a count. Null
+/// when [names] is empty.
+String? colorOwnersLine(List<String> names) {
+  if (names.isEmpty) return null;
+  if (names.length == 1) return 'Also used by ${names.first}';
+  if (names.length <= 3) {
+    final head = names.sublist(0, names.length - 1).join(', ');
+    return 'Also used by $head and ${names.last}';
+  }
+  final more = names.length - 3;
+  return 'Also used by ${names.take(3).join(', ')} and $more more';
+}
 
 /// The live preview tile of the form: 56 px, radius 18, a 28 px emoji and
 /// a 16 px colour dot.
@@ -134,71 +152,129 @@ class CategoryPreviewTile extends StatelessWidget {
   }
 }
 
-/// The eight chart colours as 30 px swatches; the chosen one has a ring in
-/// its own colour, a gap, and a tick.
+/// Every chart color as a swatch, wrapped in rows (six to a row on a phone),
+/// with the line under them that says who else uses the chosen one.
+///
+/// A swatch is a 34 px circle in a 44 px tap area. The chosen one has a ring
+/// in its own color, a gap, and a tick. A color that other categories
+/// already use shows the first one's emoji on it; it can still be picked.
+/// [takenBy] maps a color (ARGB) to the categories that use it, leaving out
+/// the category being edited.
 class ColorSwatches extends StatelessWidget {
   const ColorSwatches({
     super.key,
     required this.value,
     required this.onChanged,
+    this.takenBy = const <int, List<ExpenseCategory>>{},
   });
 
   final int value;
   final ValueChanged<CategoryColor> onChanged;
+  final Map<int, List<ExpenseCategory>> takenBy;
+
+  static const double _cell = 44;
+  static const double _dot = 34;
+
+  Widget _swatch(BuildContext context, CategoryColor color) {
+    final c = context.colors;
+    final selected = color.argb == value;
+    final owners = takenBy[color.argb] ?? const <ExpenseCategory>[];
+    final line = colorOwnersLine([for (final o in owners) o.name]);
+    final Widget dot;
+    if (selected) {
+      dot = Container(
+        width: _dot,
+        height: _dot,
+        decoration: BoxDecoration(color: color.color, shape: BoxShape.circle),
+        padding: const EdgeInsets.all(2),
+        child: Container(
+          decoration: BoxDecoration(color: c.surface, shape: BoxShape.circle),
+          padding: const EdgeInsets.all(2.5),
+          child: Container(
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: color.color,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Symbols.check_rounded,
+              size: 18,
+              color: Color(0xFF0B1517),
+            ),
+          ),
+        ),
+      );
+    } else {
+      dot = Container(
+        key: owners.isEmpty ? null : ValueKey<String>('taken-${color.name}'),
+        width: _dot,
+        height: _dot,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(color: color.color, shape: BoxShape.circle),
+        child: owners.isEmpty
+            ? null
+            : ExcludeSemantics(
+                child: Text(
+                  owners.first.emoji,
+                  style: AppText.emoji.copyWith(fontSize: 16),
+                ),
+              ),
+      );
+    }
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: color.label,
+      hint: line,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => onChanged(color),
+        child: SizedBox(
+          width: _cell,
+          height: _cell,
+          child: Center(child: dot),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final names = [for (final o in takenBy[value] ?? const <ExpenseCategory>[]) o.name];
+    final owners = colorOwnersLine(names);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final color in CategoryColor.values)
-          Semantics(
-            button: true,
-            selected: color.argb == value,
-            label: color.label,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => onChanged(color),
-              child: SizedBox(
-                width: 30,
-                height: 30,
-                child: color.argb != value
-                    ? DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: color.color,
-                          shape: BoxShape.circle,
-                        ),
-                      )
-                    : Container(
-                        decoration: BoxDecoration(
-                          color: color.color,
-                          shape: BoxShape.circle,
-                        ),
-                        padding: const EdgeInsets.all(2),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: c.surface,
-                            shape: BoxShape.circle,
-                          ),
-                          padding: const EdgeInsets.all(2.5),
-                          child: Container(
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: color.color,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Symbols.check_rounded,
-                              size: 16,
-                              color: Color(0xFF0B1517),
-                            ),
-                          ),
-                        ),
-                      ),
-              ),
-            ),
+        LayoutBuilder(
+          builder: (context, box) {
+            final perRow = (box.maxWidth / _cell).floor().clamp(1, 99);
+            final all = CategoryColor.values;
+            return Column(
+              children: [
+                for (var start = 0; start < all.length; start += perRow)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      for (var i = start; i < start + perRow; i++)
+                        if (i < all.length)
+                          _swatch(context, all[i])
+                        else
+                          const SizedBox(width: _cell, height: _cell),
+                    ],
+                  ),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 10),
+        Text(
+          owners ?? colorFreeLine,
+          style: AppText.body.copyWith(
+            color: owners == null ? c.text3 : c.text2,
           ),
+        ),
       ],
     );
   }

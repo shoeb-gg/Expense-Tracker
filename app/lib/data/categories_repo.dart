@@ -39,10 +39,13 @@ class CategoriesRepo {
         .getSingleOrNull();
     if (row != null) return row;
     // Should never happen; recreate it rather than fail.
+    final fallback = defaultCategories.firstWhere(
+      (d) => d.name == miscCategoryName,
+    );
     final id = await add(
-      name: miscCategoryName,
-      emoji: '\u{1F9E9}',
-      color: 0xFF9085E9,
+      name: fallback.name,
+      emoji: fallback.emoji,
+      color: fallback.color.argb,
       isMisc: true,
     );
     return (await get(id))!;

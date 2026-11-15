@@ -373,8 +373,19 @@ const Map<Mood, _Base> _bases = {
   ),
 };
 
-/// The eight chart colours a category can have. Category colours never
-/// change with the mood.
+/// The 18 chart colours a category can have, the one source of truth for
+/// every category colour (the defaults, the form's swatches, imports).
+/// Category colours never change with the mood.
+///
+/// The first eight are the original palette: their values, names and order
+/// never change, so stored colours and earlier picks still match. The other
+/// ten (Red ... Slate) were added so every default category can have its own.
+/// They were chosen with the data-viz palette validator against the dark
+/// surfaces: every pair is at least 7.1 apart to normal vision (OKLab x100;
+/// Orange and Coral, from the original eight, are the closest pair) and every
+/// new colour is at least 8.2 from all the others. Sky, Sand and Slate are
+/// softer than the rest on purpose, and Yellow is lighter so it stays apart
+/// from Amber for colour-blind readers.
 enum CategoryColor {
   blue('Blue', Color(0xFF3987E5)),
   green('Green', Color(0xFF41AE61)),
@@ -383,7 +394,17 @@ enum CategoryColor {
   cyan('Cyan', Color(0xFF0096AF)),
   pink('Pink', Color(0xFFD55181)),
   orange('Orange', Color(0xFFD95926)),
-  coral('Coral', Color(0xFFE66767));
+  coral('Coral', Color(0xFFE66767)),
+  red('Red', Color(0xFFB94542)),
+  yellow('Yellow', Color(0xFFCCB501)),
+  lime('Lime', Color(0xFF4A8F08)),
+  teal('Teal', Color(0xFF017C5F)),
+  sky('Sky', Color(0xFF6C96CA)),
+  indigo('Indigo', Color(0xFF645BD4)),
+  magenta('Magenta', Color(0xFFCB67D0)),
+  rose('Rose', Color(0xFF995583)),
+  sand('Sand', Color(0xFF89704A)),
+  slate('Slate', Color(0xFF576D8E));
 
   const CategoryColor(this.label, this.color);
 
@@ -399,5 +420,30 @@ enum CategoryColor {
       if (c.argb == argb) return c;
     }
     return null;
+  }
+
+  /// The first colour (in palette order) that none of [takenArgb] has; the
+  /// first colour of the palette when every one is taken. A new category
+  /// starts on it.
+  static CategoryColor firstFree(Iterable<int> takenArgb) {
+    final taken = takenArgb.toSet();
+    for (final c in values) {
+      if (!taken.contains(c.argb)) return c;
+    }
+    return values.first;
+  }
+
+  /// Colours for [count] new categories (an import): the free ones first, in
+  /// palette order, then the whole palette in turn from its start.
+  static List<CategoryColor> forNew(int count, Iterable<int> takenArgb) {
+    final taken = takenArgb.toSet();
+    final free = [
+      for (final c in values)
+        if (!taken.contains(c.argb)) c,
+    ];
+    return [
+      for (var i = 0; i < count; i++)
+        i < free.length ? free[i] : values[(i - free.length) % values.length],
+    ];
   }
 }

@@ -8,6 +8,8 @@ library;
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
+import '../theme/tokens.dart' show CategoryColor;
+
 part 'db.g.dart';
 
 /// A separate book of expenses. There is always exactly one default pocket.
@@ -80,37 +82,56 @@ class SettingsEntries extends Table {
   Set<Column<Object>> get primaryKey => {key};
 }
 
-/// A default category: name, emoji and ARGB colour.
-typedef DefaultCategory = ({String name, String emoji, int color});
-
-const int _blue = 0xFF3987E5;
-const int _green = 0xFF41AE61;
-const int _violet = 0xFF9085E9;
-const int _amber = 0xFFC98500;
-const int _cyan = 0xFF0096AF;
-const int _pink = 0xFFD55181;
-const int _orange = 0xFFD95926;
-const int _coral = 0xFFE66767;
+/// A default category: name, emoji and chart colour.
+typedef DefaultCategory = ({String name, String emoji, CategoryColor color});
 
 /// The 15 categories created on first start and after "Delete all data",
-/// in this order. The last one is Miscellaneous.
+/// in this order. The last one is Miscellaneous. Each has its own colour,
+/// and colours that sit within a few places of each other in this list are
+/// far apart, because charts draw categories side by side.
 const List<DefaultCategory> defaultCategories = [
-  (name: 'Groceries', emoji: '\u{1F966}', color: _green),
-  (name: 'Snacks', emoji: '\u{1F357}', color: _violet),
-  (name: 'Transportation', emoji: '\u{1F68D}', color: _pink),
-  (name: 'Shopping', emoji: '\u{1F6CD}\u{FE0F}', color: _pink),
-  (name: 'House Rent', emoji: '\u{1F3E0}', color: _blue),
-  (name: 'Electric Bill', emoji: '\u{26A1}', color: _amber),
-  (name: 'Internet Bill', emoji: '\u{1F310}', color: _cyan),
-  (name: 'Phone', emoji: '\u{260E}\u{FE0F}', color: _cyan),
-  (name: 'Gas', emoji: '\u{1F525}', color: _orange),
-  (name: 'Health', emoji: '\u{1F48A}', color: _cyan),
-  (name: 'Gym', emoji: '\u{1F4AA}', color: _orange),
-  (name: 'Self Care', emoji: '\u{1F9F4}', color: _coral),
-  (name: 'Online Subscriptions', emoji: '\u{25B6}\u{FE0F}', color: _blue),
-  (name: 'Gifts', emoji: '\u{1F381}', color: _coral),
-  (name: 'Miscellaneous', emoji: '\u{1F9E9}', color: _violet),
+  (name: 'Groceries', emoji: '\u{1F966}', color: CategoryColor.green),
+  (name: 'Snacks', emoji: '\u{1F357}', color: CategoryColor.violet),
+  (name: 'Transportation', emoji: '\u{1F68D}', color: CategoryColor.pink),
+  (name: 'Shopping', emoji: '\u{1F6CD}\u{FE0F}', color: CategoryColor.magenta),
+  (name: 'House Rent', emoji: '\u{1F3E0}', color: CategoryColor.blue),
+  (name: 'Electric Bill', emoji: '\u{26A1}', color: CategoryColor.amber),
+  (name: 'Internet Bill', emoji: '\u{1F310}', color: CategoryColor.cyan),
+  (name: 'Phone', emoji: '\u{260E}\u{FE0F}', color: CategoryColor.indigo),
+  (name: 'Gas', emoji: '\u{1F525}', color: CategoryColor.orange),
+  (name: 'Health', emoji: '\u{1F48A}', color: CategoryColor.teal),
+  (name: 'Gym', emoji: '\u{1F4AA}', color: CategoryColor.lime),
+  (name: 'Self Care', emoji: '\u{1F9F4}', color: CategoryColor.coral),
+  (
+    name: 'Online Subscriptions',
+    emoji: '\u{25B6}\u{FE0F}',
+    color: CategoryColor.sky,
+  ),
+  (name: 'Gifts', emoji: '\u{1F381}', color: CategoryColor.rose),
+  (name: 'Miscellaneous', emoji: '\u{1F9E9}', color: CategoryColor.slate),
 ];
+
+/// The colours the defaults had in schema 1, when only eight colours existed
+/// and several categories shared one. Schema 2 moves the defaults that
+/// still wear these to their own colour (see
+/// [AppDatabase.recolourDefaultCategories]).
+const Map<String, CategoryColor> seedColorsV1 = {
+  'Groceries': CategoryColor.green,
+  'Snacks': CategoryColor.violet,
+  'Transportation': CategoryColor.pink,
+  'Shopping': CategoryColor.pink,
+  'House Rent': CategoryColor.blue,
+  'Electric Bill': CategoryColor.amber,
+  'Internet Bill': CategoryColor.cyan,
+  'Phone': CategoryColor.cyan,
+  'Gas': CategoryColor.orange,
+  'Health': CategoryColor.cyan,
+  'Gym': CategoryColor.orange,
+  'Self Care': CategoryColor.coral,
+  'Online Subscriptions': CategoryColor.blue,
+  'Gifts': CategoryColor.coral,
+  'Miscellaneous': CategoryColor.violet,
+};
 
 /// Name of the category that can never be deleted.
 const String miscCategoryName = 'Miscellaneous';
@@ -129,14 +150,18 @@ class AppDatabase extends _$AppDatabase {
   /// For tests: `AppDatabase.forTesting(NativeDatabase.memory())`.
   AppDatabase.forTesting(super.executor);
 
+  /// 1: first release. 2: every default category has its own colour.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) async {
           await m.createAll();
           await seedDefaults();
+        },
+        onUpgrade: (m, from, to) async {
+          if (from < 2) await recolourDefaultCategories();
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
@@ -158,7 +183,7 @@ class AppDatabase extends _$AppDatabase {
             CategoriesCompanion.insert(
               name: c.name,
               emoji: c.emoji,
-              color: c.color,
+              color: c.color.argb,
               sortOrder: Value(i),
               isMisc: Value(c.name == miscCategoryName),
               createdAt: Value(at),
@@ -168,6 +193,27 @@ class AppDatabase extends _$AppDatabase {
       });
       return pocketId;
     });
+  }
+
+  /// Schema 2: gives each default category its own colour. A default (found
+  /// by name, ignoring case) is moved from its schema 1 colour to its new one
+  /// only while it still wears the old one; a colour the user picked, and
+  /// every category the user made, stay as they are. Safe to run twice.
+  /// Returns how many categories changed.
+  Future<int> recolourDefaultCategories() async {
+    var changed = 0;
+    for (final d in defaultCategories) {
+      final old = seedColorsV1[d.name];
+      if (old == null || old == d.color) continue;
+      changed += await (update(categories)
+            ..where(
+              (c) =>
+                  c.name.lower().equals(d.name.toLowerCase()) &
+                  c.color.equals(old.argb),
+            ))
+          .write(CategoriesCompanion(color: Value(d.color.argb)));
+    }
+    return changed;
   }
 
   /// Inserts only the default pocket ("Personal" 👛) and returns its id.
