@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:spill_the_bills/data/categories_repo.dart';
 import 'package:spill_the_bills/data/db.dart';
 import 'package:spill_the_bills/features/add/category_grid.dart';
 import 'package:spill_the_bills/router.dart';
@@ -71,6 +72,96 @@ void main() {
       expect(find.text('Online'), findsOneWidget);
       expect(find.text('Subscriptions'), findsOneWidget);
       expect(find.text('Miscellaneous'), findsOneWidget);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('largest text: both lines of a name are scaled alike', (tester) async {
+      final db = await openAdd(tester, settings: largest);
+      final tiles = find.byType(CategoryTile);
+      double scaleOf(WidgetTester tester, Text t) {
+        final finder = find.byWidget(t);
+        final natural = tester.renderObject<RenderParagraph>(finder).size.width;
+        return tester.getRect(finder).width / natural;
+      }
+
+      var twoLines = 0;
+      for (var i = 0; i < tiles.evaluate().length; i++) {
+        final name = tester.widget<CategoryTile>(tiles.at(i)).category.name;
+        final lines = labelLines(tester, tiles.at(i));
+        if (lines.length < 2) continue;
+        twoLines++;
+        final first = scaleOf(tester, lines.first);
+        for (final t in lines.skip(1)) {
+          expect(scaleOf(tester, t), closeTo(first, 0.005), reason: '"${t.data}" in $name');
+        }
+      }
+      expect(twoLines, greaterThan(0));
+
+      // "Online Subscriptions": "Subscriptions" is the wide line and sets the
+      // scale; "Online" follows it instead of staying full size.
+      final cell = tester.getRect(find.text('Subscriptions')).width;
+      final subs = tester.widget<Text>(find.text('Subscriptions'));
+      final online = tester.widget<Text>(find.text('Online'));
+      final scale = scaleOf(tester, subs);
+      expect(scale, lessThan(0.9), reason: 'it does not fit at full size');
+      expect(scale, closeTo(0.7827, 0.01), reason: 'the scale the widest line needs');
+      expect(scaleOf(tester, online), closeTo(scale, 0.005));
+      expect(cell, lessThanOrEqualTo(tester.getRect(find.byType(CategoryTile).at(12)).width));
+      // The scaled lines stay level with their neighbour's text.
+      expect(
+        tester.getRect(find.text('Online')).center.dy,
+        closeTo(tester.getRect(find.text('Gifts')).center.dy, 0.5),
+      );
+      await closeApp(tester, db);
+    });
+
+    testWidgets('largest text: a name too long for two lines scales its lines alike too', (
+      tester,
+    ) async {
+      final db = await sampleDatabase(tester);
+      await tester.runAsync(
+        () => CategoriesRepo(db).add(
+          name: 'Subscriptions and other recurring stuff',
+          emoji: '\u{1F4C5}',
+          color: 0xFF336699,
+        ),
+      );
+      await pumpApp(tester, db: db, location: Routes.add(), settings: largest);
+      final tile = find.byWidgetPredicate(
+        (w) => w is CategoryTile && w.category.name == 'Subscriptions and other recurring stuff',
+      );
+      expect(tile, findsOneWidget);
+      final lines = labelLines(tester, tile);
+      expect(lines.length, 2);
+      double scaleOf(Text t) {
+        final finder = find.byWidget(t);
+        return tester.getRect(finder).width / tester.renderObject<RenderParagraph>(finder).size.width;
+      }
+
+      // The first line is the wide word, the second ends in "...": both take
+      // the scale the wide word needs.
+      expect(lines.first.data, 'Subscriptions');
+      final scale = scaleOf(lines.first);
+      expect(scale, lessThan(0.9));
+      expect(scaleOf(lines.last), closeTo(scale, 0.005));
+      expect(tester.takeException(), isNull);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('largest text: a single-line label scales as it did', (tester) async {
+      final db = await openAdd(tester, settings: largest);
+      double scaleOf(String name) {
+        final finder = find.text(name);
+        final natural = tester.renderObject<RenderParagraph>(finder).size.width;
+        return tester.getRect(finder).width / natural;
+      }
+
+      expect(scaleOf('Transportation'), closeTo(0.7414, 0.005));
+      expect(scaleOf('Miscellaneous'), closeTo(0.7623, 0.005));
+      // Short names and short words are not scaled at all.
+      for (final name in ['Groceries', 'Snacks', 'Shopping', 'Phone', 'Gifts', 'House', 'Rent']) {
+        expect(scaleOf(name), closeTo(1, 0.005), reason: name);
+      }
       await closeApp(tester, db);
     });
 

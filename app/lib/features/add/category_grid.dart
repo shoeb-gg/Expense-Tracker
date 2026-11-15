@@ -134,8 +134,9 @@ class CategoryTile extends StatelessWidget {
 
 /// A category name under its tile: at most two lines, broken only between
 /// words. A word wider than the cell is scaled down to fit (never cut in the
-/// middle), and the labels of neighbouring tiles keep a gap that grows with
-/// the text size (see [labelGap]).
+/// middle). The whole label takes one scale, the one its widest line needs,
+/// so the lines of a name never differ in size. The labels of neighbouring
+/// tiles keep a gap that grows with the text size (see [labelGap]).
 class TileLabel extends StatelessWidget {
   const TileLabel({super.key, required this.text, required this.style});
 
@@ -158,27 +159,43 @@ class TileLabel extends StatelessWidget {
           maxWidth: width,
         );
         // Every line is as tall as an unscaled one, so a label that had to
-        // shrink stays level with its neighbours' text.
-        Widget line(String text, {required bool last}) {
+        // shrink stays level with its neighbours' text. All lines take the
+        // label's scale: a line is given room for its own width times it,
+        // and fits itself into that.
+        Widget line(int i) {
+          final text = label.lines[i];
+          final last = i == label.lines.length - 1;
+          final scale = label.scale;
           if (last && label.ellipsize) {
+            final cut = Text(
+              text,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+              style: style,
+            );
+            if (scale >= 1) return SizedBox(width: width, child: cut);
             return SizedBox(
               width: width,
-              child: Text(
-                text,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
-                style: style,
+              height: label.lineHeight,
+              child: FittedBox(
+                child: SizedBox(width: width / scale, child: cut),
               ),
             );
           }
+          final fitted = FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(text, maxLines: 1, softWrap: false, style: style),
+          );
           return SizedBox(
             height: label.lineHeight,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(text, maxLines: 1, softWrap: false, style: style),
-            ),
+            child: scale >= 1
+                ? fitted
+                : ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: label.widths[i] * scale),
+                    child: fitted,
+                  ),
           );
         }
 
@@ -189,8 +206,7 @@ class TileLabel extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              for (var i = 0; i < label.lines.length; i++)
-                line(label.lines[i], last: i == label.lines.length - 1),
+              for (var i = 0; i < label.lines.length; i++) line(i),
             ],
           ),
         );
@@ -208,8 +224,11 @@ double labelGap(TextScaler scaler, double fontSize) =>
 /// Splits [text] into at most two lines of whole words that fit [maxWidth].
 /// A name with more words than two lines hold keeps the rest on the second
 /// line, which then ends in "..." ([ellipsize]). [lineHeight] is the height
-/// of one line at this text size.
-({List<String> lines, bool ellipsize, double lineHeight}) labelLines(
+/// of one line at this text size. [widths] are the lines' natural widths.
+/// [scale] is the one scale the whole label takes (1 when it all fits): what
+/// the widest line that is not cut with "..." needs to fit [maxWidth].
+({List<String> lines, bool ellipsize, double lineHeight, List<double> widths, double scale})
+labelLines(
   String text, {
   required TextStyle style,
   required TextScaler scaler,
@@ -237,11 +256,17 @@ double labelGap(TextScaler scaler, double fontSize) =>
     }
   }
   lines.add(current);
-  widthOf(lines.first);
+  final ellipsize = lines.length > 2;
+  final shown = ellipsize ? [lines.first, lines.skip(1).join(' ')] : lines;
+  final widths = [for (final line in shown) widthOf(line)];
+  widthOf(shown.first);
   final lineHeight = painter.height;
   painter.dispose();
-  if (lines.length <= 2) return (lines: lines, ellipsize: false, lineHeight: lineHeight);
-  return (lines: [lines.first, lines.skip(1).join(' ')], ellipsize: true, lineHeight: lineHeight);
+  // A line cut with "..." is not scaled to fit, so it does not set the scale.
+  final fitting = ellipsize ? widths.take(1) : widths;
+  final widest = fitting.reduce(math.max);
+  final scale = widest <= maxWidth ? 1.0 : maxWidth / widest;
+  return (lines: shown, ellipsize: ellipsize, lineHeight: lineHeight, widths: widths, scale: scale);
 }
 
 /// The last cell: a dashed tile with a pencil that opens Categories.
