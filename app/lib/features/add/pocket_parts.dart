@@ -8,7 +8,9 @@ import '../../widgets/kit.dart';
 import 'add_styles.dart';
 
 /// The small pocket pill at the top right of Add and Edit expense (only
-/// with two or more pockets).
+/// with two or more pockets). It is 100 px wide at most at the default text
+/// size and grows with larger text, so a short name ("Personal", "Test trip")
+/// always shows in full; a long one ends in "...".
 class PocketPill extends StatelessWidget {
   const PocketPill({
     super.key,
@@ -21,11 +23,21 @@ class PocketPill extends StatelessWidget {
   final VoidCallback onTap;
   final String semanticLabel;
 
+  /// The widest the pill gets at the default text size.
+  static const double baseMaxWidth = 100;
+
+  /// The widest it gets however large the text is.
+  static const double largestMaxWidth = 135;
+
+  /// The widest the pill gets with the text scaled by [scaler].
+  static double maxWidthFor(TextScaler scaler) =>
+      (baseMaxWidth * scaler.scale(12) / 12).clamp(baseMaxWidth, largestMaxWidth);
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 100),
+      constraints: BoxConstraints(maxWidth: maxWidthFor(MediaQuery.textScalerOf(context))),
       child: SizedBox(
         height: 36,
         child: Pressable(

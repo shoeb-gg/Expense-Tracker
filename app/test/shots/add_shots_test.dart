@@ -4,6 +4,7 @@ library;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/data/learned_words_repo.dart';
+import 'package:spill_the_bills/data/pockets_repo.dart';
 import 'package:spill_the_bills/features/add/photo_picker.dart';
 import 'package:spill_the_bills/router.dart';
 import 'package:spill_the_bills/state/providers.dart';
@@ -163,6 +164,58 @@ void main() {
     await tester.drag(find.text('Groceries'), const Offset(0, -600));
     await settle(tester);
     await takeShot(tester, 'add_open_scrolled_large');
+    await closeApp(tester, db);
+  });
+
+  testWidgets('Largest text: grid labels and the header (add, pocket pill, edit)', (tester) async {
+    final db = await sampleDatabase(tester);
+    await addSamplePockets(tester, db);
+    await tester.runAsync(() => PocketsRepo(db).add(name: 'Test trip', emoji: '\u{1F9F3}'));
+    final largest = AppSettings(textScale: textScaleSteps.last);
+    await pumpApp(tester, db: db, location: Routes.add(), settings: largest);
+    await takeShot(tester, 'add_open_pockets_large');
+
+    await tapText(tester, 'Personal');
+    await tester.tap(find.text('Test trip').last);
+    await settle(tester);
+    await takeShot(tester, 'add_pocket_test_trip_large');
+
+    await tapText(tester, 'Snacks');
+    await takeShot(tester, 'add_keypad_pocket_large');
+    await closeApp(tester, db);
+  });
+
+  testWidgets('Largest text: Edit expense header', (tester) async {
+    final db = await sampleDatabase(tester);
+    await addSamplePockets(tester, db);
+    await pumpApp(
+      tester,
+      db: db,
+      location: Routes.editExpense(doctorVisitId),
+      settings: AppSettings(textScale: textScaleSteps.last),
+    );
+    await takeShot(tester, 'add_edit_large');
+    await closeApp(tester, db);
+  });
+
+  testWidgets('Largest text: sub-screen headers', (tester) async {
+    final db = await sampleDatabase(tester);
+    for (final (name, route) in <(String, String)>[
+      ('categories', Routes.categories),
+      ('pockets', Routes.pockets),
+      ('export', Routes.export),
+      ('new_category', Routes.newCategory),
+    ]) {
+      await pumpApp(
+        tester,
+        db: db,
+        location: route,
+        settings: AppSettings(textScale: textScaleSteps.last),
+      );
+      await takeShot(tester, 'subheader_${name}_large');
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    }
     await closeApp(tester, db);
   });
 

@@ -748,14 +748,21 @@ Future<void> _quietly(Future<void> work) async {
 }
 
 /// The 60 px header of Add and Edit expense: Cancel, the title, and the
-/// pocket pill when there are two or more pockets (the side columns widen
-/// from 88 to 100 px for it).
+/// pocket pill when there are two or more pockets.
+///
+/// The side columns are 88 px wide (100 px with the pill) and grow only when
+/// Cancel or the pill needs more room (large text), so nothing moves at the
+/// default text size. The title takes what is left and scales down to fit:
+/// "Add expense" is never cut.
 class _EditorHeader extends StatelessWidget {
   const _EditorHeader({required this.title, required this.onCancel, this.pill});
 
   final String title;
   final VoidCallback onCancel;
   final Widget? pill;
+
+  /// The widest a side column grows (the pocket pill's largest width).
+  static const double _sideMax = PocketPill.largestMaxWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -766,29 +773,39 @@ class _EditorHeader extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           children: [
-            SizedBox(
-              width: side,
+            ConstrainedBox(
+              constraints: BoxConstraints(minWidth: side, maxWidth: _sideMax),
               child: Align(
                 alignment: Alignment.centerLeft,
+                widthFactor: 1,
                 child: Pill(label: 'Cancel', onTap: onCancel),
               ),
             ),
             Expanded(
               child: Semantics(
                 header: true,
-                child: Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppText.screenTitle,
+                child: Padding(
+                  // Room between the title and Cancel or the pill when
+                  // large text makes the title scale down to fit.
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      softWrap: false,
+                      style: AppText.screenTitle,
+                    ),
+                  ),
                 ),
               ),
             ),
-            SizedBox(
-              width: side,
+            ConstrainedBox(
+              constraints: BoxConstraints(minWidth: side, maxWidth: _sideMax),
               child: Align(
                 alignment: Alignment.centerRight,
+                widthFactor: 1,
                 child: pill ?? const SizedBox.shrink(),
               ),
             ),
