@@ -13,6 +13,10 @@ const double kNavBarHeight = 72;
 /// floating plus button that overlaps the bar by 16 px and opens Add
 /// expense. Tab screens do not pad for the bar: their area already ends at
 /// the bar's top edge (the plus button may overlap the last 16 px).
+///
+/// System Back: on Charts, Reports or Settings it switches to the Home tab;
+/// on Home it leaves the app. Screens pushed above the shell close first,
+/// since they sit above this route.
 class AppShell extends StatelessWidget {
   const AppShell({
     super.key,
@@ -27,6 +31,16 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final inset = MediaQuery.viewPaddingOf(context).bottom;
+    return PopScope(
+      canPop: navigationShell.currentIndex == 0,
+      onPopInvokedWithResult: (bool didPop, Object? result) {
+        if (!didPop) navigationShell.goBranch(0);
+      },
+      child: _scaffold(context, c, inset),
+    );
+  }
+
+  Widget _scaffold(BuildContext context, AppColors c, double inset) {
     return Scaffold(
       backgroundColor: c.bg,
       resizeToAvoidBottomInset: false,

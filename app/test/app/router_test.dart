@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -114,5 +115,142 @@ void main() {
     expect(find.byType(CalendarScreen), findsNothing);
     expect(find.byType(HomeScreen), findsOneWidget);
     await closeApp(tester, db);
+  });
+
+  backTests();
+}
+
+/// Counts the "leave the app" requests of the system back button: Back with
+/// nothing left to close ends up in `SystemNavigator.pop`.
+class _AppExits {
+  _AppExits(WidgetTester tester) {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (MethodCall call) async {
+        if (call.method == 'SystemNavigator.pop') count++;
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+  }
+
+  int count = 0;
+}
+
+/// A tab label in the bottom bar (the plus button covers the bar's centre,
+/// so the bar itself is never "hit-testable" at its middle).
+Finder _barTab(String label) => find.descendant(
+  of: find.byType(AppNavBar),
+  matching: find.text(label),
+);
+
+Future<void> back(WidgetTester tester) async {
+  await tester.binding.handlePopRoute();
+  await tester.pumpAndSettle();
+}
+
+void backTests() {
+  group('system Back on the tabs', () {
+    const tabs = {
+      'Charts': ChartsScreen,
+      'Reports': ReportsScreen,
+      'Settings': SettingsScreen,
+    };
+    for (final MapEntry(key: label, value: type) in tabs.entries) {
+      testWidgets('$label: Back goes to Home, not out of the app', (
+        tester,
+      ) async {
+        final db = openTestDatabase();
+        await pumpApp(tester, db: db);
+        final exits = _AppExits(tester);
+        await tester.tap(find.text(label));
+        await tester.pumpAndSettle();
+        expect(find.byType(type), findsOneWidget);
+
+        await back(tester);
+        expect(exits.count, 0, reason: 'the app stays open');
+        expect(find.byType(HomeScreen), findsOneWidget);
+        expect(find.byType(type).hitTestable(), findsNothing);
+        final bar = tester.widget<AppNavBar>(find.byType(AppNavBar));
+        expect(bar.currentIndex, 0);
+
+        await back(tester);
+        expect(exits.count, 1, reason: 'Back on Home leaves the app');
+        await closeApp(tester, db);
+      });
+    }
+
+    testWidgets('Back on Home leaves the app', (tester) async {
+      final db = openTestDatabase();
+      await pumpApp(tester, db: db);
+      final exits = _AppExits(tester);
+      await back(tester);
+      expect(exits.count, 1);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('a screen pushed above a tab closes before the tab does', (
+      tester,
+    ) async {
+      final db = openTestDatabase();
+      await pumpApp(tester, db: db, location: Routes.settings);
+      final exits = _AppExits(tester);
+      final router = ProviderScope.containerOf(
+        tester.element(find.byType(SettingsScreen)),
+      ).read(routerProvider);
+
+      for (final path in [
+        Routes.categories,
+        Routes.pockets,
+        Routes.export,
+        Routes.calendar(),
+        Routes.category(1),
+        Routes.expense(1),
+      ]) {
+        unawaited(router.push<Object?>(path));
+        await tester.pumpAndSettle();
+        expect(_barTab('Charts').hitTestable(), findsNothing, reason: path);
+
+        await back(tester);
+        expect(find.byType(SettingsScreen), findsOneWidget, reason: path);
+        expect(_barTab('Charts').hitTestable(), findsOneWidget, reason: path);
+        expect(exits.count, 0, reason: path);
+      }
+
+      await back(tester);
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(exits.count, 0);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('Back from a sub-screen of Settings goes one step at a time', (
+      tester,
+    ) async {
+      final db = openTestDatabase();
+      await pumpApp(tester, db: db, location: Routes.settings);
+      final exits = _AppExits(tester);
+      final router = ProviderScope.containerOf(
+        tester.element(find.byType(SettingsScreen)),
+      ).read(routerProvider);
+      unawaited(router.push<Object?>(Routes.categories));
+      await tester.pumpAndSettle();
+      unawaited(router.push<Object?>(Routes.editCategory(2)));
+      await tester.pumpAndSettle();
+      expect(find.byType(CategoryFormScreen), findsOneWidget);
+
+      await back(tester);
+      expect(find.byType(CategoriesScreen), findsOneWidget);
+      await back(tester);
+      expect(find.byType(SettingsScreen), findsOneWidget);
+      await back(tester);
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(exits.count, 0);
+      await closeApp(tester, db);
+    });
   });
 }
