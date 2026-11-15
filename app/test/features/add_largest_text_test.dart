@@ -145,9 +145,7 @@ void main() {
       await closeApp(tester, db);
     });
 
-    testWidgets('largest text: a long pocket name ellipsizes and breaks nothing', (
-      tester,
-    ) async {
+    testWidgets('largest text: a long pocket name ellipsizes and breaks nothing', (tester) async {
       final db = await sampleDatabase(tester);
       await tester.runAsync(
         () => PocketsRepo(db).add(name: 'The Smiths family holiday', emoji: '\u{1F3D6}'),
