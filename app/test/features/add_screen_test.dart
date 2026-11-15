@@ -6,6 +6,7 @@ import 'package:spill_the_bills/data/db.dart';
 import 'package:spill_the_bills/data/learned_words_repo.dart';
 import 'package:spill_the_bills/features/add/add_events.dart';
 import 'package:spill_the_bills/features/add/add_screen.dart';
+import 'package:spill_the_bills/features/add/category_grid.dart';
 import 'package:spill_the_bills/features/add/photo_picker.dart';
 import 'package:spill_the_bills/features/home/home_screen.dart';
 import 'package:spill_the_bills/router.dart';
@@ -295,7 +296,11 @@ void main() {
     await typeInBar(tester, 'saree 1200');
     expect(find.text('No category'), findsOneWidget);
     expect(find.text('Select a category above'), findsOneWidget);
-    expect(find.text('So the app knows where “saree” goes'), findsOneWidget);
+    // A screen reader also hears why.
+    expect(
+      find.bySemanticsLabel('Select a category above. So the app knows where “saree” goes'),
+      findsOneWidget,
+    );
     expect(find.text('Saree · Today'), findsOneWidget);
 
     // The grey Add cannot save; it points at the grid instead.
@@ -326,6 +331,38 @@ void main() {
     expect(again, hasLength(2));
     expect(again.last.categoryId, gifts);
     expect(again.last.amount, 5000);
+    await closeApp(tester, db);
+  });
+
+  testWidgets('type to add: "Select a category above" shows above the keyboard', (tester) async {
+    final db = await emptyDb(tester);
+    await pumpApp(tester, db: db, location: Routes.add());
+    showSoftKeyboard(tester);
+    await tester.tap(find.byType(EditableText).last);
+    await typeInBar(tester, 'saree 1200');
+
+    // The prompt sits inside the bottom area, on the keyboard: nothing to
+    // scroll to, nothing lies over it.
+    final prompt = find.text('Select a category above');
+    expect(prompt, findsOneWidget);
+    expect(prompt.hitTestable(), findsOneWidget);
+    final quick = tester.getRect(find.byKey(const ValueKey('quick')));
+    expect(quick.bottom, 780 - 300);
+    expect(tester.getRect(prompt).top, greaterThanOrEqualTo(quick.top));
+    expect(tester.getRect(prompt).bottom, lessThanOrEqualTo(quick.bottom));
+
+    // The grid keeps at least two whole rows above it.
+    for (var i = 0; i < 8; i++) {
+      final tile = tester.getRect(find.byType(CategoryTile).at(i));
+      expect(tile.bottom, lessThanOrEqualTo(quick.top), reason: 'tile $i');
+    }
+
+    // The grid still scrolls under the bottom area.
+    final first = find.text('Groceries');
+    final before = tester.getRect(first).top;
+    await tester.drag(first, const Offset(0, -120));
+    await settle(tester);
+    expect(tester.getRect(first).top, lessThan(before));
     await closeApp(tester, db);
   });
 

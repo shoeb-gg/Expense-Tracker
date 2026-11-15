@@ -77,6 +77,10 @@ class GuideCard extends StatelessWidget {
 
 /// The preview of a typed expense: category (or "No category"), the title
 /// and date, the amount, and after a pick by hand the "Next time" line.
+///
+/// Without a [category] the card also carries the prompt "Select a category
+/// above" as a tinted strip along its top, so it shows right above the
+/// keyboard, in the same place as the rest of the card.
 class PreviewCard extends StatelessWidget {
   const PreviewCard({
     super.key,
@@ -84,6 +88,7 @@ class PreviewCard extends StatelessWidget {
     required this.subtitle,
     required this.amount,
     required this.onCategoryTap,
+    this.word = '',
     this.hint,
   });
 
@@ -92,6 +97,9 @@ class PreviewCard extends StatelessWidget {
   final String subtitle;
   final String amount;
   final VoidCallback onCategoryTap;
+
+  /// The typed title in lower case, or empty (read out with the prompt).
+  final String word;
   final String? hint;
 
   @override
@@ -122,10 +130,17 @@ class PreviewCard extends StatelessWidget {
     final hintText = hint;
     return Container(
       decoration: BoxDecoration(color: c.surface, borderRadius: BorderRadius.circular(20)),
+      foregroundDecoration: cat == null
+          ? BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: c.accent.withAlpha(0x8C), width: 1.5),
+            )
+          : null,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (cat == null) _SelectCategoryStrip(word: word, onTap: onCategoryTap),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
@@ -384,11 +399,11 @@ class _AddButton extends StatelessWidget {
   }
 }
 
-/// The tinted panel under the grid when a typed word has no category yet.
-class SelectCategoryBanner extends StatelessWidget {
-  const SelectCategoryBanner({super.key, required this.word, required this.onTap});
+/// "Select a category above": the tinted strip along the top of the preview
+/// card while a typed word has no category yet. Tapping it flashes the tiles.
+class _SelectCategoryStrip extends StatelessWidget {
+  const _SelectCategoryStrip({required this.word, required this.onTap});
 
-  /// The typed title in lower case, or empty.
   final String word;
   final VoidCallback onTap;
 
@@ -406,55 +421,27 @@ class SelectCategoryBanner extends StatelessWidget {
         onTap: onTap,
         child: ExcludeSemantics(
           child: Container(
-            margin: const EdgeInsets.fromLTRB(16, 18, 16, 0),
-            height: 64,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
             decoration: BoxDecoration(
               color: c.accent.withAlpha(0x1F),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            foregroundDecoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: c.accent.withAlpha(0x8C), width: 1.5),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: Row(
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: c.accent.withAlpha(0x33),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(Symbols.arrow_upward_rounded, size: 26, color: c.accent),
-                ),
-                const SizedBox(width: 12),
+                Icon(Symbols.arrow_upward_rounded, size: 18, color: c.accent),
+                const SizedBox(width: 8),
                 Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Select a category above',
-                        maxLines: 1,
-                        style: boardText(
-                          17,
-                          22,
-                          FontWeight.w800,
-                          letterSpacing: -0.2,
-                          color: c.accent,
-                        ),
-                      ),
-                      const SizedBox(height: 1),
-                      Text(
-                        sub,
-                        maxLines: 1,
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppText.sub.copyWith(color: c.text2),
-                      ),
-                    ],
+                  child: Text(
+                    'Select a category above',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: boardText(
+                      14,
+                      18,
+                      FontWeight.w800,
+                      letterSpacing: -0.1,
+                      color: c.accent,
+                    ),
                   ),
                 ),
               ],

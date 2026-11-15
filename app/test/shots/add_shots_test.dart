@@ -129,6 +129,43 @@ void main() {
     });
   }
 
+  for (final (suffix, settings) in <(String, AppSettings)>[
+    ('', const AppSettings()),
+    ('_large', AppSettings(textScale: textScaleSteps.last)),
+  ]) {
+    testWidgets('Type to add: new word, then a pick, with the keyboard up$suffix', (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: Routes.add(), settings: settings);
+      showSoftKeyboard(tester, height: 300);
+      await tester.tap(find.byType(EditableText).last);
+      await tester.enterText(find.byType(EditableText).last, '250 for taxi');
+      await settle(tester);
+      expect(find.text('Select a category above'), findsOneWidget);
+      expect(find.text('Taxi · Today'), findsOneWidget);
+      await takeShot(tester, 'add_quick_new_keyboard$suffix');
+
+      await tester.tap(find.text('Transportation').first);
+      await settle(tester);
+      expect(find.text('Next time, “taxi” goes to Transportation.'), findsOneWidget);
+      await takeShot(tester, 'add_quick_picked_keyboard$suffix');
+      await closeApp(tester, db);
+    });
+  }
+
+  testWidgets('Add expense: the grid scrolled to its end, largest text', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(
+      tester,
+      db: db,
+      location: Routes.add(),
+      settings: AppSettings(textScale: textScaleSteps.last),
+    );
+    await tester.drag(find.text('Groceries'), const Offset(0, -600));
+    await settle(tester);
+    await takeShot(tester, 'add_open_scrolled_large');
+    await closeApp(tester, db);
+  });
+
   testWidgets('Pockets: pill and the pick sheet (PocketAddExpense, PocketPick)', (tester) async {
     final db = await sampleDatabase(tester);
     await addSamplePockets(tester, db);

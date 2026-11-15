@@ -204,7 +204,9 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
     double reserveFor(double collapse) =>
         (keypadMode
             ? KeypadPanel.height - KeypadPanel.keysHeight * collapse
-            : (hint == null ? 162.0 : 198.0)) +
+            // The card grows by its "Next time" line, or by the prompt of
+            // a typed word that has no category yet.
+            : (hint == null && !unknown ? 162.0 : 198.0)) +
         navInset +
         keyboard;
 
@@ -225,7 +227,7 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
     Widget buildContent(double reserve) => LayoutBuilder(
       builder: (context, box) {
         final rows = ((categories.length + 1) / CategoryGrid.columns).ceil();
-        final height = 8 + rows * 84 + (unknown ? 82 : 0);
+        final height = 8 + rows * 84;
         // When everything fits, nothing scrolls, so the glow of a selected
         // tile in the first row may spread past the top, as on the board.
         final fits = height + reserve <= box.maxHeight + 0.5;
@@ -234,14 +236,7 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
           child: SingleChildScrollView(
             clipBehavior: fits ? Clip.none : Clip.hardEdge,
             padding: EdgeInsets.only(bottom: reserve),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                grid,
-                if (unknown)
-                  SelectCategoryBanner(word: parsed.title.toLowerCase(), onTap: _pointAtGrid),
-              ],
-            ),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [grid]),
           ),
         );
       },
@@ -301,6 +296,7 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
         subtitle: parsed.title.isEmpty ? dateLabel : '${parsed.title} · $dateLabel',
         amount: fmt.format(parsed.amount ?? 0),
         onCategoryTap: _pointAtGrid,
+        word: parsed.title.toLowerCase(),
         hint: hint,
       ),
     };
