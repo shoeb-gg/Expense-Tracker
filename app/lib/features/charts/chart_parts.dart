@@ -124,36 +124,54 @@ class ShareBar extends StatelessWidget {
       );
 }
 
-/// The "Details" pill in the ring centre (opens the category drill-down).
+/// The "Details" pill (opens the category drill-down): in the ring centre,
+/// and on the selected row of the ranked list.
 class DetailsPill extends StatelessWidget {
-  const DetailsPill({super.key, required this.onTap});
+  const DetailsPill({
+    super.key,
+    required this.onTap,
+    this.semanticLabel = 'Details',
+  });
 
   final VoidCallback onTap;
+
+  /// What a screen reader says ("Details of Health" on a row, where the
+  /// ring centre has its own plain "Details").
+  final String semanticLabel;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return Pressable(
+    // Its own semantics node, so a screen reader can reach it on a row that
+    // is itself a button, and says one label for it.
+    return Semantics(
+      container: true,
+      excludeSemantics: true,
+      button: true,
+      label: semanticLabel,
       onTap: onTap,
-      color: c.accentSoft,
-      borderRadius: BorderRadius.circular(12),
-      semanticLabel: 'Details',
-      child: SizedBox(
-        height: 24,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 0, 6, 0),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Details',
-                style: AppText.caption.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: c.accent,
+      child: Pressable(
+        onTap: onTap,
+        color: c.accentSoft,
+        borderRadius: BorderRadius.circular(12),
+        button: false,
+        child: SizedBox(
+          height: 24,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 0, 6, 0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Details',
+                  style: AppText.caption.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: c.accent,
+                  ),
                 ),
-              ),
-              Icon(Symbols.chevron_right_rounded, size: 16, color: c.accent),
-            ],
+                Icon(Symbols.chevron_right_rounded, size: 16, color: c.accent),
+              ],
+            ),
           ),
         ),
       ),

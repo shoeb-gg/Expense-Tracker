@@ -7,6 +7,7 @@ import 'package:spill_the_bills/core/days.dart';
 import 'package:spill_the_bills/data/expenses_repo.dart';
 import 'package:spill_the_bills/data/pockets_repo.dart';
 import 'package:spill_the_bills/features/charts/category_screen.dart';
+import 'package:spill_the_bills/features/charts/chart_parts.dart';
 import 'package:spill_the_bills/features/charts/charts_screen.dart';
 import 'package:spill_the_bills/features/charts/column_chart.dart';
 import 'package:spill_the_bills/features/charts/range_popups.dart';
@@ -271,12 +272,77 @@ void main() {
       await _tapRow(tester, find.text('Health'));
       expect(find.text('3.4% of total'), findsOneWidget);
 
-      await _tapRow(tester, find.text('Details'));
+      // Two Details actions now: the ring centre and the selected row.
+      expect(find.byType(DetailsPill), findsNWidgets(2));
+      await _tapRow(tester, find.byType(DetailsPill).first);
       final screen = tester.widget<CategoryScreen>(find.byType(CategoryScreen));
       expect(screen.categoryId, 10);
       expect(screen.from, dayOf(2026, 10, 1));
       expect(screen.to, dayOf(2026, 10, 31));
       expect(find.text('1,180'), findsWidgets);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('the selected row has its own Details, so it still works '
+        'with the ring scrolled away', (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: Routes.charts);
+      expect(find.byType(DetailsPill), findsNothing);
+
+      const names = ['Groceries', 'Health', 'Gifts'];
+      // Scroll to the bottom, so the ring is far above the screen.
+      await tester.drag(
+        find.byType(SingleChildScrollView).first,
+        const Offset(0, -3000),
+      );
+      await settle(tester);
+      Map<String, double> tops() => {
+            for (final name in names)
+              name: tester.getTopLeft(find.text(name).last).dy,
+          };
+
+      final before = tops();
+      await tester.tap(find.text('Health').last);
+      await settle(tester);
+      // The rows keep their places, the selected one too.
+      expect(tops(), before);
+
+      // The ring's Details is off the top; the row's is on screen.
+      final pills = find.byType(DetailsPill);
+      expect(pills, findsNWidgets(2));
+      expect(tester.getRect(pills.first).bottom, lessThan(0));
+      final inline = tester.getRect(pills.last);
+      expect(inline.top, greaterThan(0));
+      expect(inline.bottom, lessThan(780));
+      expect(inline.right, lessThanOrEqualTo(360 - 16));
+
+      await tester.tap(pills.last);
+      await settle(tester);
+      final screen = tester.widget<CategoryScreen>(find.byType(CategoryScreen));
+      expect(screen.categoryId, 10);
+      expect(screen.from, dayOf(2026, 10, 1));
+      expect(screen.to, dayOf(2026, 10, 31));
+      await closeApp(tester, db);
+    });
+
+    testWidgets('only the selected row has the inline Details',
+        (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: Routes.charts);
+      await _tapRow(tester, find.text('Health'));
+      expect(find.byType(DetailsPill), findsNWidgets(2));
+      // Selecting another row moves the inline Details with it.
+      await _tapRow(tester, find.text('Gifts'));
+      expect(find.byType(DetailsPill), findsNWidgets(2));
+      expect(find.bySemanticsLabel('Details of Gifts'), findsOneWidget);
+      expect(find.bySemanticsLabel('Details of Health'), findsNothing);
+      // Back to the total: no Details anywhere.
+      await _tapRow(tester, find.text('Gifts').last);
+      expect(find.byType(DetailsPill), findsNothing);
+      // Top days has no category to open.
+      await _tapRow(tester, find.text('Health'));
+      await _tapRow(tester, find.text('Top days'));
+      expect(find.byType(DetailsPill), findsNothing);
       await closeApp(tester, db);
     });
 

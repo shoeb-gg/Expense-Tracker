@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -493,11 +494,22 @@ class _ChartsBody extends ConsumerWidget {
             total: summary.total,
             selected: view == ChartView.categories ? selected : null,
             onRow: onRow,
+            onDetails: (id) => _openCategory(context, id, period),
           ),
         ],
       ),
     );
   }
+}
+
+/// Opens a category's drill-down for [period] (the ring's Details and the
+/// selected row's Details).
+void _openCategory(BuildContext context, int categoryId, ChartPeriod period) {
+  unawaited(
+    context.push(
+      Routes.category(categoryId, from: period.from, to: period.to),
+    ),
+  );
 }
 
 class _SummaryCard extends ConsumerWidget {
@@ -746,11 +758,7 @@ class _CategoriesRing extends ConsumerWidget {
           title: r.category.name,
           value: fmt.format(r.amount),
           sub: '${shareText(r.amount, total, fmt)} of total',
-          onDetails: () => unawaited(
-            context.push(
-              Routes.category(r.category.id, from: period.from, to: period.to),
-            ),
-          ),
+          onDetails: () => _openCategory(context, r.category.id, period),
         );
       }
     }
@@ -1074,12 +1082,16 @@ class _RankedList extends ConsumerWidget {
     required this.total,
     required this.selected,
     required this.onRow,
+    required this.onDetails,
   });
 
   final List<_Ranked> ranked;
   final int total;
   final String? selected;
   final ValueChanged<String> onRow;
+
+  /// Opens the drill-down of a category (by id).
+  final ValueChanged<int> onDetails;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1145,6 +1157,7 @@ class _RankedList extends ConsumerWidget {
                         on: selected == 'c${ranked[i].category.id}',
                         divider: i < ranked.length - 1,
                         onTap: () => onRow('c${ranked[i].category.id}'),
+                        onDetails: () => onDetails(ranked[i].category.id),
                       ),
                   ],
                 ),
@@ -1166,6 +1179,7 @@ class _RankedRow extends StatelessWidget {
     required this.on,
     required this.divider,
     required this.onTap,
+    required this.onDetails,
   });
 
   final ExpenseCategory category;
@@ -1177,9 +1191,20 @@ class _RankedRow extends StatelessWidget {
   final bool divider;
   final VoidCallback onTap;
 
+  /// The Details action of the selected row (the ring's own may be scrolled
+  /// out of sight).
+  final VoidCallback onDetails;
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    // The second line (bar and share) is 16 px at the default text size and
+    // grows with the text, so a larger share is not cut off. The selected
+    // row's Details pill is 24 px tall: it takes the extra height evenly from
+    // the gap above and from the padding on top, so both lines stay where
+    // they are and the row keeps its 68 px.
+    final line = MediaQuery.textScalerOf(context).scale(16);
+    final pill = math.max(24.0, line);
     return Pressable(
       onTap: onTap,
       color: on ? c.wash : const Color(0x00000000),
@@ -1196,6 +1221,7 @@ class _RankedRow extends StatelessWidget {
               child: Container(
                 height: 68,
                 margin: const EdgeInsets.only(right: 16),
+                padding: EdgeInsets.only(top: on ? (pill - line) / 2 : 0),
                 decoration: divider
                     ? BoxDecoration(
                         border: Border(bottom: BorderSide(color: c.line)),
@@ -1220,27 +1246,35 @@ class _RankedRow extends StatelessWidget {
                         Text(amount, style: AppText.rowAmount),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: on ? 8 - (pill - line) / 2 : 8),
                     SizedBox(
-                      height: 16,
+                      height: on ? pill : line,
                       child: Row(
                         children: [
                           Expanded(
                             child: ShareBar(fraction: fraction, color: color),
                           ),
                           const SizedBox(width: 8),
-                          // At least 44 px; "100.0%" widens it and the
-                          // bar gives way, so the right edge never moves.
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(minWidth: 44),
-                            child: Text(
-                              share,
-                              textAlign: TextAlign.right,
-                              maxLines: 1,
-                              softWrap: false,
-                              style: ChartText.share(c),
+                          if (on)
+                            // The share is in the ring centre and in this
+                            // row's spoken label; the pill takes its place.
+                            DetailsPill(
+                              onTap: onDetails,
+                              semanticLabel: 'Details of ${category.name}',
+                            )
+                          else
+                            // At least 44 px; "100.0%" widens it and the
+                            // bar gives way, so the right edge never moves.
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(minWidth: 44),
+                              child: Text(
+                                share,
+                                textAlign: TextAlign.right,
+                                maxLines: 1,
+                                softWrap: false,
+                                style: ChartText.share(c),
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),

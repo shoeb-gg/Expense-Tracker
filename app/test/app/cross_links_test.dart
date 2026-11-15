@@ -94,7 +94,9 @@ void main() {
     await _tap(tester, find.text('Charts'));
     expect(_location(tester), Routes.charts);
     await _tap(tester, find.text('Health'));
-    await _tap(tester, find.text('Details'));
+    // The ring's Details and the selected row's: both open the same screen.
+    expect(find.text('Details'), findsNWidgets(2));
+    await _tap(tester, find.text('Details').first);
     expect(
       _location(tester),
       Routes.category(
