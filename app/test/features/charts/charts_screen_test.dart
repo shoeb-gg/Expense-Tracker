@@ -157,6 +157,35 @@ void main() {
       await closeApp(tester, db);
     });
 
+    testWidgets('a future week, month or year has no average: "—", not 0',
+        (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: Routes.charts);
+      final zeroStat = find.byWidgetPredicate(
+        (w) => w is Text && w.data == '0' && w.style?.fontSize == 18,
+      );
+      for (final kind in ['Week', 'Month', 'Year']) {
+        await tester.tap(find.text(kind));
+        await settle(tester);
+        // Still on the current period: it has an average.
+        expect(find.text('—'), findsNothing, reason: kind);
+        for (var i = 0; i < 3; i++) {
+          await _swipe(tester, const Offset(-200, 0));
+        }
+        expect(find.text('—'), findsOneWidget, reason: '$kind ahead');
+        expect(zeroStat, findsNothing, reason: kind);
+        expect(find.textContaining('NaN'), findsNothing);
+        // The same on the chart: no dashed line, no made-up average.
+        await tester.tap(find.text('Over time'));
+        await settle(tester);
+        expect(find.textContaining('Dashed line'), findsNothing);
+        expect(find.text('—'), findsOneWidget);
+        await tester.tap(find.text('Categories'));
+        await settle(tester);
+      }
+      await closeApp(tester, db);
+    });
+
     testWidgets('tabs choose a period; the chosen tab opens the month pop-up',
         (tester) async {
       final db = await sampleDatabase(tester);

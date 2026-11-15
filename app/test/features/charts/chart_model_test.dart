@@ -240,6 +240,29 @@ void main() {
       expect(future.delta, isNull);
     });
 
+    test('a future week, month or year has no average, never 0 or NaN', () {
+      final future = <ChartPeriod>[
+        weekPeriod(today, monday, -1),
+        weekPeriod(today, monday, -52),
+        monthPeriod(today, -1),
+        monthPeriod(today, -40),
+        yearPeriod(today, -1),
+        yearPeriod(today, -30),
+      ];
+      for (final p in future) {
+        final s = summaryOf(p, today, index);
+        expect(s.total, 0, reason: '$p');
+        expect(s.average, isNull, reason: '$p');
+        expect(s.delta, isNull, reason: '$p');
+        // The chart columns of a future period are all "still to come".
+        expect(
+          periodColumns(p, today, index).every((c) => c.value == null),
+          isTrue,
+          reason: '$p',
+        );
+      }
+    });
+
     // One rule for the monthly average, here and on Reports: the total of
     // the full (ended) months from the first month with data, divided by
     // how many there are; none yet means "not available" (null).
