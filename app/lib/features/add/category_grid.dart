@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../data/db.dart';
@@ -115,11 +117,8 @@ class CategoryTile extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             ExcludeSemantics(
-              child: Text(
-                category.name,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              child: TileLabel(
+                text: category.name,
                 style: AppText.navLabel.copyWith(
                   color: selected ? c.accent : c.text,
                   fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
@@ -131,6 +130,118 @@ class CategoryTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A category name under its tile: at most two lines, broken only between
+/// words. A word wider than the cell is scaled down to fit (never cut in the
+/// middle), and the labels of neighbouring tiles keep a gap that grows with
+/// the text size (see [labelGap]).
+class TileLabel extends StatelessWidget {
+  const TileLabel({super.key, required this.text, required this.style});
+
+  final String text;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final scaler = MediaQuery.textScalerOf(context);
+    final direction = Directionality.of(context);
+    return LayoutBuilder(
+      builder: (context, box) {
+        final gap = labelGap(scaler, style.fontSize ?? 12);
+        final width = math.max(box.maxWidth - 2 * gap, 1.0);
+        final label = labelLines(
+          text,
+          style: style,
+          scaler: scaler,
+          direction: direction,
+          maxWidth: width,
+        );
+        // Every line is as tall as an unscaled one, so a label that had to
+        // shrink stays level with its neighbours' text.
+        Widget line(String text, {required bool last}) {
+          if (last && label.ellipsize) {
+            return SizedBox(
+              width: width,
+              child: Text(
+                text,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
+                style: style,
+              ),
+            );
+          }
+          return SizedBox(
+            height: label.lineHeight,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(text, maxLines: 1, softWrap: false, style: style),
+            ),
+          );
+        }
+
+        return Padding(
+          // Under two lines of large text the next row would sit right on
+          // the label, so it gets some room below too (none at default size).
+          padding: EdgeInsets.fromLTRB(gap, 0, gap, gap * 2.5),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < label.lines.length; i++)
+                line(label.lines[i], last: i == label.lines.length - 1),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Room kept on each side of a label: none at the default text size (the
+/// labels have the whole cell, as on the board), 12 px per whole step of text
+/// size above it, so neighbours do not run together in large text.
+double labelGap(TextScaler scaler, double fontSize) =>
+    math.max(0, scaler.scale(fontSize) / fontSize - 1) * 12;
+
+/// Splits [text] into at most two lines of whole words that fit [maxWidth].
+/// A name with more words than two lines hold keeps the rest on the second
+/// line, which then ends in "..." ([ellipsize]). [lineHeight] is the height
+/// of one line at this text size.
+({List<String> lines, bool ellipsize, double lineHeight}) labelLines(
+  String text, {
+  required TextStyle style,
+  required TextScaler scaler,
+  required TextDirection direction,
+  required double maxWidth,
+}) {
+  final words = text.trim().split(RegExp(r'\s+'));
+  final painter = TextPainter(textDirection: direction, textScaler: scaler, maxLines: 1);
+  double widthOf(String s) {
+    painter
+      ..text = TextSpan(text: s, style: style)
+      ..layout();
+    return painter.width;
+  }
+
+  final lines = <String>[];
+  var current = '';
+  for (final word in words) {
+    final joined = current.isEmpty ? word : '$current $word';
+    if (current.isEmpty || widthOf(joined) <= maxWidth) {
+      current = joined;
+    } else {
+      lines.add(current);
+      current = word;
+    }
+  }
+  lines.add(current);
+  widthOf(lines.first);
+  final lineHeight = painter.height;
+  painter.dispose();
+  if (lines.length <= 2) return (lines: lines, ellipsize: false, lineHeight: lineHeight);
+  return (lines: [lines.first, lines.skip(1).join(' ')], ellipsize: true, lineHeight: lineHeight);
 }
 
 /// The last cell: a dashed tile with a pencil that opens Categories.
