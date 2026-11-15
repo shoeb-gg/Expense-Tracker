@@ -11,6 +11,7 @@ import 'package:spill_the_bills/features/data/data_providers.dart';
 import 'package:spill_the_bills/features/data/export_logic.dart';
 import 'package:spill_the_bills/features/data/import_logic.dart';
 import 'package:spill_the_bills/features/data/import_table.dart';
+import 'package:spill_the_bills/theme/tokens.dart';
 
 import '../../support/sample_data.dart';
 import '../../support/test_db.dart';
@@ -402,6 +403,53 @@ void main() {
         expect(await categories.findByName('Pets'), isNull);
       },
     );
+
+    test('new categories get colours nobody has, then the palette in turn',
+        () async {
+      // The 15 defaults leave Red, Yellow and Sand free.
+      const names = ['Pets', 'Travel', 'Books', 'Toys', 'Fish'];
+      final file =
+          'date,amount,category,title\n'
+          '${[for (final n in names) '2025-03-02,10,$n,x'].join('\n')}\n';
+      final s = ImportSession.start(readImportTable('b.csv', csvBytes(file)));
+      final p = await plan(s, personal);
+      expect(p.newCategories, names);
+      await applyImport(
+        plan: p,
+        pocketId: personal,
+        categories: categories,
+        expenses: expenses,
+      );
+      Future<int> colourOf(String name) async =>
+          (await categories.findByName(name))!.color;
+      expect(await colourOf('Pets'), CategoryColor.red.argb);
+      expect(await colourOf('Travel'), CategoryColor.yellow.argb);
+      expect(await colourOf('Books'), CategoryColor.sand.argb);
+      // Everything is taken now: back to the start of the palette.
+      expect(await colourOf('Toys'), CategoryColor.blue.argb);
+      expect(await colourOf('Fish'), CategoryColor.green.argb);
+    });
+
+    test('a category that already exists takes no colour from the import',
+        () async {
+      final file =
+          'date,amount,category,title\n'
+          '2025-03-02,10,groceries,x\n'
+          '2025-03-02,10,Pets,x\n';
+      final s = ImportSession.start(readImportTable('c.csv', csvBytes(file)));
+      final p = await plan(s, personal);
+      expect(p.newCategories, ['Pets']);
+      await applyImport(
+        plan: p,
+        pocketId: personal,
+        categories: categories,
+        expenses: expenses,
+      );
+      expect(
+        (await categories.findByName('Pets'))!.color,
+        CategoryColor.red.argb,
+      );
+    });
 
     test('Undo keeps a created category that is now in use', () async {
       final s = ImportSession.start(readImportTable('a.csv', csvBytes(file)));

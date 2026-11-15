@@ -605,21 +605,10 @@ class ImportResult {
 /// Emoji of a category created by an import (the user can change it later).
 const String importedCategoryEmoji = '\u{1F3F7}\u{FE0F}';
 
-/// Colours given to new categories, in turn, starting with the Add
-/// category form's default (amber).
-const List<CategoryColor> importedCategoryColors = [
-  CategoryColor.amber,
-  CategoryColor.cyan,
-  CategoryColor.pink,
-  CategoryColor.orange,
-  CategoryColor.coral,
-  CategoryColor.blue,
-  CategoryColor.green,
-  CategoryColor.violet,
-];
-
 /// Saves the plan: creates the new categories, then adds the expenses in
-/// one transaction.
+/// one transaction. New categories get the colours no category has yet, in
+/// palette order, and then the whole palette in turn
+/// ([CategoryColor.forNew]).
 Future<ImportResult> applyImport({
   required ImportPlan plan,
   required int pocketId,
@@ -627,15 +616,28 @@ Future<ImportResult> applyImport({
   required ExpensesRepo expenses,
 }) async {
   final created = <String, int>{};
-  for (var i = 0; i < plan.newCategories.length; i++) {
-    final name = plan.newCategories[i];
-    final existing = await categories.findByName(name);
+  final existing = <String, int>{};
+  final missing = <String>[];
+  for (final name in plan.newCategories) {
+    final found = await categories.findByName(name);
+    if (found == null) {
+      missing.add(name);
+    } else {
+      existing[name] = found.id;
+    }
+  }
+  final colours = CategoryColor.forNew(
+    missing.length,
+    [for (final c in await categories.all()) c.color],
+  );
+  var next = 0;
+  for (final name in plan.newCategories) {
     created[name] =
-        existing?.id ??
+        existing[name] ??
         await categories.add(
           name: name,
           emoji: importedCategoryEmoji,
-          color: importedCategoryColors[i % importedCategoryColors.length].argb,
+          color: colours[next++].argb,
         );
   }
   final ids = await expenses.addAll([
