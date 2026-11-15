@@ -162,6 +162,10 @@ class HeroCard extends StatelessWidget {
 }
 
 /// The dark "2026 / Oct ˅" chip that opens the month pop-up.
+///
+/// The chip is a fixed 80 x 76 box, so its content scales down to fit when
+/// the text size makes it bigger (it never clips): at the default size it is
+/// laid out at its own size, exactly as drawn.
 class _MonthChip extends StatelessWidget {
   const _MonthChip({required this.month, required this.onTap});
 
@@ -177,38 +181,40 @@ class _MonthChip extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       semanticLabel: 'Choose month, ${monthYear(month.year, month.month)}',
       child: ExcludeSemantics(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 11),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                '${month.year}',
-                style: AppText.overline.copyWith(color: c.pillDim),
-              ),
-              const SizedBox(height: 6),
-              SizedBox(
-                height: 36,
-                child: Row(
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.topCenter,
+          child: Padding(
+            // 4 px at the sides keep the chevron (it paints 4 px past its
+            // box) inside the chip when the content is scaled to the width.
+            padding: const EdgeInsets.fromLTRB(4, 11, 4, 0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  '${month.year}',
+                  style: AppText.overline.copyWith(color: c.pillDim),
+                ),
+                const SizedBox(height: 6),
+                Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Flexible(
-                      child: Text(
-                        monthShortName(month.month),
-                        maxLines: 1,
-                        softWrap: false,
-                        overflow: TextOverflow.clip,
-                        style: AppText.pageTitle.copyWith(
-                          fontSize: 22,
-                          height: 36 / 22,
-                          color: c.text,
-                        ),
+                    Text(
+                      monthShortName(month.month),
+                      maxLines: 1,
+                      softWrap: false,
+                      style: AppText.pageTitle.copyWith(
+                        fontSize: 22,
+                        height: 36 / 22,
+                        color: c.text,
                       ),
                     ),
                     // The chevron overlaps the text box by 4 px (margin -4),
                     // so the group centres as "Oct˅" in the mockup.
                     SizedBox(
                       width: 16,
+                      height: 22,
                       child: OverflowBox(
                         alignment: Alignment.centerLeft,
                         minWidth: 20,
@@ -225,8 +231,8 @@ class _MonthChip extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
