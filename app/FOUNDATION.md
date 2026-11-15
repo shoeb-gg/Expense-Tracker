@@ -31,6 +31,8 @@ CSS px on a 360 px phone = Flutter logical px).
 | Regenerate Drift code | `dart run build_runner build --delete-conflicting-outputs --force-jit` |
 | Test SQLite DLL (once) | `powershell -ExecutionPolicy Bypass -File tool/get_sqlite_dll.ps1` |
 | Debug APK | `flutter build apk --debug` |
+| Release APK + icon check | `dart run tool/check_release_icons.dart` (builds `flutter build apk --release`, then checks it) |
+| Regenerate the icon font | `dart run tool/icon_font.dart` (after editing `lib/theme/symbols.dart`) |
 
 `--force-jit` is required: without it build_runner tries an AOT compile that
 fails because some plugins (jni, objective_c) use build hooks.
@@ -47,14 +49,20 @@ lib/
   core/                pure Dart: days, format, calculator, type_to_add
   data/                db.dart (+ db.g.dart), repositories, PhotoStore, maintenance
   state/               providers.dart (all providers), settings.dart
-  theme/               tokens.dart (AppColors), text.dart (AppText), app_theme.dart
+  theme/               tokens.dart (AppColors), text.dart (AppText), app_theme.dart,
+                       symbols.dart (Symbols: every icon the app uses)
   widgets/             shared UI kit; import 'widgets/kit.dart' for all of it
   features/<area>/     one file per screen (placeholders now)
 test/
   core/ data/ app/ widgets/   unit and widget tests
   shots/               screenshot tests (tag: shots)
   support/             test_db.dart, sample_data.dart, shots.dart, sqlite.dart
-tool/get_sqlite_dll.ps1
+  tool/                icon_font_test.dart (the icon font survives tree shaking)
+tool/
+  get_sqlite_dll.ps1
+  icon_font.dart             regenerates assets/fonts/MaterialSymbolsRounded.ttf
+  check_release_icons.dart   release build + icon check
+  src/ttf.dart               font reading/checking shared by the two above
 ```
 
 ## Conventions
@@ -66,7 +74,8 @@ tool/get_sqlite_dll.ps1
 - **Today** = `ref.watch(todayProvider)` (never `DateTime.now()` in UI; tests
   pin the clock to 18 Oct 2026 10:18 with `Clock.fixed(mockupNow)`).
 - Text colour defaults to `colors.text`. Letter spacing defaults to 0 (CSS).
-- Icons: `Symbols.<name>_rounded` from `package:material_symbols_icons/symbols.dart`.
+- Icons: `Symbols.<name>_rounded` from `lib/theme/symbols.dart` (never import
+  `package:material_symbols_icons` in lib/; see "Icon font" below).
   The theme sets weight 500, optical size 24, fill 0; pass `fill: 1` for a
   filled icon. Icon size = the mockup's `font-size`.
 - Emojis are plain `Text` (`AppText.emoji`), drawn by the phone's font.
@@ -373,6 +382,38 @@ phone's own scale (`MediaQuery.textScaler`), so layouts see 0.87x to 1.27x.
 - Share state between the three import steps with a provider in
   `features/data/`, not with `extra`.
 
+## Icon font (release builds)
+
+`flutter build apk --release` tree-shakes icon fonts with Flutter's
+`font-subset`. For variable fonts it packs each glyph's `gvar` variation data
+back to back but may store the offsets as 16-bit "offset / 2". Material
+Symbols has odd-length glyph data, so every glyph whose data starts on an odd
+byte got an offset one byte early and drew blank on the phone (the + button,
+calendar, Settings tab, receipt...). Which icons broke depended on the byte
+sizes of the others. Debug builds, widget tests and screenshots never
+tree-shake, so none of them showed it.
+
+The fix: the app ships its own `assets/fonts/MaterialSymbolsRounded.ttf`,
+made by `tool/icon_font.dart` from the `material_symbols_icons` package (now a
+dev dependency, so its own 34 MB of fonts are not bundled). The tool pads
+every glyph's variation data to an even length (offsets stay exact however
+font-subset stores them) and trims the font to the icons in
+`lib/theme/symbols.dart` (outlines identical to the package's).
+
+Adding an icon:
+
+1. Copy its line from the package's `lib/symbols.dart` into
+   `lib/theme/symbols.dart` (keep `matchTextDirection`, drop `fontPackage`).
+2. `dart run tool/icon_font.dart`
+3. `flutter test test/tool` (fails if the font lacks an icon, is unpadded, or
+   breaks when run through font-subset).
+
+Before handing over a release APK: `dart run tool/check_release_icons.dart`.
+It runs `flutter build apk --release`, opens the APK, and fails if any icon
+used in lib/ is missing from the shaken font or any glyph's variation data is
+corrupt (`--no-build` checks the last build, `--apk <path>` another APK).
+Never use `--no-tree-shake-icons` (74 MB instead of ~62 MB).
+
 ## Screenshot tests
 
 ```dart
@@ -395,8 +436,8 @@ void main() {
 
 `pumpApp(tester, {required db, location = '/', AppSettings settings, List<Override> overrides})`;
 `settle(tester)` after taps; open pop-ups with `unawaited(showX(tester.element(find.byType(MyScreen)), ...))`.
-Fonts: Plus Jakarta Sans from assets, Material Symbols Rounded from the
-package, colour emoji from `C:\Windows\Fonts\seguiemj.ttf` (Segoe UI Emoji,
+Fonts: Plus Jakarta Sans and Material Symbols Rounded from assets, colour
+emoji from `C:\Windows\Fonts\seguiemj.ttf` (Segoe UI Emoji,
 COLR; drawn in colour; glyph style differs from the phone's Noto). Real
 shadows are on. Today is 18 Oct 2026 10:18. Compare with the mockup render:
 `cd ../design/headertest && node measure_any.js <Board> <name>` writes

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_symbols_icons/symbols.dart';
 import 'package:spill_the_bills/core/days.dart';
 import 'package:spill_the_bills/data/categories_repo.dart';
 import 'package:spill_the_bills/data/db.dart';
@@ -8,6 +7,7 @@ import 'package:spill_the_bills/data/expenses_repo.dart';
 import 'package:spill_the_bills/features/categories/categories_screen.dart';
 import 'package:spill_the_bills/features/categories/category_parts.dart';
 import 'package:spill_the_bills/router.dart';
+import 'package:spill_the_bills/theme/symbols.dart';
 import 'package:spill_the_bills/theme/tokens.dart';
 import 'package:spill_the_bills/widgets/kit.dart';
 

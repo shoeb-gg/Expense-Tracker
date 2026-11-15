@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_symbols_icons/symbols.dart';
 import 'package:spill_the_bills/data/db.dart';
 import 'package:spill_the_bills/data/learned_words_repo.dart';
 import 'package:spill_the_bills/features/add/add_events.dart';
@@ -11,6 +10,7 @@ import 'package:spill_the_bills/features/add/photo_picker.dart';
 import 'package:spill_the_bills/features/home/home_screen.dart';
 import 'package:spill_the_bills/router.dart';
 import 'package:spill_the_bills/state/providers.dart';
+import 'package:spill_the_bills/theme/symbols.dart';
 import 'package:spill_the_bills/widgets/kit.dart';
 
 import '../support/add_support.dart';

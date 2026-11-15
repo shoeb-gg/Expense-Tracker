@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 import '../../router.dart';
 import '../../state/providers.dart';
+import '../../theme/symbols.dart';
 import '../../theme/text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/kit.dart';

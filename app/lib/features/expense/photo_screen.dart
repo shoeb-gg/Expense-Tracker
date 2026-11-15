@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 import '../../core/format.dart';
 import '../../state/providers.dart';
+import '../../theme/symbols.dart';
 import '../../theme/text.dart';
 import '../../widgets/kit.dart';
 import '../add/add_styles.dart';

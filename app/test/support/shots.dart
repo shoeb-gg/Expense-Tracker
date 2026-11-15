@@ -52,9 +52,9 @@ const List<String> _emojiFonts = [
 const Key _boundaryKey = ValueKey<String>('shot-boundary');
 bool _fontsLoaded = false;
 
-/// Loads Plus Jakarta Sans (500-800) from the app's assets, Material
-/// Symbols Rounded from the material_symbols_icons package, and a colour
-/// emoji font from the system as [shotEmojiFamily]. Call in `setUpAll`.
+/// Loads Plus Jakarta Sans (500-800) and Material Symbols Rounded from the
+/// app's assets, and a colour emoji font from the system as
+/// [shotEmojiFamily]. Call in `setUpAll`.
 Future<void> loadShotFonts() async {
   TestWidgetsFlutterBinding.ensureInitialized();
   if (_fontsLoaded) return;
@@ -64,12 +64,8 @@ Future<void> loadShotFonts() async {
   }
   await jakarta.load();
 
-  final symbols = FontLoader('packages/material_symbols_icons/MaterialSymbolsRounded')
-    ..addFont(
-      rootBundle.load(
-        'packages/material_symbols_icons/lib/fonts/MaterialSymbolsRounded.ttf',
-      ),
-    );
+  final symbols = FontLoader('MaterialSymbolsRounded')
+    ..addFont(rootBundle.load('assets/fonts/MaterialSymbolsRounded.ttf'));
   await symbols.load();
 
   for (final path in _emojiFonts) {

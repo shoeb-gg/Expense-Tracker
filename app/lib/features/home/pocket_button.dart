@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 import '../../data/db.dart';
+import '../../theme/symbols.dart';
 import '../../theme/text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/kit.dart';

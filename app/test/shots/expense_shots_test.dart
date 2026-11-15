@@ -3,9 +3,9 @@ library;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_symbols_icons/symbols.dart';
 import 'package:spill_the_bills/data/expenses_repo.dart';
 import 'package:spill_the_bills/router.dart';
+import 'package:spill_the_bills/theme/symbols.dart';
 
 import '../support/add_support.dart';
 import '../support/shots.dart';
