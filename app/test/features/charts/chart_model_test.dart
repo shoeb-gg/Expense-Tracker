@@ -7,6 +7,7 @@ import 'package:spill_the_bills/features/calendar/calendar_data.dart';
 import 'package:spill_the_bills/features/charts/chart_data.dart';
 import 'package:spill_the_bills/features/charts/chart_model.dart';
 import 'package:spill_the_bills/features/charts/column_chart.dart';
+import 'package:spill_the_bills/features/reports/reports_logic.dart' as reports;
 import 'package:spill_the_bills/state/providers.dart';
 
 import '../../support/sample_data.dart';
@@ -161,7 +162,7 @@ void main() {
     }) {
       final s = summaryOf(p, today, index);
       expect(fmt.format(s.total), total, reason: '$p total');
-      expect(whole(s.average), average, reason: '$p average');
+      expect(whole(s.average!), average, reason: '$p average');
       expect(s.averageLabel, label);
       expect(s.delta?.text, delta, reason: '$p delta');
     }
@@ -234,7 +235,128 @@ void main() {
       expect(empty.delta, isNull);
       final future = summaryOf(customPeriod(today + 1, today + 5), today, index);
       expect(future.total, 0);
+      // No day of it has happened: there is nothing to average.
+      expect(future.average, isNull);
       expect(future.delta, isNull);
+    });
+
+    // One rule for the monthly average, here and on Reports: the total of
+    // the full (ended) months from the first month with data, divided by
+    // how many there are; none yet means "not available" (null).
+    group('monthly average of a year', () {
+      DaySpend spend(int y, int m, int d, int whole) =>
+          (day: dayOf(y, m, d), categoryId: 1, amount: whole * 100);
+
+      PeriodSummary yearOf(List<DaySpend> rows, {int offset = 0}) =>
+          summaryOf(yearPeriod(today, offset), today, SpendIndex(rows));
+
+      test('the first expense is this month: not available, not 0', () {
+        final s = yearOf([spend(2026, 10, 5, 390)]);
+        expect(s.total, 39000);
+        expect(s.average, isNull);
+      });
+
+      test('the first expense is in the last full month', () {
+        final s = yearOf([spend(2026, 9, 5, 800), spend(2026, 10, 5, 390)]);
+        expect(s.average, 80000); // September alone, not 800 / 9
+      });
+
+      test('months before the first expense are not counted', () {
+        // March 1,000 + April 3,000 over the 7 full months March to
+        // September (Jan and Feb are before the first expense).
+        final s = yearOf([
+          spend(2026, 3, 10, 1000),
+          spend(2026, 4, 2, 3000),
+          spend(2026, 10, 5, 500),
+        ]);
+        expect(s.average, closeTo(400000 / 7, 1e-9));
+      });
+
+      test('a quiet month after the first one counts as 0', () {
+        final s = yearOf([spend(2026, 1, 3, 900), spend(2026, 10, 5, 100)]);
+        expect(s.average, 90000 / 9);
+      });
+
+      test('a finished year counts from the first month with data', () {
+        // First expense in July 2025: July to December, six months.
+        final s = yearOf([
+          spend(2025, 7, 9, 600),
+          spend(2025, 12, 30, 600),
+          spend(2026, 10, 5, 100),
+        ], offset: 1);
+        expect(s.total, 120000);
+        expect(s.average, 120000 / 6);
+      });
+
+      test('a finished year before any data is not available', () {
+        final s = yearOf([spend(2026, 3, 1, 50)], offset: 1);
+        expect(s.total, 0);
+        expect(s.average, isNull);
+      });
+
+      test('a year with no expenses at all is not available', () {
+        expect(yearOf(const []).average, isNull);
+      });
+
+      test('the first days of January have no full month yet', () {
+        final jan = dayOf(2026, 1, 20);
+        final rows = [spend(2026, 1, 5, 250)];
+        final s = summaryOf(yearPeriod(jan, 0), jan, SpendIndex(rows));
+        expect(s.total, 25000);
+        expect(s.average, isNull);
+      });
+
+      test('the last day of a month ends it', () {
+        final end = dayOf(2026, 10, 31);
+        final rows = [spend(2026, 10, 5, 390)];
+        final s = summaryOf(yearPeriod(end, 0), end, SpendIndex(rows));
+        expect(s.average, 39000);
+      });
+
+      test('a pocket first day can start the count earlier (category view)', () {
+        // A category with a single October expense in a pocket that has
+        // been used since March: seven full months of nothing spent.
+        final rows = [spend(2026, 10, 5, 390)];
+        final first = dayOf(2026, 3, 2);
+        expect(
+          periodAverage(yearPeriod(today, 0), today, SpendIndex(rows),
+              firstDay: first),
+          0,
+        );
+        expect(periodAverage(yearPeriod(today, 0), today, SpendIndex(rows)),
+            isNull);
+      });
+
+      test('Reports and Charts agree on every case', () {
+        final cases = <({List<DaySpend> rows, int offset})>[
+          (rows: [spend(2026, 10, 5, 390)], offset: 0),
+          (rows: [spend(2026, 9, 5, 800), spend(2026, 10, 5, 1)], offset: 0),
+          (rows: [spend(2026, 3, 10, 1000), spend(2026, 6, 2, 3333)], offset: 0),
+          (rows: [spend(2025, 7, 9, 600), spend(2026, 2, 1, 7)], offset: 1),
+          (rows: [spend(2026, 3, 1, 50)], offset: 1),
+        ];
+        for (final c in cases) {
+          final idx = SpendIndex(c.rows);
+          final year = yearOfDay(today) - c.offset;
+          final totals = <(int, int), int>{};
+          for (final r in c.rows) {
+            final k = (yearOfDay(r.day), monthOfDay(r.day));
+            totals[k] = (totals[k] ?? 0) + r.amount;
+          }
+          final months = reports.monthsOfYear(
+            year: year,
+            totals: totals,
+            today: today,
+            firstDay: idx.firstDay,
+          );
+          final charts = periodAverage(yearPeriod(today, c.offset), today, idx);
+          expect(
+            charts?.round(),
+            reports.fullMonthAverage(months),
+            reason: '${c.rows} offset ${c.offset}',
+          );
+        }
+      });
     });
 
     test('about the same', () {

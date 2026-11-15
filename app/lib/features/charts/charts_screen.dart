@@ -510,6 +510,7 @@ class _SummaryCard extends ConsumerWidget {
     final c = context.colors;
     final fmt = ref.watch(amountFormatProvider);
     final delta = summary.delta;
+    final average = summary.average;
     final Widget pill;
     if (delta == null) {
       pill = Container(
@@ -611,9 +612,11 @@ class _SummaryCard extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.only(left: 12, top: 2),
                     child: Text(
-                      fmt.formatWhole(summary.average.round()),
+                      average == null ? '—' : fmt.formatWhole(average.round()),
                       textAlign: TextAlign.right,
-                      style: ChartText.stat,
+                      style: average == null
+                          ? ChartText.stat.copyWith(color: c.text3)
+                          : ChartText.stat,
                     ),
                   ),
                 ],
@@ -1010,9 +1013,12 @@ class _OverTime extends ConsumerWidget {
     final today = ref.watch(todayProvider);
     final points = periodColumns(period, today, index);
     final byMonth = period.byMonth;
+    final average = summary.average;
     final keyLine = summary.total == 0
         ? 'Nothing spent in this period.'
-        : 'Dashed line = average ${fmt.formatWhole(summary.average.round())}';
+        : average == null
+            ? 'No full month yet in ${yearOfDay(period.from)}'
+            : 'Dashed line = average ${fmt.formatWhole(average.round())}';
     return ChartCard(
       child: Column(
         children: [
@@ -1023,7 +1029,7 @@ class _OverTime extends ConsumerWidget {
           const SizedBox(height: 12),
           ColumnChart(
             points: points,
-            average: summary.total == 0 ? 0 : summary.average,
+            average: summary.total == 0 ? 0 : (average ?? 0),
             colors: ColumnColors(hi: c.accent, soft: c.barSoft, dim: c.barDim),
             pinned: pinned,
             onPin: onPin,

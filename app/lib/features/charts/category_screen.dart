@@ -130,6 +130,9 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
       _ => dayRangeLabel(range.from, range.to),
     };
 
+    // The monthly average counts from the pocket's first month with data
+    // (the same rule as Charts and Reports), so a year waits for it.
+    final span = ref.watch(daySpanProvider(pocketId)).value;
     final lastPast = math.min(range.to, today);
     final expenses = lastPast < range.from
         ? const <Expense>[]
@@ -157,11 +160,12 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
               onPill: () => unawaited(_pickMonth(range.from)),
             ),
             Expanded(
-              child: expenses == null
+              child: expenses == null || span == null
                   ? const SizedBox.shrink()
                   : _Body(
                       category: category,
                       range: range,
+                      firstDay: span.first,
                       byYear: kind == _RangeKind.year,
                       ticks: switch (kind) {
                         _RangeKind.week => DayTicks.weekdays,
@@ -274,6 +278,7 @@ class _Body extends ConsumerWidget {
   const _Body({
     required this.category,
     required this.range,
+    required this.firstDay,
     required this.byYear,
     required this.ticks,
     required this.expenses,
@@ -285,6 +290,9 @@ class _Body extends ConsumerWidget {
 
   final ExpenseCategory category;
   final ({int from, int to}) range;
+
+  /// The pocket's first day with an expense (null: none).
+  final int? firstDay;
   final bool byYear;
   final DayTicks ticks;
 
@@ -310,7 +318,7 @@ class _Body extends ConsumerWidget {
       to: range.to,
     );
     final total = index.sum(range.from, period.lastPast(today));
-    final average = periodAverage(period, today, index);
+    final average = periodAverage(period, today, index, firstDay: firstDay);
     final points = byYear
         ? monthColumns(yearOfDay(range.from), today, index.sum)
         : dayColumns(range.from, range.to, today, ticks, index.dayTotal);
@@ -380,9 +388,13 @@ class _Body extends ConsumerWidget {
                     ),
                     _cell(
                       Text(
-                        fmt.formatWhole(average.round()),
+                        average == null
+                            ? '—'
+                            : fmt.formatWhole(average.round()),
                         textAlign: TextAlign.right,
-                        style: ChartText.stat,
+                        style: average == null
+                            ? ChartText.stat.copyWith(color: c.text3)
+                            : ChartText.stat,
                       ),
                       top: 2,
                     ),
@@ -407,13 +419,15 @@ class _Body extends ConsumerWidget {
                   title: byYear ? 'Monthly spending' : 'Daily spending',
                   keyLine: total == 0
                       ? 'Nothing spent in this period.'
-                      : 'Dashed line = average '
-                          '${fmt.formatWhole(average.round())}',
+                      : average == null
+                          ? 'No full month yet in ${yearOfDay(range.from)}'
+                          : 'Dashed line = average '
+                              '${fmt.formatWhole(average.round())}',
                 ),
                 const SizedBox(height: 12),
                 ColumnChart(
                   points: points,
-                  average: total == 0 ? 0 : average,
+                  average: total == 0 ? 0 : (average ?? 0),
                   colors: ColumnColors(
                     hi: color,
                     soft: mix(color, c.surface, 0.8),

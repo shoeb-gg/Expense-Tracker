@@ -272,19 +272,45 @@ Delta? deltaOf(int total, Comparison? cmp) {
 /// Text shown when there is nothing earlier to compare with.
 const String nothingToCompare = 'Nothing earlier to compare with';
 
-/// Average spending of a period in minor units: per day so far, or (year
-/// view) per full month, leaving out a month in progress like Reports does.
-double periodAverage(ChartPeriod p, int today, SpendIndex index) {
+/// Average spending of a period in minor units, or null when it cannot be
+/// worked out ("not available", shown as "—").
+///
+/// * Day views: the total so far over the days that have happened. A period
+///   with nothing spent genuinely averages 0; one that has not started has
+///   no days, so null.
+/// * Year view: ONE rule, the same as Reports' full-month average. The total
+///   of the full (ended) months on or after the first month with data,
+///   divided by the number of such months; null when there are none yet.
+///   Months before the first expense are not counted (they are not "zero
+///   months", the pocket did not exist), and neither is the month in
+///   progress. A finished year counts from its first data month too.
+///
+/// [firstDay] is the first day with data. It defaults to the first day in
+/// [index]; the category screen passes its pocket's first day, because its
+/// own index holds one category's expenses of the year only.
+double? periodAverage(
+  ChartPeriod p,
+  int today,
+  SpendIndex index, {
+  int? firstDay,
+}) {
   final eEff = p.lastPast(today);
-  if (eEff < p.from) return 0;
-  final total = index.sum(p.from, eEff);
-  if (!p.byMonth) return total / (eEff - p.from + 1);
-  if (eEff < p.to) {
-    final fullMonths = monthOfDay(eEff) - 1;
-    if (fullMonths == 0) return total.toDouble();
-    return index.sum(p.from, monthStartOfDay(eEff) - 1) / fullMonths;
+  if (eEff < p.from) return null;
+  if (!p.byMonth) return index.sum(p.from, eEff) / (eEff - p.from + 1);
+  final first = firstDay ?? index.firstDay;
+  if (first == null) return null;
+  final firstMonth = monthStartOfDay(first);
+  final year = yearOfDay(p.from);
+  var months = 0;
+  var total = 0;
+  for (var m = 1; m <= 12; m++) {
+    final s = monthStart(year, m);
+    final e = monthEnd(year, m);
+    if (s < firstMonth || e > today) continue;
+    months++;
+    total += index.sum(s, e);
   }
-  return total / 12;
+  return months == 0 ? null : total / months;
 }
 
 /// The summary card of a period.
@@ -300,8 +326,8 @@ class PeriodSummary {
   /// Total spent so far, minor units.
   final int total;
 
-  /// Average in minor units (see [periodAverage]).
-  final double average;
+  /// Average in minor units; null when not available (see [periodAverage]).
+  final double? average;
 
   /// "Daily average" or "Monthly average".
   final String averageLabel;
@@ -311,11 +337,16 @@ class PeriodSummary {
 }
 
 /// The summary of [p].
-PeriodSummary summaryOf(ChartPeriod p, int today, SpendIndex index) {
+PeriodSummary summaryOf(
+  ChartPeriod p,
+  int today,
+  SpendIndex index, {
+  int? firstDay,
+}) {
   final total = index.sum(p.from, p.lastPast(today));
   return PeriodSummary(
     total: total,
-    average: periodAverage(p, today, index),
+    average: periodAverage(p, today, index, firstDay: firstDay),
     averageLabel: p.byMonth ? 'Monthly average' : 'Daily average',
     delta: deltaOf(total, comparisonOf(p, today, index)),
   );

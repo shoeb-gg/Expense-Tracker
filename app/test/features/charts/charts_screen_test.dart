@@ -15,6 +15,7 @@ import 'package:spill_the_bills/state/providers.dart';
 import 'package:spill_the_bills/widgets/kit.dart';
 
 import '../../support/shots.dart';
+import '../../support/test_db.dart';
 
 AppSettings _settings(WidgetTester tester) => ProviderScope.containerOf(
       tester.element(find.byType(ChartsScreen)),
@@ -37,6 +38,12 @@ Future<void> _tapRow(WidgetTester tester, Finder f) async {
 
 /// The total of the summary card ("34,555" also shows in the ring).
 Finder _total(String text) => find.text(text);
+
+/// A label by its words, wherever the summary card breaks the line (it
+/// writes "Monthly" and "average" on two lines when the name needs the room).
+Finder _words(String text) => find.byWidgetPredicate(
+      (w) => w is Text && (w.data ?? '').replaceAll('\n', ' ') == text,
+    );
 
 void main() {
   group('Charts', () {
@@ -494,6 +501,30 @@ void main() {
       });
     });
 
+    testWidgets('Year: the first expense is this month, so the monthly '
+        'average is not available', (tester) async {
+      final db = openTestDatabase();
+      await tester.runAsync(() async {
+        await ExpensesRepo(db, clock: Clock.fixed(mockupNow)).add(
+          pocketId: 1,
+          categoryId: 1,
+          amount: 39000,
+          day: dayOf(2026, 10, 5),
+        );
+      });
+      await pumpApp(tester, db: db, location: Routes.charts);
+      await tester.tap(find.text('Year'));
+      await settle(tester);
+      expect(find.text('Monthly average'), findsOneWidget);
+      expect(find.text('390'), findsWidgets);
+      expect(find.text('—'), findsOneWidget, reason: 'not 0');
+      await tester.tap(find.text('Over time'));
+      await settle(tester);
+      expect(find.text('No full month yet in 2026'), findsOneWidget);
+      expect(find.textContaining('Dashed line'), findsNothing);
+      await closeApp(tester, db);
+    });
+
     testWidgets('follows the current pocket', (tester) async {
       final db = await sampleDatabase(tester);
       late int other;
@@ -622,6 +653,58 @@ void main() {
       expect(find.text('555'), findsWidgets);
       expect(find.text('45,220'), findsNothing);
       await closeApp(tester, db);
+    });
+
+    testWidgets('year: the monthly average counts from the pocket first '
+        'month, and is "—" while there is no full month', (tester) async {
+      final year = Routes.category(
+        1,
+        from: yearStart(2026),
+        to: yearEnd(2026),
+      );
+      // Groceries only in October, in a pocket used since March: seven full
+      // months of nothing spent on Groceries.
+      final used = openTestDatabase();
+      await tester.runAsync(() async {
+        final repo = ExpensesRepo(used, clock: Clock.fixed(mockupNow));
+        await repo.add(
+          pocketId: 1,
+          categoryId: 1,
+          amount: 39000,
+          day: dayOf(2026, 10, 5),
+        );
+        await repo.add(
+          pocketId: 1,
+          categoryId: 2,
+          amount: 70000,
+          day: dayOf(2026, 3, 5),
+        );
+      });
+      await pumpApp(tester, db: used, location: year);
+      expect(_words('Monthly average'), findsOneWidget);
+      final stat = find.byWidgetPredicate(
+        (w) => w is Text && w.data == '0' && w.style?.fontSize == 18,
+      );
+      expect(stat, findsOneWidget);
+      expect(find.text('—'), findsNothing);
+      expect(find.text('No full month yet in 2026'), findsNothing);
+      await closeApp(tester, used);
+
+      // A pocket whose first expense is this month has no full month yet.
+      final fresh = openTestDatabase();
+      await tester.runAsync(() async {
+        await ExpensesRepo(fresh, clock: Clock.fixed(mockupNow)).add(
+          pocketId: 1,
+          categoryId: 1,
+          amount: 39000,
+          day: dayOf(2026, 10, 5),
+        );
+      });
+      await pumpApp(tester, db: fresh, location: year);
+      expect(_words('Monthly average'), findsOneWidget);
+      expect(find.text('—'), findsOneWidget);
+      expect(find.text('No full month yet in 2026'), findsOneWidget);
+      await closeApp(tester, fresh);
     });
 
     testWidgets('an unknown category says so', (tester) async {
