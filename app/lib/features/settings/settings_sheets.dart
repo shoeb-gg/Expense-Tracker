@@ -139,8 +139,10 @@ Future<void> confirmDeleteAll(BuildContext context, WidgetRef ref) async {
   final ok = await showAppDialog(
     context,
     title: 'Delete all data?',
-    boldLine: 'All expenses, categories and photos',
-    quietLine: "This can't be undone.",
+    boldLine: 'All pockets, expenses, categories and photos',
+    quietLine:
+        'The app starts fresh with Personal and the default categories. '
+        "This can't be undone.",
     extra: Builder(
       builder: (dialog) => DialogLinkRow(
         label: 'Save a copy first',

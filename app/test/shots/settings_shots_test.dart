@@ -99,6 +99,29 @@ void main() {
     await closeApp(tester, db);
   });
 
+  testWidgets('settings: delete all data dialog at the largest text size', (
+    tester,
+  ) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(
+      tester,
+      db: db,
+      location: Routes.settings,
+      settings: AppSettings(textScale: textScaleSteps.last),
+    );
+    await revealRow(tester, find.text('Delete all data'));
+    await tester.tap(find.text('Delete all data'));
+    await settle(tester);
+    expect(
+      find.text('All pockets, expenses, categories and photos'),
+      findsOneWidget,
+    );
+    await takeShot(tester, 'settings_delete_all_largest');
+    await tester.tap(find.text('Cancel'));
+    await settle(tester);
+    await closeApp(tester, db);
+  });
+
   testWidgets('settings: delete all data dialog, then ticked', (tester) async {
     final db = await sampleDatabase(tester);
     await pumpApp(tester, db: db, location: Routes.settings);

@@ -250,6 +250,27 @@ void main() {
     await closeApp(tester, db);
   });
 
+  testWidgets('delete all: the warning names the pockets it erases', (
+    tester,
+  ) async {
+    final db = await openSettings(tester);
+    await tapRow(tester, 'Delete all data');
+    expect(find.text('Delete all data?'), findsOneWidget);
+    expect(
+      find.text('All pockets, expenses, categories and photos'),
+      findsOneWidget,
+    );
+    expect(
+      find.text(
+        'The app starts fresh with Personal and the default categories. '
+        "This can't be undone.",
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('All expenses, categories and photos'), findsNothing);
+    await closeApp(tester, db);
+  });
+
   testWidgets('delete all: "Save a copy first" opens Export', (tester) async {
     final db = await openSettings(tester);
     await tapRow(tester, 'Delete all data');
