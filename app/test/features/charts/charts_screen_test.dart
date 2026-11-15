@@ -578,6 +578,52 @@ void main() {
       await closeApp(tester, db);
     });
 
+    testWidgets('a given pocket is shown, also after choosing another month',
+        (tester) async {
+      final db = await sampleDatabase(tester);
+      late int trip;
+      await tester.runAsync(() async {
+        trip = await PocketsRepo(db).add(name: 'Trip', emoji: '\u{1F334}');
+        final repo = ExpensesRepo(db, clock: Clock.fixed(mockupNow));
+        await repo.add(
+          pocketId: trip,
+          categoryId: 1,
+          amount: 77700,
+          day: dayOf(2026, 10, 3),
+        );
+        await repo.add(
+          pocketId: trip,
+          categoryId: 1,
+          amount: 55500,
+          day: dayOf(2026, 9, 9),
+        );
+      });
+      // Personal stays the pocket in use.
+      await pumpApp(
+        tester,
+        db: db,
+        location: Routes.category(
+          1,
+          from: dayOf(2026, 10, 1),
+          to: dayOf(2026, 10, 31),
+          pocket: trip,
+        ),
+      );
+      expect(find.text('777'), findsWidgets);
+      expect(find.text('6,540'), findsNothing, reason: 'not Personal');
+
+      await tester.tap(find.text('Oct 2026'));
+      await settle(tester);
+      await tester.tap(find.text('Sep'));
+      await settle(tester);
+      await tester.tap(find.text('Confirm'));
+      await settle(tester);
+      expect(find.text('Sep 2026'), findsOneWidget);
+      expect(find.text('555'), findsWidgets);
+      expect(find.text('45,220'), findsNothing);
+      await closeApp(tester, db);
+    });
+
     testWidgets('an unknown category says so', (tester) async {
       final db = await sampleDatabase(tester);
       await pumpApp(tester, db: db, location: Routes.category(999));

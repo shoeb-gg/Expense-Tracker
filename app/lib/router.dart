@@ -57,9 +57,14 @@ abstract final class Routes {
   static String calendar({int? day}) =>
       day == null ? '/calendar' : '/calendar?day=$day';
 
-  /// Category drill-down for a day range (inclusive day numbers).
-  static String category(int id, {int? from, int? to}) {
-    final q = [if (from != null) 'from=$from', if (to != null) 'to=$to'];
+  /// Category drill-down for a day range (inclusive day numbers), in the
+  /// pocket [pocket] (null: the pocket in use).
+  static String category(int id, {int? from, int? to, int? pocket}) {
+    final q = [
+      if (from != null) 'from=$from',
+      if (to != null) 'to=$to',
+      if (pocket != null) 'pocket=$pocket',
+    ];
     return q.isEmpty ? '/category/$id' : '/category/$id?${q.join('&')}';
   }
 
@@ -147,6 +152,7 @@ GoRouter buildRouter({String initialLocation = Routes.home}) {
           categoryId: _id(s),
           from: _query(s, 'from'),
           to: _query(s, 'to'),
+          pocketId: _query(s, 'pocket'),
         ),
       ),
       top(Routes.categories, (_, _) => const CategoriesScreen()),

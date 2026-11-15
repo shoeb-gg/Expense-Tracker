@@ -61,6 +61,11 @@ void main() {
       Routes.category(3, from: dayOf(2026, 10, 1), to: dayOf(2026, 10, 18)),
     );
     expect((cat.categoryId, cat.from, cat.to), (3, 20727, 20744));
+    expect(cat.pocketId, isNull, reason: 'no pocket: the one in use');
+    final inPocket = await open<CategoryScreen>(
+      Routes.category(3, from: dayOf(2026, 10, 1), pocket: 2),
+    );
+    expect((inPocket.categoryId, inPocket.from, inPocket.pocketId), (3, 20727, 2));
     await open<CategoriesScreen>(Routes.categories);
     expect((await open<CategoryFormScreen>(Routes.newCategory)).categoryId, isNull);
     expect((await open<CategoryFormScreen>(Routes.editCategory(4))).categoryId, 4);

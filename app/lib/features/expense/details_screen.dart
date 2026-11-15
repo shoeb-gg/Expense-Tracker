@@ -332,7 +332,14 @@ class _MonthLink extends ConsumerWidget {
       color: c.surface,
       borderRadius: BorderRadius.circular(20),
       semanticLabel: 'See all $categoryName in $month',
-      onTap: () => context.push(Routes.category(expense.categoryId, from: from, to: to)),
+      onTap: () => context.push(
+        Routes.category(
+          expense.categoryId,
+          from: from,
+          to: to,
+          pocket: expense.pocketId,
+        ),
+      ),
       child: ConstrainedBox(
         // 76 px; a long category name wraps to a second line instead of
         // being cut off.

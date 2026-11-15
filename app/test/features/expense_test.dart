@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/data/db.dart';
 import 'package:spill_the_bills/data/expenses_repo.dart';
 import 'package:spill_the_bills/features/add/add_screen.dart';
+import 'package:spill_the_bills/features/charts/category_screen.dart';
 import 'package:spill_the_bills/features/expense/details_screen.dart';
 import 'package:spill_the_bills/features/expense/photo_screen.dart';
 import 'package:spill_the_bills/features/home/home_screen.dart';
@@ -46,6 +47,33 @@ void main() {
     await tap(tester, find.bySemanticsLabel('Close'));
     expect(find.byType(PhotoScreen), findsNothing);
     await closeAppWithFiles(tester, db);
+  });
+
+  testWidgets('Details: "See all" opens the pocket the expense is in', (
+    tester,
+  ) async {
+    final db = await sampleDatabase(tester);
+    // Move the doctor visit to Business while Personal stays the pocket in use.
+    final pockets = await addSamplePockets(tester, db);
+    await tester.runAsync(() async {
+      final repo = ExpensesRepo(db);
+      final expense = await repo.get(doctorVisitId);
+      await repo.update(expense!.copyWith(pocketId: pockets.business));
+    });
+    await pumpApp(tester, db: db);
+    await pushRoute(tester, Routes.expense(doctorVisitId));
+    expect(find.text('1 expense so far'), findsOneWidget);
+
+    await tap(tester, find.textContaining('See all Health'));
+    expect(find.byType(CategoryScreen), findsOneWidget);
+    expect(
+      tester.widget<CategoryScreen>(find.byType(CategoryScreen)).pocketId,
+      pockets.business,
+    );
+    // The screen shows that expense, not an empty month.
+    expect(find.text('Doctor visit'), findsOneWidget);
+    expect(find.text('Nothing spent in this period.'), findsNothing);
+    await closeApp(tester, db);
   });
 
   testWidgets('Delete asks first, then Undo brings the expense and its photo back', (tester) async {

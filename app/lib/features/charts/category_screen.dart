@@ -19,22 +19,26 @@ import 'chart_model.dart';
 import 'chart_parts.dart';
 import 'column_chart.dart';
 
-/// Category drill-down (`/category/:id?from=&to=`, opened from "Details" on
-/// Charts). [from] and [to] are inclusive day numbers (null: this month).
-/// Summary (total, average, entries), a column chart in the category's own
-/// colour and its expenses by amount or by date. The month pill opens the
-/// month pop-up.
+/// Category drill-down (`/category/:id?from=&to=&pocket=`, opened from
+/// "Details" on Charts and from "See all" on an expense). [from] and [to] are
+/// inclusive day numbers (null: this month). [pocketId] is the pocket whose
+/// expenses it shows (null: the pocket in use); an expense's own pocket may
+/// not be the one in use. Summary (total, average, entries), a column chart
+/// in the category's own colour and its expenses by amount or by date. The
+/// month pill opens the month pop-up.
 class CategoryScreen extends ConsumerStatefulWidget {
   const CategoryScreen({
     super.key,
     required this.categoryId,
     this.from,
     this.to,
+    this.pocketId,
   });
 
   final int categoryId;
   final int? from;
   final int? to;
+  final int? pocketId;
 
   @override
   ConsumerState<CategoryScreen> createState() => _CategoryScreenState();
@@ -75,7 +79,8 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
     final c = context.colors;
     final today = ref.watch(todayProvider);
     final first = ref.watch(settingsProvider.select((s) => s.firstDayOfWeek));
-    final pocketId = ref.watch(currentPocketIdProvider);
+    final currentPocketId = ref.watch(currentPocketIdProvider);
+    final pocketId = widget.pocketId ?? currentPocketId;
     final categories = ref.watch(categoriesProvider).value;
     final category = categories
         ?.where((e) => e.id == widget.categoryId)
