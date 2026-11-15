@@ -194,6 +194,7 @@ class _ImportReviewScreenState extends ConsumerState<ImportReviewScreen> {
             subtitle: r.sub,
             titleStyle: AppText.tabular(AppText.rowTitle),
             divider: false,
+            wrap: true,
             leading: IconTile(icon: r.icon, iconColor: r.color),
           ),
         ),

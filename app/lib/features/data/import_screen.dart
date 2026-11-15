@@ -99,6 +99,7 @@ class ImportScreen extends ConsumerWidget {
                     subtitle: step.$2,
                     height: 64,
                     divider: false,
+                    wrap: true,
                     leading: SizedBox(
                       width: 44,
                       child: Center(
@@ -121,6 +122,7 @@ class ImportScreen extends ConsumerWidget {
                   subtitle: 'In every row',
                   height: 60,
                   divider: false,
+                  wrap: true,
                   trailing: SmallChip(label: 'Needed', color: c.accent),
                 ),
               ),
@@ -129,6 +131,7 @@ class ImportScreen extends ConsumerWidget {
                 subtitle: 'Blank ones go to Miscellaneous',
                 height: 60,
                 divider: false,
+                wrap: true,
                 trailing: SmallChip(label: 'Optional', color: c.text3),
               ),
               Padding(

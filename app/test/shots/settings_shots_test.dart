@@ -46,6 +46,36 @@ void main() {
     await closeApp(tester, db);
   });
 
+  testWidgets('settings: every row at the largest text size', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(
+      tester,
+      db: db,
+      location: Routes.settings,
+      settings: AppSettings(textScale: textScaleSteps.last),
+    );
+    await boardHeight(tester, 2300);
+    await takeShot(tester, 'settings_largest_full');
+    await closeApp(tester, db);
+  });
+
+  testWidgets('settings sheet: Calculator keys at the largest text size', (
+    tester,
+  ) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(
+      tester,
+      db: db,
+      location: Routes.settings,
+      settings: AppSettings(textScale: textScaleSteps.last),
+    );
+    await revealRow(tester, find.text('Calculator keys'));
+    await tester.tap(find.text('Calculator keys'));
+    await settle(tester);
+    await takeShot(tester, 'settings_sheet_calc_largest');
+    await closeApp(tester, db);
+  });
+
   testWidgets('settings: Coral, Large text, separator off', (tester) async {
     final db = await sampleDatabase(tester);
     await pumpApp(

@@ -170,6 +170,10 @@ Future<T?> showOptionSheet<T>(
 /// A 56 px choice row (radius 16). Selected: `accentSoft` tint, 2 px accent
 /// ring, w800 label, accent circle with a check. Else: `tile`, w600, an
 /// empty circle with a popStub ring.
+///
+/// A label that does not fit (large text, next to a [trailing] strip) wraps
+/// and the row grows to hold it, 10 px above and below the text. A [tabular]
+/// label (a number sample) stays on one line.
 class OptionRow extends StatelessWidget {
   const OptionRow({
     super.key,
@@ -202,8 +206,8 @@ class OptionRow extends StatelessWidget {
       inMutuallyExclusiveGroup: true,
       checked: selected,
       label: semanticLabel,
-      child: SizedBox(
-        height: 56,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 56),
         child: Pressable(
           onTap: onTap,
           selected: selected,
@@ -211,11 +215,16 @@ class OptionRow extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: selected ? Border.all(color: c.accent, width: 2) : null,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
               children: [
                 Expanded(
-                  child: Text(label, maxLines: 1, softWrap: false, style: style),
+                  child: Text(
+                    label,
+                    maxLines: tabular ? 1 : null,
+                    softWrap: !tabular,
+                    style: style,
+                  ),
                 ),
                 if (note != null && note!.isNotEmpty) ...[
                   const SizedBox(width: 12),

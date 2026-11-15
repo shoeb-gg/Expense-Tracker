@@ -193,6 +193,7 @@ class _HomeCalendarCard extends ConsumerWidget {
         title: title,
         subtitle: sub,
         divider: false,
+        wrap: true,
         onTap: () => set(!value),
         trailing: AppSwitch(value: value, onChanged: set, semanticLabel: title),
       ),
@@ -230,6 +231,7 @@ class _HomeCalendarCard extends ConsumerWidget {
           ListRow(
             title: 'First day of the week',
             divider: false,
+            wrap: true,
             trailing: ValueChevron(text: s.firstDayOfWeek.label),
             onTap: () => pickFirstDayOfWeek(context, ref),
           ),
@@ -252,6 +254,7 @@ class _PocketsCard extends ConsumerWidget {
         title: 'Manage pockets',
         subtitle: 'Add, edit, delete',
         divider: false,
+        wrap: true,
         trailing: PeekTiles(emojis: [for (final p in pockets.take(3)) p.emoji]),
         onTap: () => context.push(Routes.pockets),
       ),
@@ -272,6 +275,7 @@ class _CategoriesCard extends ConsumerWidget {
         title: 'Manage categories',
         subtitle: 'Add, edit, delete, reorder',
         divider: false,
+        wrap: true,
         trailing: PeekTiles(
           emojis: [for (final cat in cats.take(2)) cat.emoji],
           more: cats.length > 2 ? cats.length - 2 : 0,
@@ -299,6 +303,7 @@ class _NumbersCard extends ConsumerWidget {
             child: ListRow(
               title: 'Number format',
               divider: false,
+              wrap: true,
               trailing: ValueChevron(
                 text: s.numberStyle.sample(separator: s.thousandsSeparator),
                 tabular: true,
@@ -310,6 +315,7 @@ class _NumbersCard extends ConsumerWidget {
             child: ListRow(
               title: 'Thousands separator',
               divider: false,
+              wrap: true,
               onTap: () => n.setThousandsSeparator(!s.thousandsSeparator),
               trailing: AppSwitch(
                 value: s.thousandsSeparator,
@@ -321,6 +327,7 @@ class _NumbersCard extends ConsumerWidget {
           ListRow(
             title: 'Calculator keys',
             divider: false,
+            wrap: true,
             trailing: ValueChevron(text: s.calcKeys.label),
             onTap: () => pickCalcKeys(context, ref),
           ),
@@ -347,6 +354,7 @@ class _DataCard extends ConsumerWidget {
               title: 'Export',
               subtitle: 'Excel or CSV, for any date range',
               divider: false,
+              wrap: true,
               trailing: const ValueChevron(),
               onTap: () => context.push(Routes.export),
             ),
@@ -356,6 +364,7 @@ class _DataCard extends ConsumerWidget {
               title: 'Import',
               subtitle: 'From a CSV, Excel or JSON file',
               divider: false,
+              wrap: true,
               trailing: const ValueChevron(),
               onTap: () => context.push(Routes.importStart),
             ),
@@ -365,6 +374,7 @@ class _DataCard extends ConsumerWidget {
               title: 'Automatic backup',
               subtitle: 'Phone and Google Drive',
               divider: false,
+              wrap: true,
               titleColor: c.text3,
               trailing: const ComingLaterPill(),
             ),
@@ -374,6 +384,7 @@ class _DataCard extends ConsumerWidget {
               title: 'Clear cache',
               subtitle: 'Frees up space. Your expenses stay.',
               divider: false,
+              wrap: true,
               onTap: () => clearCacheNow(context, ref),
             ),
           ),
@@ -383,6 +394,7 @@ class _DataCard extends ConsumerWidget {
             titleStyle: AppText.rowTitle.copyWith(fontWeight: FontWeight.w700),
             titleColor: c.bad,
             divider: false,
+            wrap: true,
             trailing: HangingIcon(
               icon: Symbols.delete_rounded,
               box: 18,

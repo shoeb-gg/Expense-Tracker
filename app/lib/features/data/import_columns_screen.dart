@@ -46,6 +46,7 @@ class ImportColumnsScreen extends ConsumerWidget {
                 ? '1 row'
                 : '${fmt.count(table.rows.length)} rows',
             divider: false,
+            wrap: true,
             leading: IconTile(
               icon: Symbols.description_rounded,
               iconSize: 24,

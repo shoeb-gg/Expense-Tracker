@@ -320,6 +320,10 @@ class NotFoundCard extends StatelessWidget {
 /// * Without: 16 px margins and a full-width divider (Settings rows).
 ///
 /// Height: [height], else 68 with a [subtitle] or a [leading] tile, else 56.
+/// With [wrap] that is the least height: the title and the subtitle wrap
+/// instead of ending in "…", and the row grows to hold them (10 px of room
+/// above and below the text), so large text shows in full. Text that fits
+/// one line leaves the row as it was.
 /// [divider] draws a 1 px `line` at the bottom (leave it off on the last row).
 /// Right side: [trailing] widget, or [trailingText] as a 15/20 w700 amount.
 class ListRow extends StatelessWidget {
@@ -334,6 +338,7 @@ class ListRow extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.height,
+    this.wrap = false,
     this.titleStyle,
     this.titleColor,
     this.subtitleColor,
@@ -349,6 +354,10 @@ class ListRow extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final double? height;
+
+  /// Let the title and the subtitle wrap and the row grow (see above)
+  /// instead of cutting them to one line.
+  final bool wrap;
 
   /// Defaults to [AppText.rowTitle].
   final TextStyle? titleStyle;
@@ -368,8 +377,8 @@ class ListRow extends StatelessWidget {
       children: [
         Text(
           title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          maxLines: wrap ? null : 1,
+          overflow: wrap ? TextOverflow.clip : TextOverflow.ellipsis,
           style: (titleStyle ?? AppText.rowTitle)
               .copyWith(color: titleColor ?? c.text),
         ),
@@ -377,8 +386,8 @@ class ListRow extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             subtitle!,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            maxLines: wrap ? null : 1,
+            overflow: wrap ? TextOverflow.clip : TextOverflow.ellipsis,
             style: AppText.sub.copyWith(color: subtitleColor ?? c.text3),
           ),
         ],
@@ -391,17 +400,26 @@ class ListRow extends StatelessWidget {
                 trailingText!,
                 style: AppText.rowAmount.copyWith(color: c.text),
               ));
+    final content = Row(
+      children: [
+        Expanded(child: texts),
+        if (right != null) ...[const SizedBox(width: 12), right],
+      ],
+    );
     final body = Container(
-      height: h,
+      height: wrap ? null : h,
+      constraints: wrap ? BoxConstraints(minHeight: h) : null,
       decoration: divider
           ? BoxDecoration(border: Border(bottom: BorderSide(color: c.line)))
           : null,
-      child: Row(
-        children: [
-          Expanded(child: texts),
-          if (right != null) ...[const SizedBox(width: 12), right],
-        ],
-      ),
+      // Wrapped text keeps 10 px from the row's edges; the row is at least
+      // [h] high, so one line of text sits where it always did.
+      child: wrap
+          ? Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: content,
+            )
+          : content,
     );
     final row = leading == null
         ? Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: body)
