@@ -157,9 +157,13 @@ green, violet, amber, cyan, pink, orange, coral with `.label`, `.color`,
 | `AppShell`, `AppNavBar`, `AddFab` | the shell (used by the router only) |
 | `SwipeArea` | `({required child, required ValueChanged<SwipeEvent> onSwipe, threshold = 24})`; `SwipeEvent.next` / `.axis`; taps inside check `SwipeArea.swipedRecently(context)` |
 | `SlideSwitcher` | `({required Object pageKey, required bool forward, required Widget child, axis = horizontal})` slide between months |
+| `NowPill` | `({required bool visible, required String label, required String semanticLabel, required VoidCallback onTap, Color? ringColor})` the "back to now" pill: 32 px accent `Pill` with a calendar icon that fades and scales in over 200 ms while `visible` and leaves the tree when gone. Home "This month" (hangs over the month card, ring `bg`), Calendar "Today" and Charts "This week/month/year" (right of the header), the three pop-ups |
+| `NowPillOverCard` | `({required NowPill pill, required Widget child})` a pop-up card with the pill hanging over the right end of its top edge; the card stays centred (26 px added above and below) |
 
 Swipe rule (Calendar screen too): finger left-to-right or top-to-bottom shows
 the PREVIOUS month (`next == false`); right-to-left or bottom-to-top the NEXT.
+Swiping, the arrows and the pop-ups never stop: no first month with data and
+no "this month" limit, back or forward (Home, Calendar, Charts, the pop-ups).
 
 ### Pop-ups
 

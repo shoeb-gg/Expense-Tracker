@@ -9,6 +9,9 @@ import '../../theme/text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/kit.dart';
 
+/// The height of [HeroCard].
+const double heroCardHeight = 92;
+
 /// Home's turquoise card (PocketHome board): the month chip on the left and
 /// the month's total on the right, 92 px tall, radius 24.
 ///
@@ -50,7 +53,7 @@ class HeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     return SizedBox(
-      height: 92,
+      height: heroCardHeight,
       child: CustomPaint(
         painter: _HeroPainter(
           fill: c.accent,

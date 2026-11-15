@@ -5,6 +5,7 @@ import 'package:spill_the_bills/features/add/add_screen.dart';
 import 'package:spill_the_bills/router.dart';
 import 'package:spill_the_bills/state/providers.dart';
 import 'package:spill_the_bills/state/settings.dart';
+import 'package:spill_the_bills/widgets/kit.dart';
 
 import '../../support/shots.dart';
 
@@ -21,7 +22,9 @@ void main() {
     await pumpApp(tester, db: db, location: Routes.calendar());
     expect(find.text('October 2026'), findsOneWidget);
     expect(find.text('34,555 spent'), findsOneWidget);
-    expect(find.text('Today'), findsNWidgets(2)); // button and card
+    // Only the day card says "Today": the pill is for when you have moved.
+    expect(find.text('Today'), findsOneWidget);
+    expect(find.bySemanticsLabel('Back to today'), findsNothing);
     expect(find.text('Doctor visit'), findsOneWidget);
     expect(find.text('Health · 10:18 AM'), findsOneWidget);
     expect(find.text('Add expense on Oct 18'), findsOneWidget);
@@ -282,11 +285,85 @@ void main() {
     await tester.tap(find.text('Confirm'));
     await settle(tester);
     expect(find.text('March 2026'), findsOneWidget);
-    await tester.tap(find.text('Today').first);
+    await tester.tap(find.bySemanticsLabel('Back to today'));
     await settle(tester);
     expect(find.text('October 2026'), findsOneWidget);
     expect(find.text('Doctor visit'), findsOneWidget);
     await closeApp(tester, db);
+  });
+
+  group('back to today', () {
+    Finder pill() => find.bySemanticsLabel('Back to today');
+
+    bool forward(WidgetTester tester) =>
+        tester.widget<SlideSwitcher>(find.byType(SlideSwitcher)).forward;
+
+    testWidgets('shows once the view has moved, and fades away on return',
+        (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: Routes.calendar());
+      expect(pill(), findsNothing);
+      expect(find.byType(NowPill), findsOneWidget);
+
+      await _swipe(tester, const Offset(200, 0));
+      expect(find.text('September 2026'), findsOneWidget);
+      expect(pill(), findsOneWidget);
+      await _swipe(tester, const Offset(-200, 0));
+      expect(find.text('October 2026'), findsOneWidget);
+      // Back in October by hand: it opens on today, so the pill is gone.
+      expect(pill(), findsNothing);
+      await _swipe(tester, const Offset(-200, 0));
+      expect(find.text('November 2026'), findsOneWidget);
+      expect(pill(), findsOneWidget);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('a tap shows this month and chooses today', (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: Routes.calendar());
+      for (var i = 0; i < 5; i++) {
+        await tester.tap(find.bySemanticsLabel('Previous month'));
+        await settle(tester);
+      }
+      expect(find.text('May 2026'), findsOneWidget);
+      await tester.tap(pill());
+      await tester.pump();
+      expect(forward(tester), isTrue, reason: 'from the past: slide forward');
+      await settle(tester);
+      expect(find.text('October 2026'), findsOneWidget);
+      expect(find.text('Add expense on Oct 18'), findsOneWidget);
+      expect(find.text('Doctor visit'), findsOneWidget);
+      expect(pill(), findsNothing);
+
+      for (var i = 0; i < 7; i++) {
+        await tester.tap(find.bySemanticsLabel('Next month'));
+        await settle(tester);
+      }
+      expect(find.text('May 2027'), findsOneWidget);
+      await tester.tap(pill());
+      await tester.pump();
+      expect(forward(tester), isFalse, reason: 'from the future: slide back');
+      await settle(tester);
+      expect(find.text('October 2026'), findsOneWidget);
+      expect(find.text('Add expense on Oct 18'), findsOneWidget);
+      expect(pill(), findsNothing);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('in this month it also brings back today after another day',
+        (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: Routes.calendar());
+      await tester.tap(find.text('12'));
+      await settle(tester);
+      expect(find.text('Add expense on Oct 12'), findsOneWidget);
+      expect(pill(), findsOneWidget);
+      await tester.tap(pill());
+      await settle(tester);
+      expect(find.text('Add expense on Oct 18'), findsOneWidget);
+      expect(pill(), findsNothing);
+      await closeApp(tester, db);
+    });
   });
 
   testWidgets('amounts can be turned off; weeks can start on Monday',

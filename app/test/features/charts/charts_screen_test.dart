@@ -92,7 +92,8 @@ void main() {
       expect(_total('493,610'), findsWidgets);
       await _swipe(tester, const Offset(-200, 0));
       expect(find.text('2027'), findsOneWidget);
-      expect(find.text('This year'), findsOneWidget);
+      // The tab, and the pill that goes back to it.
+      expect(find.text('This year'), findsNWidgets(2));
       expect(_total('493,610'), findsNothing);
       await _swipe(tester, const Offset(-200, 0));
       expect(find.text('2028'), findsOneWidget);
@@ -104,7 +105,7 @@ void main() {
       await pumpApp(tester, db: db, location: Routes.charts);
       await _swipe(tester, const Offset(-200, 0));
       expect(find.text('Nov 2026'), findsOneWidget);
-      expect(find.text('This month'), findsOneWidget);
+      expect(find.text('This month'), findsNWidgets(2), reason: 'tab and pill');
       expect(find.text('Last month'), findsOneWidget);
       expect(find.text('Nothing spent in this period.'), findsOneWidget);
       await _swipe(tester, const Offset(-200, 0));
@@ -118,7 +119,7 @@ void main() {
       await settle(tester);
       await _swipe(tester, const Offset(-200, 0));
       expect(find.text('Oct 25 – Oct 31'), findsOneWidget);
-      expect(find.text('This week'), findsOneWidget);
+      expect(find.text('This week'), findsNWidgets(2), reason: 'tab and pill');
       await closeApp(tester, db);
     });
 
@@ -387,8 +388,110 @@ void main() {
       await tester.tap(find.text('Confirm'));
       await settle(tester);
       expect(find.text('2028'), findsOneWidget);
-      expect(find.text('This year'), findsOneWidget);
+      expect(find.text('This year'), findsNWidgets(2), reason: 'tab and pill');
       await closeApp(tester, db);
+    });
+
+    group('back to now', () {
+      Finder pill(String what) => find.bySemanticsLabel('Back to $what');
+
+      bool forward(WidgetTester tester) =>
+          tester.widget<SlideSwitcher>(find.byType(SlideSwitcher)).forward;
+
+      testWidgets('Month: off this month it shows, a tap goes back the right '
+          'way', (tester) async {
+        final db = await sampleDatabase(tester);
+        await pumpApp(tester, db: db, location: Routes.charts);
+        expect(find.byType(Pill), findsNothing);
+
+        await _swipe(tester, const Offset(200, 0));
+        expect(pill('this month'), findsOneWidget);
+        await _swipe(tester, const Offset(200, 0));
+        await _swipe(tester, const Offset(200, 0));
+        expect(find.text('Jul 2026'), findsOneWidget);
+        await tester.tap(pill('this month'));
+        await tester.pump();
+        expect(forward(tester), isTrue, reason: 'from the past');
+        await settle(tester);
+        expect(_total('34,555'), findsWidgets);
+        expect(find.text('Jul 2026'), findsNothing);
+        expect(find.byType(Pill), findsNothing);
+
+        // By swiping back to this month it goes by itself.
+        await _swipe(tester, const Offset(200, 0));
+        expect(find.byType(Pill), findsOneWidget);
+        await _swipe(tester, const Offset(-200, 0));
+        expect(find.byType(Pill), findsNothing);
+
+        // From the future it slides the other way.
+        for (var i = 0; i < 3; i++) {
+          await _swipe(tester, const Offset(-200, 0));
+        }
+        expect(find.text('Jan 2027'), findsOneWidget);
+        await tester.tap(pill('this month'));
+        await tester.pump();
+        expect(forward(tester), isFalse, reason: 'from the future');
+        await settle(tester);
+        expect(_total('34,555'), findsWidgets);
+        expect(find.byType(Pill), findsNothing);
+        await closeApp(tester, db);
+      });
+
+      testWidgets('Week and Year have their own pill and their own period',
+          (tester) async {
+        final db = await sampleDatabase(tester);
+        await pumpApp(tester, db: db, location: Routes.charts);
+        // Two months back, then to the other tabs.
+        await _swipe(tester, const Offset(200, 0));
+        await _swipe(tester, const Offset(200, 0));
+        expect(pill('this month'), findsOneWidget);
+
+        await tester.tap(find.text('Week'));
+        await settle(tester);
+        expect(find.byType(Pill), findsNothing, reason: 'this week');
+        await _swipe(tester, const Offset(200, 0));
+        expect(pill('this week'), findsOneWidget);
+        expect(pill('this month'), findsNothing);
+        await tester.tap(pill('this week'));
+        await settle(tester);
+        expect(find.text('This week'), findsOneWidget);
+        expect(find.byType(Pill), findsNothing);
+
+        await tester.tap(find.text('Year'));
+        await settle(tester);
+        expect(find.byType(Pill), findsNothing, reason: 'this year');
+        await _swipe(tester, const Offset(-200, 0));
+        expect(find.text('2027'), findsOneWidget);
+        expect(pill('this year'), findsOneWidget);
+        await tester.tap(pill('this year'));
+        await settle(tester);
+        expect(_total('493,610'), findsWidgets);
+        expect(find.byType(Pill), findsNothing);
+
+        // The month tab still remembers where it was.
+        await tester.tap(find.text('Month'));
+        await settle(tester);
+        expect(find.text('Aug 2026'), findsOneWidget);
+        expect(pill('this month'), findsOneWidget);
+        await closeApp(tester, db);
+      });
+
+      testWidgets('Custom has no pill', (tester) async {
+        final db = await sampleDatabase(tester);
+        await pumpApp(tester, db: db, location: Routes.charts);
+        await _swipe(tester, const Offset(200, 0));
+        expect(find.byType(Pill), findsOneWidget);
+        await tester.tap(find.text('Custom'));
+        await settle(tester);
+        await tester.tap(find.text('Confirm'));
+        await settle(tester);
+        expect(find.text('Sep 19 – Oct 18'), findsOneWidget);
+        expect(find.byType(Pill), findsNothing);
+        // Swiping does not move a custom range, and no pill appears.
+        await _swipe(tester, const Offset(200, 0));
+        expect(find.byType(Pill), findsNothing);
+        await closeApp(tester, db);
+      });
     });
 
     testWidgets('follows the current pocket', (tester) async {

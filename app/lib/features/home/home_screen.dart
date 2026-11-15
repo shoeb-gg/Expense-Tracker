@@ -135,6 +135,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final hidden = ref.watch(homeTotalHiddenProvider);
     final fmt = ref.watch(amountFormatProvider);
     final today = ref.watch(todayProvider);
+    final thisMonth = yearMonthOfDay(today);
 
     final last = _lastMonth;
     if (last != null && last != month) {
@@ -221,51 +222,72 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             ),
             Expanded(
-              child: SwipeArea(
-                onSwipe: _onSwipe,
-                child: Builder(
-                  builder: (inner) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: HeroCard(
-                          month: month,
-                          caption: caption,
-                          value: value,
-                          unit: unit,
-                          valueSemanticLabel: showTotal && hidden
-                              ? '$caption: hidden. See all-time spending'
-                              : '$caption: $spoken. See all-time spending',
-                          onMonthTap: () {
-                            if (SwipeArea.swipedRecently(inner)) return;
-                            unawaited(_pickMonth(month));
-                          },
-                          onValueTap: () {
-                            if (SwipeArea.swipedRecently(inner)) return;
-                            context.go(Routes.reports);
-                          },
-                        ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  SwipeArea(
+                    onSwipe: _onSwipe,
+                    child: Builder(
+                      builder: (inner) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: HeroCard(
+                              month: month,
+                              caption: caption,
+                              value: value,
+                              unit: unit,
+                              valueSemanticLabel: showTotal && hidden
+                                  ? '$caption: hidden. See all-time spending'
+                                  : '$caption: $spoken. See all-time spending',
+                              onMonthTap: () {
+                                if (SwipeArea.swipedRecently(inner)) return;
+                                unawaited(_pickMonth(month));
+                              },
+                              onValueTap: () {
+                                if (SwipeArea.swipedRecently(inner)) return;
+                                context.go(Routes.reports);
+                              },
+                            ),
+                          ),
+                          Expanded(
+                            child: pocket == null
+                                ? const SizedBox.shrink()
+                                : SlideSwitcher(
+                                    pageKey: month,
+                                    forward: _forward,
+                                    child: HomeMonthList(
+                                      key: ValueKey<int>(pocket.id),
+                                      pocket: pocket,
+                                      month: month,
+                                      expenses: expenses,
+                                      onRow: _onRow,
+                                      onSeePrevious: () => _step(-1),
+                                    ),
+                                  ),
+                          ),
+                        ],
                       ),
-                      Expanded(
-                        child: pocket == null
-                            ? const SizedBox.shrink()
-                            : SlideSwitcher(
-                                pageKey: month,
-                                forward: _forward,
-                                child: HomeMonthList(
-                                  key: ValueKey<int>(pocket.id),
-                                  pocket: pocket,
-                                  month: month,
-                                  expenses: expenses,
-                                  onRow: _onRow,
-                                  onSeePrevious: () => _step(-1),
-                                ),
-                              ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                  // Hangs over the lower edge of the month card, at its right:
+                  // the one free spot (the header holds the pocket button and
+                  // two round buttons, the card is full). The ring in the
+                  // page colour sets it apart from the card's own turquoise.
+                  Positioned(
+                    top: heroCardHeight - 16 - NowPill.ringWidth,
+                    right: 16 - NowPill.ringWidth,
+                    child: NowPill(
+                      visible: month != thisMonth,
+                      label: 'This month',
+                      semanticLabel: 'Back to this month',
+                      ringColor: c.bg,
+                      onTap: () =>
+                          ref.read(homeMonthProvider.notifier).followToday(),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

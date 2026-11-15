@@ -8,6 +8,7 @@ export 'controls.dart';
 export 'dialogs.dart';
 export 'docks.dart';
 export 'headers.dart';
+export 'now_pill.dart';
 export 'pickers.dart';
 export 'placeholder.dart';
 export 'pressable.dart';

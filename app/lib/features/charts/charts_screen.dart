@@ -87,6 +87,20 @@ class _ChartsScreenState extends ConsumerState<ChartsScreen> {
     _select(_kind, e.next ? o - 1 : o + 1, forward: e.next);
   }
 
+  /// "week", "month" or "year": what the pill takes you back to, null for a
+  /// custom range (it has no current period).
+  static String? _nowWord(PeriodKind kind) => switch (kind) {
+        PeriodKind.week => 'week',
+        PeriodKind.month => 'month',
+        PeriodKind.year => 'year',
+        PeriodKind.custom => null,
+      };
+
+  void _backToNow() {
+    final o = _offsets[_kind]!;
+    if (o != 0) _select(_kind, 0, forward: o > 0);
+  }
+
   void _onKind(PeriodKind kind) {
     if (kind == PeriodKind.custom) {
       unawaited(_openCustom());
@@ -176,6 +190,7 @@ class _ChartsScreenState extends ConsumerState<ChartsScreen> {
         ? null
         : ref.watch(spendIndexProvider(pocketId)).value;
     final period = _period(today, settings);
+    final nowWord = _nowWord(_kind);
 
     final tabs = [
       for (final o in _tabOffsets(_kind, _offsets[_kind]!))
@@ -215,7 +230,24 @@ class _ChartsScreenState extends ConsumerState<ChartsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const PageHeader(title: 'Charts'),
+                      Stack(
+                        children: [
+                          const PageHeader(title: 'Charts'),
+                          // Free room at the right of the title: shown off
+                          // the current week, month or year.
+                          Positioned(
+                            top: (64 - NowPill.height) / 2,
+                            right: 16,
+                            child: NowPill(
+                              visible: nowWord != null && _offsets[_kind] != 0,
+                              label: 'This ${nowWord ?? 'period'}',
+                              semanticLabel:
+                                  'Back to this ${nowWord ?? 'period'}',
+                              onTap: _backToNow,
+                            ),
+                          ),
+                        ],
+                      ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Semantics(

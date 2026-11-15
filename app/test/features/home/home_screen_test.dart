@@ -10,6 +10,7 @@ import 'package:spill_the_bills/features/home/home_state.dart';
 import 'package:spill_the_bills/features/home/pocket_button.dart';
 import 'package:spill_the_bills/router.dart';
 import 'package:spill_the_bills/state/providers.dart';
+import 'package:spill_the_bills/widgets/kit.dart';
 
 import '../../support/pocket_samples.dart';
 import '../../support/shots.dart';
@@ -102,6 +103,83 @@ void main() {
       await pumpApp(tester, db: db);
       // Starts in the gap above the first day card, so no row is tapped.
       await tester.dragFrom(const Offset(100, 162), const Offset(16, 0));
+      await settle(tester);
+      expect(find.text('Spent in October'), findsOneWidget);
+      await closeApp(tester, db);
+    });
+  });
+
+  group('back to this month', () {
+    Finder pill() => find.bySemanticsLabel('Back to this month');
+
+    bool forward(WidgetTester tester) =>
+        tester.widget<SlideSwitcher>(find.byType(SlideSwitcher)).forward;
+
+    testWidgets('shows only off the current month, and fades away on return',
+        (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db);
+      expect(pill(), findsNothing);
+      expect(find.byType(NowPill), findsOneWidget);
+
+      await _swipe(tester, 300);
+      expect(find.text('Spent in September'), findsOneWidget);
+      expect(pill(), findsOneWidget);
+      expect(find.text('This month'), findsOneWidget);
+
+      // Back to October by hand: the pill goes by itself.
+      await _swipe(tester, -300);
+      expect(find.text('Spent in October'), findsOneWidget);
+      expect(pill(), findsNothing);
+
+      // Later months too.
+      await _swipe(tester, -300);
+      expect(pill(), findsOneWidget);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('a tap slides back to this month, the right way round',
+        (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db);
+      for (var i = 0; i < 4; i++) {
+        await _swipe(tester, 300);
+      }
+      expect(find.text('Spent in June'), findsOneWidget);
+      await tester.tap(pill());
+      await tester.pump();
+      expect(forward(tester), isTrue, reason: 'from the past: slide forward');
+      await settle(tester);
+      expect(find.text('Spent in October'), findsOneWidget);
+      expect(find.text('34,555'), findsOneWidget);
+      expect(pill(), findsNothing);
+
+      for (var i = 0; i < 5; i++) {
+        await _swipe(tester, -300);
+      }
+      expect(find.text('Spent in March'), findsOneWidget);
+      await tester.tap(pill());
+      await tester.pump();
+      expect(forward(tester), isFalse, reason: 'from the future: slide back');
+      await settle(tester);
+      expect(find.text('Spent in October'), findsOneWidget);
+      expect(pill(), findsNothing);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('the month pop-up and the calendar know it too',
+        (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db);
+      await tester.tap(find.bySemanticsLabel('Choose month, October 2026'));
+      await settle(tester);
+      await tester.tap(find.text('Mar'));
+      await settle(tester);
+      await tester.tap(find.text('Confirm'));
+      await settle(tester);
+      expect(find.text('Spent in March'), findsOneWidget);
+      expect(pill(), findsOneWidget);
+      await tester.tap(pill());
       await settle(tester);
       expect(find.text('Spent in October'), findsOneWidget);
       await closeApp(tester, db);

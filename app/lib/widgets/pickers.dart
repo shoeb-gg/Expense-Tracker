@@ -12,6 +12,7 @@ import '../theme/text.dart';
 import '../theme/tokens.dart';
 import 'buttons.dart';
 import 'dialogs.dart';
+import 'now_pill.dart';
 import 'pressable.dart';
 import 'swipe.dart';
 
@@ -20,7 +21,9 @@ import 'swipe.dart';
 /// the chosen day filled, today as an accent number with a dot, weeks
 /// starting on the day set in Settings. Tapping the month name shows the
 /// twelve months (and from there twelve years) in the same pop-up.
-/// Swipes and arrows change the month.
+/// Swipes and arrows change the month, without limit. A "Today" pill hangs
+/// over the card's top edge while the chosen day or the page shown is not
+/// today's; it shows today's month and chooses today.
 Future<int?> showDayPicker(
   BuildContext context, {
   required int initialDay,
@@ -35,7 +38,9 @@ Future<int?> showDayPicker(
 /// Opens the month pop-up ("Month to show") and returns the confirmed
 /// (year, month) (month 1-12), or null on Cancel. Tapping the year swaps the
 /// twelve months for twelve years; swipes and arrows step one year (twelve
-/// in the year view).
+/// in the year view), without limit. A "This month" pill hangs over the
+/// card's top edge while the chosen month or the page shown is not the
+/// current one; it shows this year and chooses this month.
 Future<(int year, int month)?> showMonthPicker(
   BuildContext context, {
   required int year,
@@ -95,6 +100,20 @@ class _DayPickerDialogState extends ConsumerState<DayPickerDialog> {
     });
   }
 
+  /// Shows today's month and chooses today (the "Today" pill).
+  void _goToday(int today) {
+    final now = yearMonthOfDay(today);
+    setState(() {
+      _forward = now.year * 12 + now.month > _year * 12 + _month;
+      _axis = Axis.horizontal;
+      _selected = today;
+      _year = now.year;
+      _month = now.month;
+      _page = yearPageStart(now.year);
+      _view = _View.days;
+    });
+  }
+
   void _toggle() {
     setState(() {
       switch (_view) {
@@ -112,20 +131,23 @@ class _DayPickerDialogState extends ConsumerState<DayPickerDialog> {
   @override
   Widget build(BuildContext context) {
     final today = ref.watch(todayProvider);
-    final first =
-        ref.watch(settingsProvider.select((s) => s.firstDayOfWeek));
-    final (String navLabel, IconData caret, String toggleHint) = switch (_view) {
+    final first = ref.watch(settingsProvider.select((s) => s.firstDayOfWeek));
+    final (
+      String navLabel,
+      IconData caret,
+      String toggleHint,
+    ) = switch (_view) {
       _View.days => (
-          monthYear(_year, _month),
-          Symbols.expand_more_rounded,
-          'Choose month and year',
-        ),
+        monthYear(_year, _month),
+        Symbols.expand_more_rounded,
+        'Choose month and year',
+      ),
       _View.months => ('$_year', Symbols.expand_more_rounded, 'Choose year'),
       _View.years => (
-          '$_page – ${_page + 11}',
-          Symbols.expand_less_rounded,
-          'Back to months',
-        ),
+        '$_page – ${_page + 11}',
+        Symbols.expand_less_rounded,
+        'Back to months',
+      ),
     };
     final (String prevHint, String nextHint) = switch (_view) {
       _View.days => ('Previous month', 'Next month'),
@@ -207,45 +229,62 @@ class _DayPickerDialogState extends ConsumerState<DayPickerDialog> {
         );
     }
 
-    return AppPopupCard(
-      semanticLabel: widget.label,
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
-      child: SwipeArea(
-        onSwipe: (e) => _step(e.next, e.axis),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _Heading(label: widget.label, heading: weekdayDate(_selected)),
-            const SizedBox(height: 16),
-            _NavRow(
-              label: navLabel,
-              tabular: _view != _View.days,
-              caret: caret,
-              toggleHint: toggleHint,
-              prevHint: prevHint,
-              nextHint: nextHint,
-              onToggle: _toggle,
-              onPrev: () => _step(false, Axis.horizontal),
-              onNext: () => _step(true, Axis.horizontal),
-            ),
-            SizedBox(
-              height: 272,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 160),
-                layoutBuilder: (current, previous) => Stack(
-                  alignment: Alignment.topCenter,
-                  children: [...previous, ?current],
-                ),
-                child: body,
+    final now = yearMonthOfDay(today);
+    final moved =
+        _selected != today ||
+        switch (_view) {
+          _View.days => _year != now.year || _month != now.month,
+          _View.months => _year != now.year,
+          _View.years => _page != yearPageStart(now.year),
+        };
+
+    return NowPillOverCard(
+      pill: NowPill(
+        visible: moved,
+        label: 'Today',
+        semanticLabel: 'Back to today',
+        onTap: () => _goToday(today),
+      ),
+      child: AppPopupCard(
+        semanticLabel: widget.label,
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+        child: SwipeArea(
+          onSwipe: (e) => _step(e.next, e.axis),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _Heading(label: widget.label, heading: weekdayDate(_selected)),
+              const SizedBox(height: 16),
+              _NavRow(
+                label: navLabel,
+                tabular: _view != _View.days,
+                caret: caret,
+                toggleHint: toggleHint,
+                prevHint: prevHint,
+                nextHint: nextHint,
+                onToggle: _toggle,
+                onPrev: () => _step(false, Axis.horizontal),
+                onNext: () => _step(true, Axis.horizontal),
               ),
-            ),
-            const SizedBox(height: 12),
-            PopupButtons(
-              onCancel: () => Navigator.of(context).pop(),
-              onAction: () => Navigator.of(context).pop(_selected),
-            ),
-          ],
+              SizedBox(
+                height: 272,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 160),
+                  layoutBuilder: (current, previous) => Stack(
+                    alignment: Alignment.topCenter,
+                    children: [...previous, ?current],
+                  ),
+                  child: body,
+                ),
+              ),
+              const SizedBox(height: 12),
+              PopupButtons(
+                onCancel: () => Navigator.of(context).pop(),
+                onAction: () => Navigator.of(context).pop(_selected),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -292,9 +331,28 @@ class _MonthPickerDialogState extends ConsumerState<MonthPickerDialog> {
     });
   }
 
+  /// Shows this year and chooses this month (the "This month" pill).
+  void _goNow(int today) {
+    final now = yearMonthOfDay(today);
+    setState(() {
+      _forward = _years ? yearPageStart(now.year) > _page : now.year > _year;
+      _axis = Axis.horizontal;
+      _selYear = now.year;
+      _selMonth = now.month;
+      _year = now.year;
+      _page = yearPageStart(now.year);
+      _years = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final today = ref.watch(todayProvider);
+    final now = yearMonthOfDay(today);
+    final moved =
+        _selYear != now.year ||
+        _selMonth != now.month ||
+        (_years ? _page != yearPageStart(now.year) : _year != now.year);
     final grid = _years
         ? SlideSwitcher(
             key: const ValueKey('years'),
@@ -327,49 +385,58 @@ class _MonthPickerDialogState extends ConsumerState<MonthPickerDialog> {
               }),
             ),
           );
-    return AppPopupCard(
-      semanticLabel: widget.label,
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
-      child: SwipeArea(
-        onSwipe: (e) => _step(e.next, e.axis),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _Heading(
-              label: widget.label,
-              heading: monthYear(_selYear, _selMonth),
-            ),
-            const SizedBox(height: 16),
-            _NavRow(
-              label: _years ? '$_page – ${_page + 11}' : '$_year',
-              caret: _years
-                  ? Symbols.expand_less_rounded
-                  : Symbols.expand_more_rounded,
-              toggleHint: _years ? 'Back to months' : 'Choose year',
-              prevHint: _years ? 'Earlier years' : 'Previous year',
-              nextHint: _years ? 'Later years' : 'Next year',
-              onToggle: () => setState(() {
-                if (!_years) _page = yearPageStart(_year);
-                _years = !_years;
-              }),
-              onPrev: () => _step(false, Axis.horizontal),
-              onNext: () => _step(true, Axis.horizontal),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 192,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 160),
-                child: grid,
+    return NowPillOverCard(
+      pill: NowPill(
+        visible: moved,
+        label: 'This month',
+        semanticLabel: 'Back to this month',
+        onTap: () => _goNow(today),
+      ),
+      child: AppPopupCard(
+        semanticLabel: widget.label,
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+        child: SwipeArea(
+          onSwipe: (e) => _step(e.next, e.axis),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _Heading(
+                label: widget.label,
+                heading: monthYear(_selYear, _selMonth),
               ),
-            ),
-            const SizedBox(height: 24),
-            PopupButtons(
-              onCancel: () => Navigator.of(context).pop(),
-              onAction: () => Navigator.of(context).pop((_selYear, _selMonth)),
-            ),
-          ],
+              const SizedBox(height: 16),
+              _NavRow(
+                label: _years ? '$_page – ${_page + 11}' : '$_year',
+                caret: _years
+                    ? Symbols.expand_less_rounded
+                    : Symbols.expand_more_rounded,
+                toggleHint: _years ? 'Back to months' : 'Choose year',
+                prevHint: _years ? 'Earlier years' : 'Previous year',
+                nextHint: _years ? 'Later years' : 'Next year',
+                onToggle: () => setState(() {
+                  if (!_years) _page = yearPageStart(_year);
+                  _years = !_years;
+                }),
+                onPrev: () => _step(false, Axis.horizontal),
+                onNext: () => _step(true, Axis.horizontal),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 192,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 160),
+                  child: grid,
+                ),
+              ),
+              const SizedBox(height: 24),
+              PopupButtons(
+                onCancel: () => Navigator.of(context).pop(),
+                onAction: () =>
+                    Navigator.of(context).pop((_selYear, _selMonth)),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -633,15 +700,16 @@ class _DayCell extends StatelessWidget {
     final fg = selected
         ? c.onAccent
         : isToday
-            ? c.accent
-            : inMonth
-                ? c.text
-                : c.popDim;
+        ? c.accent
+        : inMonth
+        ? c.text
+        : c.popDim;
     final bold = selected || isToday;
     return Semantics(
       button: true,
       selected: selected,
-      label: '${weekdayName(day)}, ${monthName(d.month)} ${d.day}'
+      label:
+          '${weekdayName(day)}, ${monthName(d.month)} ${d.day}'
           '${isToday ? ', today' : ''}',
       excludeSemantics: true,
       child: GestureDetector(
@@ -750,8 +818,8 @@ class _Tile extends StatelessWidget {
     final fg = data.selected
         ? c.onAccent
         : data.isNow
-            ? c.accent
-            : c.text;
+        ? c.accent
+        : c.text;
     return SizedBox(
       height: 56,
       child: Pressable(

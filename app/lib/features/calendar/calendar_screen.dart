@@ -104,16 +104,28 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SubHeader(
-              title: 'Calendar',
-              trailing: _TodayButton(
-                onTap: () => _go(
-                  now,
-                  forward: latest > key,
-                  axis: Axis.horizontal,
-                  day: today,
+            Stack(
+              children: [
+                const SubHeader(title: 'Calendar'),
+                // At the right of the header, where the title leaves room:
+                // shown once the month is not this one or today is not the
+                // chosen day.
+                Positioned(
+                  top: (60 - NowPill.height) / 2,
+                  right: 16,
+                  child: NowPill(
+                    visible: key != latest || _sel != today,
+                    label: 'Today',
+                    semanticLabel: 'Back to today',
+                    onTap: () => _go(
+                      now,
+                      forward: latest > key,
+                      axis: Axis.horizontal,
+                      day: today,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -182,27 +194,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         ),
       ),
     );
-  }
-}
-
-/// "Today": 40 px high, 16 px side padding, on `surface`.
-class _TodayButton extends StatelessWidget {
-  const _TodayButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final style = AppText.pill;
-    final painter = TextPainter(
-      text: TextSpan(text: 'Today', style: style),
-      textDirection: TextDirection.ltr,
-      textScaler: MediaQuery.textScalerOf(context),
-      maxLines: 1,
-    )..layout();
-    final width = painter.width + 32;
-    painter.dispose();
-    return Pill(label: 'Today', onTap: onTap, height: 40, width: width);
   }
 }
 

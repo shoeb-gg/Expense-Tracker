@@ -19,11 +19,10 @@ typedef DayRange = ({int from, int to});
 Future<DayRange?> showCustomRange(
   BuildContext context, {
   required DayRange initial,
-}) =>
-    showAppPopup<DayRange>(
-      context,
-      builder: (_) => CustomRangeDialog(initial: initial),
-    );
+}) => showAppPopup<DayRange>(
+  context,
+  builder: (_) => CustomRangeDialog(initial: initial),
+);
 
 /// The Custom range pop-up (board "Charts: custom range"): quick choices of
 /// 7, 30 and 90 days ending today, From above To (each opens the date
@@ -63,8 +62,8 @@ class _CustomRangeDialogState extends ConsumerState<CustomRangeDialog> {
     final sub = !valid
         ? "To can't be earlier than From."
         : days == 1
-            ? 'Charts will show this 1 day.'
-            : 'Charts will show these $days days.';
+        ? 'Charts will show this 1 day.'
+        : 'Charts will show these $days days.';
     int? quick;
     for (final n in _quick) {
       if (_to == today && _from == today - n + 1) quick = n;
@@ -89,9 +88,7 @@ class _CustomRangeDialogState extends ConsumerState<CustomRangeDialog> {
           Semantics(
             label: 'Quick choices, ending today',
             child: AppSegmented<int?>(
-              segments: [
-                for (final n in _quick) Segment<int?>(n, '$n days'),
-              ],
+              segments: [for (final n in _quick) Segment<int?>(n, '$n days')],
               value: quick,
               tabular: true,
               onChanged: (n) {
@@ -121,9 +118,9 @@ class _CustomRangeDialogState extends ConsumerState<CustomRangeDialog> {
           PopupButtons(
             onCancel: () => Navigator.of(context).pop(),
             onAction: valid
-                ? () => Navigator.of(context).pop<DayRange>(
-                      (from: _from, to: _to),
-                    )
+                ? () => Navigator.of(
+                    context,
+                  ).pop<DayRange>((from: _from, to: _to))
                 : null,
           ),
         ],
@@ -189,17 +186,18 @@ class _RangeRow extends StatelessWidget {
 }
 
 /// Opens the year pop-up (the month pop-up's year view on its own: "Year to
-/// show", twelve years with arrows that step twelve) and returns the
-/// confirmed year, or null on Cancel.
+/// show", twelve years with arrows that step twelve, without limit) and
+/// returns the confirmed year, or null on Cancel. A "This year" pill hangs
+/// over the card's top edge while the chosen year or the page shown is not
+/// the current one; it shows this year's page and chooses it.
 Future<int?> showYearPicker(
   BuildContext context, {
   required int year,
   String label = 'Year to show',
-}) =>
-    showAppPopup<int>(
-      context,
-      builder: (_) => YearPickerDialog(year: year, label: label),
-    );
+}) => showAppPopup<int>(
+  context,
+  builder: (_) => YearPickerDialog(year: year, label: label),
+);
 
 /// The year pop-up (see [showYearPicker]).
 class YearPickerDialog extends ConsumerStatefulWidget {
@@ -218,84 +216,100 @@ class _YearPickerDialogState extends ConsumerState<YearPickerDialog> {
   bool _forward = true;
 
   void _step(bool next) => setState(() {
-        _forward = next;
-        _page += next ? 12 : -12;
-      });
+    _forward = next;
+    _page += next ? 12 : -12;
+  });
+
+  /// Shows this year's page and chooses this year (the "This year" pill).
+  void _goNow(int thisYear) => setState(() {
+    _forward = yearPageStart(thisYear) > _page;
+    _page = yearPageStart(thisYear);
+    _year = thisYear;
+  });
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final thisYear = yearOfDay(ref.watch(todayProvider));
     final span = '$_page – ${_page + 11}';
-    return AppPopupCard(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
-      semanticLabel: widget.label,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            widget.label,
-            textAlign: TextAlign.center,
-            style: AppText.overline.copyWith(color: c.text3),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            '$_year',
-            textAlign: TextAlign.center,
-            style: AppText.popHeading,
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 40,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    span,
-                    style: AppText.tabular(AppText.cardTitle),
-                  ),
-                ),
-                _Arrow(
-                  icon: Symbols.chevron_left_rounded,
-                  label: 'Earlier years',
-                  onTap: () => _step(false),
-                ),
-                _Arrow(
-                  icon: Symbols.chevron_right_rounded,
-                  label: 'Later years',
-                  onTap: () => _step(true),
-                ),
-              ],
+    final moved = _year != thisYear || _page != yearPageStart(thisYear);
+    return NowPillOverCard(
+      pill: NowPill(
+        visible: moved,
+        label: 'This year',
+        semanticLabel: 'Back to this year',
+        onTap: () => _goNow(thisYear),
+      ),
+      child: AppPopupCard(
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+        semanticLabel: widget.label,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              widget.label,
+              textAlign: TextAlign.center,
+              style: AppText.overline.copyWith(color: c.text3),
             ),
-          ),
-          const SizedBox(height: 12),
-          SwipeArea(
-            onSwipe: (e) => _step(e.next),
-            child: SizedBox(
-              height: 192,
-              child: SlideSwitcher(
-                pageKey: _page,
-                forward: _forward,
-                child: _YearGrid(
-                  key: ValueKey(_page),
-                  first: _page,
-                  chosen: _year,
-                  current: thisYear,
-                  onPick: (y) {
-                    if (SwipeArea.swipedRecently(context)) return;
-                    setState(() => _year = y);
-                  },
+            const SizedBox(height: 2),
+            Text(
+              '$_year',
+              textAlign: TextAlign.center,
+              style: AppText.popHeading,
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 40,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      span,
+                      style: AppText.tabular(AppText.cardTitle),
+                    ),
+                  ),
+                  _Arrow(
+                    icon: Symbols.chevron_left_rounded,
+                    label: 'Earlier years',
+                    onTap: () => _step(false),
+                  ),
+                  _Arrow(
+                    icon: Symbols.chevron_right_rounded,
+                    label: 'Later years',
+                    onTap: () => _step(true),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            SwipeArea(
+              onSwipe: (e) => _step(e.next),
+              child: SizedBox(
+                height: 192,
+                child: SlideSwitcher(
+                  pageKey: _page,
+                  forward: _forward,
+                  child: _YearGrid(
+                    key: ValueKey(_page),
+                    first: _page,
+                    chosen: _year,
+                    current: thisYear,
+                    onPick: (y) {
+                      if (SwipeArea.swipedRecently(context)) return;
+                      setState(() => _year = y);
+                    },
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 24),
-          PopupButtons(
-            onCancel: () => Navigator.of(context).pop(),
-            onAction: () => Navigator.of(context).pop<int>(_year),
-          ),
-        ],
+            const SizedBox(height: 24),
+            PopupButtons(
+              onCancel: () => Navigator.of(context).pop(),
+              onAction: () => Navigator.of(context).pop<int>(_year),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -380,8 +394,8 @@ class _YearGrid extends StatelessWidget {
                                 color: on
                                     ? c.onAccent
                                     : now
-                                        ? c.accent
-                                        : c.text,
+                                    ? c.accent
+                                    : c.text,
                               ),
                             ),
                           ),
