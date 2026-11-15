@@ -157,12 +157,19 @@ class QuickView {
   List<String> get wordsToLearn =>
       byHand && categoryId != null ? learnableWords(parsed.titleWords) : const [];
 
-  /// The confirmation inside the card after a pick by hand, e.g.
-  /// Next time, “saree” goes to Gifts.
+  /// The confirmation inside the card after a pick by hand. It names the
+  /// words that are really learned ([wordsToLearn]), never the whole title:
+  /// Next time, “saree” goes to Gifts. / Next time, “taxi” and “uber” go to
+  /// Transportation.
   String? hint(String categoryName) {
-    if (wordsToLearn.isEmpty || parsed.title.isEmpty) return null;
-    return 'Next time, “${parsed.title.toLowerCase()}” '
-        'goes to $categoryName.';
+    final words = wordsToLearn;
+    if (words.isEmpty) return null;
+    final quoted = [for (final w in words) '“$w”'];
+    final names = quoted.length == 1
+        ? quoted.single
+        : '${quoted.sublist(0, quoted.length - 1).join(', ')} and ${quoted.last}';
+    final verb = quoted.length == 1 ? 'goes' : 'go';
+    return 'Next time, $names $verb to $categoryName.';
   }
 }
 
@@ -194,24 +201,6 @@ QuickView quickView({
   );
 }
 
-const Set<String> _stopWords = {
-  'a',
-  'an',
-  'and',
-  'at',
-  'by',
-  'for',
-  'from',
-  'in',
-  'my',
-  'of',
-  'on',
-  'or',
-  'the',
-  'to',
-  'with',
-};
-
 final RegExp _letter = RegExp(r'\p{L}', unicode: true);
 final RegExp _digit = RegExp(r'\d');
 
@@ -223,7 +212,7 @@ List<String> learnableWords(List<String> titleWords) {
     final word = w.trim().toLowerCase();
     if (word.length < 2) continue;
     if (!_letter.hasMatch(word) || _digit.hasMatch(word)) continue;
-    if (_stopWords.contains(word) || out.contains(word)) continue;
+    if (stopWords.contains(word) || out.contains(word)) continue;
     out.add(word);
   }
   return out;

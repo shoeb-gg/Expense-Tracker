@@ -145,6 +145,32 @@ void main() {
       expect(v.byHand, isFalse);
     });
 
+    test('the hint names the learned words, not the whole title', () {
+      final v = view('250 for taxi', pick: 14);
+      expect(v.parsed.title, 'Taxi');
+      expect(v.wordsToLearn, ['taxi']);
+      expect(v.hint('Transportation'), 'Next time, “taxi” goes to Transportation.');
+    });
+
+    test('the hint lists several learned words naturally', () {
+      final two = view('taxi uber 250', pick: 14);
+      expect(two.wordsToLearn, ['taxi', 'uber']);
+      expect(two.hint('Transportation'), 'Next time, “taxi” and “uber” go to Transportation.');
+
+      final three = view('taxi to the airport uber 250', pick: 14);
+      expect(three.wordsToLearn, ['taxi', 'airport', 'uber']);
+      expect(
+        three.hint('Transportation'),
+        'Next time, “taxi”, “airport” and “uber” go to Transportation.',
+      );
+    });
+
+    test('words that are not learned stay out of the hint', () {
+      final v = view('lunch with Sam 240 x2', pick: 2);
+      expect(v.wordsToLearn, ['lunch', 'sam']);
+      expect(v.hint('Snacks'), 'Next time, “lunch” and “sam” go to Snacks.');
+    });
+
     test('no title, no hint', () {
       expect(view('500', pick: 14).hint('Gifts'), isNull);
     });

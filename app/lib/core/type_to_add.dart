@@ -16,6 +16,9 @@
 ///   user's own case kept otherwise. Words that matched the winning category
 ///   by its NAME are left out of the title ("snacks 555" has no title);
 ///   learned words stay in it ("saree 1200" keeps the title "Saree").
+/// * Small linking words ([stopWords]: "for", "on", "the" ...) at the start
+///   or the end of the title are dropped ("250 for taxi" is "Taxi"); in the
+///   middle they stay ("Present for mom").
 /// * There is NO built-in word list for categories.
 library;
 
@@ -69,6 +72,13 @@ class TypedExpense {
 const Set<String> _currencyWords = {
   'tk', 'taka', 'takas', 'bdt', 'rs', 'inr', 'rupee', 'rupees', 'usd', //
   'dollar', 'dollars', 'eur', 'euro', 'euros', 'gbp', 'pound', 'pounds',
+};
+
+/// Small linking words. They are never learned for a category, and they are
+/// dropped from the start and the end of a typed title.
+const Set<String> stopWords = {
+  'a', 'an', 'and', 'at', 'by', 'for', 'from', 'in', 'my', 'of', 'on', //
+  'or', 'the', 'to', 'with',
 };
 
 final RegExp _space = RegExp(r'\s+');
@@ -165,6 +175,13 @@ TypedExpense parseTypeToAdd(
     }
     if (pointsToWinner && !w.learned) continue;
     titleParts.add(w);
+  }
+  // "250 for taxi": the title is "Taxi", not "For taxi".
+  while (titleParts.isNotEmpty && stopWords.contains(titleParts.first.key)) {
+    titleParts.removeAt(0);
+  }
+  while (titleParts.isNotEmpty && stopWords.contains(titleParts.last.key)) {
+    titleParts.removeLast();
   }
 
   var title = titleParts.map((w) => w.original).join(' ');

@@ -107,6 +107,30 @@ void main() {
     expect(r.titleWords, ['dinner', 'with', 'sam']);
   });
 
+  test('filler words at the start and end of the title are dropped', () {
+    final r = parse('250 for taxi');
+    expect(r.amount, 25000);
+    expect(r.title, 'Taxi');
+    expect(r.titleWords, ['taxi']);
+
+    expect(parse('taxi to 250').title, 'Taxi');
+    expect(parse('for the taxi at 250').title, 'Taxi');
+    expect(parse('250 on a lunch with').title, 'Lunch');
+    // Filler words only: nothing left for a title.
+    expect(parse('250 for the').title, '');
+    expect(parse('250 for the').titleWords, isEmpty);
+    // Capitals and punctuation do not hide a filler word.
+    expect(parse('For, taxi 250').title, 'Taxi');
+  });
+
+  test('filler words in the middle of the title stay', () {
+    expect(parse('Present for mom 500').title, 'Present for mom');
+    expect(parse('Present for mom 500').titleWords, ['present', 'for', 'mom']);
+    expect(parse('250 for taxi to the airport').title, 'Taxi to the airport');
+    // A category word leaves the title first, then the ends are trimmed.
+    expect(parse('snacks for kids 120').title, 'Kids');
+  });
+
   test('no amount yet, but a known word already picks the category', () {
     final r = parse('snacks');
     expect(r.amount, isNull);
