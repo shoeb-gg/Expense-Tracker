@@ -3,6 +3,7 @@ import 'package:spill_the_bills/core/calculator.dart';
 import 'package:spill_the_bills/core/days.dart';
 import 'package:spill_the_bills/core/format.dart';
 import 'package:spill_the_bills/core/type_to_add.dart';
+import 'package:spill_the_bills/data/db.dart';
 import 'package:spill_the_bills/features/add/add_logic.dart';
 
 void main() {
@@ -182,5 +183,103 @@ void main() {
       'sam',
       'tv',
     ]);
+  });
+
+  group('hasUnsavedInput', () {
+    final original = Expense(
+      id: 7,
+      pocketId: 1,
+      categoryId: 2,
+      amount: 118000,
+      note: 'Doctor visit',
+      day: 20744,
+      createdAt: DateTime(2026, 10, 18),
+      updatedAt: DateTime(2026, 10, 18),
+      photoPath: 'r1.jpg',
+    );
+
+    bool fresh({
+      String expr = '',
+      String title = '',
+      int? categoryId,
+      String? photo,
+      int day = 20744,
+      int? pocketId,
+      String typed = '',
+    }) => hasUnsavedInput(
+      expr: expr,
+      title: title,
+      categoryId: categoryId,
+      photo: photo,
+      day: day,
+      initialDay: 20744,
+      pocketId: pocketId,
+      currentPocketId: 1,
+      typed: typed,
+    );
+
+    bool edited({
+      String expr = '1180',
+      String title = 'Doctor visit',
+      int? categoryId = 2,
+      String? photo = 'r1.jpg',
+      int day = 20744,
+      int? pocketId,
+    }) => hasUnsavedInput(
+      original: original,
+      expr: expr,
+      title: title,
+      categoryId: categoryId,
+      photo: photo,
+      day: day,
+      initialDay: 20744,
+      pocketId: pocketId,
+      currentPocketId: 1,
+      typed: '',
+    );
+
+    test('a new expense with nothing entered is clean', () {
+      expect(fresh(), isFalse);
+      expect(fresh(title: '   ', typed: '  '), isFalse);
+    });
+
+    test('a new expense: each thing entered counts', () {
+      expect(fresh(expr: '5'), isTrue);
+      expect(fresh(title: 'Coffee'), isTrue);
+      expect(fresh(categoryId: 2), isTrue);
+      expect(fresh(photo: 'r1.jpg'), isTrue);
+      expect(fresh(day: 20740), isTrue);
+      expect(fresh(pocketId: 3), isTrue);
+      expect(fresh(typed: 'coffee 5'), isTrue);
+    });
+
+    test('a new expense: the day it opened on, or the pocket it is in, is not a change', () {
+      expect(fresh(day: 20744), isFalse);
+      expect(fresh(pocketId: 1), isFalse);
+    });
+
+    test('an edit with nothing changed is clean', () {
+      expect(edited(), isFalse);
+      expect(edited(title: 'Doctor visit  '), isFalse);
+      expect(edited(pocketId: 1), isFalse);
+    });
+
+    test('an edit: any difference from the original counts', () {
+      expect(edited(expr: '118'), isTrue);
+      expect(edited(expr: '1180+5'), isTrue);
+      expect(edited(expr: ''), isTrue);
+      expect(edited(title: 'Doctor'), isTrue);
+      expect(edited(title: ''), isTrue);
+      expect(edited(categoryId: 14), isTrue);
+      expect(edited(photo: null), isTrue);
+      expect(edited(photo: 'r2.jpg'), isTrue);
+      expect(edited(day: 20743), isTrue);
+      expect(edited(pocketId: 3), isTrue);
+    });
+
+    test('an edit: the same amount written another way is not a change', () {
+      expect(edited(expr: '1180.00'), isFalse);
+      expect(edited(expr: '1000+180'), isFalse);
+    });
   });
 }

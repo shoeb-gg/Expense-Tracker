@@ -4,6 +4,7 @@ import '../../core/calculator.dart';
 import '../../core/days.dart';
 import '../../core/format.dart';
 import '../../core/type_to_add.dart';
+import '../../data/db.dart';
 
 /// What the check key at the bottom right of the keypad shows.
 enum CheckKey {
@@ -216,4 +217,43 @@ List<String> learnableWords(List<String> titleWords) {
     out.add(word);
   }
   return out;
+}
+
+/// Whether leaving Add / Edit expense would throw away something the user
+/// entered or changed (then Cancel and Back ask first).
+///
+/// A new expense counts as changed once there is an amount or calculation
+/// ([expr]), a [title], a [categoryId], a [photo], words in the typing bar
+/// ([typed]), a [day] other than [initialDay], or a [pocketId] other than
+/// [currentPocketId] (the pocket the user is in). Editing an [original]
+/// counts any difference from it: the amount (what [expr] works out to), the
+/// title, the category, the photo, the day or the pocket ([pocketId] null:
+/// not touched).
+bool hasUnsavedInput({
+  Expense? original,
+  required String expr,
+  required String title,
+  required int? categoryId,
+  required String? photo,
+  required int day,
+  required int initialDay,
+  required int? pocketId,
+  required int? currentPocketId,
+  required String typed,
+}) {
+  if (original != null) {
+    return evaluateExpression(expr) != original.amount ||
+        title.trim() != original.note.trim() ||
+        categoryId != original.categoryId ||
+        photo != original.photoPath ||
+        day != original.day ||
+        (pocketId ?? original.pocketId) != original.pocketId;
+  }
+  return expr.isNotEmpty ||
+      title.trim().isNotEmpty ||
+      categoryId != null ||
+      photo != null ||
+      typed.trim().isNotEmpty ||
+      day != initialDay ||
+      (pocketId != null && pocketId != currentPocketId);
 }

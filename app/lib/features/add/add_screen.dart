@@ -55,6 +55,9 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
 
   late int _day;
 
+  /// The day the screen opened on, to tell whether the user changed it.
+  late final int _initialDay;
+
   /// Category of the keypad (null: the opening state with type to add).
   int? _picked;
 
@@ -75,6 +78,12 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
   bool _busy = false;
   bool _saved = false;
 
+  /// The "Discard?" question is showing.
+  bool _asking = false;
+
+  /// Whether the last build found something entered (see [_dirty]).
+  bool _wasDirty = false;
+
   /// Photos picked on this screen, removed again unless saved.
   final Set<String> _newPhotos = {};
   PhotoStore? _store;
@@ -92,7 +101,9 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
       ],
     ]).animate(_flash);
     _noteFocus.addListener(_onNoteFocus);
+    _note.addListener(_onNoteChanged);
     _day = widget.day ?? ref.read(todayProvider);
+    _initialDay = _day;
     if (_isEdit) {
       _loading = true;
       unawaited(_load());
@@ -129,6 +140,7 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
       }
     }
     _noteFocus.removeListener(_onNoteFocus);
+    _note.removeListener(_onNoteChanged);
     _flash.dispose();
     _note.dispose();
     _typed.dispose();
@@ -140,6 +152,29 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
   /// The title field gained or lost focus: the keys fold away or come back.
   void _onNoteFocus() {
     if (mounted) setState(() {});
+  }
+
+  /// Typing a title starts or ends "something entered" without another
+  /// screen update, so Back needs one to know.
+  void _onNoteChanged() {
+    if (mounted && !_loading && _dirty != _wasDirty) setState(() {});
+  }
+
+  /// Whether leaving now would lose something the user entered or changed.
+  bool get _dirty {
+    if (_isEdit && _original == null) return false;
+    return hasUnsavedInput(
+      original: _original,
+      expr: _expr,
+      title: _note.text,
+      categoryId: _picked,
+      photo: _photo,
+      day: _day,
+      initialDay: _initialDay,
+      pocketId: _pocketId,
+      currentPocketId: ref.read(currentPocketIdProvider),
+      typed: _typed.text,
+    );
   }
 
   @override
@@ -326,63 +361,71 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
       ),
     );
 
-    return Scaffold(
-      backgroundColor: c.bg,
-      resizeToAvoidBottomInset: false,
-      body: SafeArea(
-        bottom: false,
-        child: TweenAnimationBuilder<double>(
-          tween: Tween<double>(end: typingTitle ? 1 : 0),
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-          builder: (context, collapse, _) => Stack(
-            children: [
-              Column(
-                children: [
-                  _EditorHeader(
-                    title: title,
-                    onCancel: _close,
-                    pill: pill == null
-                        ? null
-                        : PocketPill(
-                            pocket: pill,
-                            semanticLabel: _isEdit
-                                ? 'This expense is in the pocket ${pill.name}. '
-                                      'Tap to move it to another pocket'
-                                : 'This expense will be saved in the pocket ${pill.name}. '
-                                      'Tap to choose another pocket',
-                            onTap: () => unawaited(_choosePocket(pockets, pill.id)),
-                          ),
-                  ),
-                  Expanded(child: buildContent(reserveFor(collapse))),
-                ],
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: keyboard,
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  switchInCurve: Curves.easeOutCubic,
-                  switchOutCurve: Curves.easeInCubic,
-                  layoutBuilder: (current, previous) =>
-                      Stack(alignment: Alignment.bottomCenter, children: [...previous, ?current]),
-                  transitionBuilder: (child, animation) => FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 0.12),
-                        end: Offset.zero,
-                      ).animate(animation),
-                      child: child,
+    final dirty = _dirty;
+    _wasDirty = dirty;
+    return PopScope(
+      canPop: _saved || !dirty,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) unawaited(_close());
+      },
+      child: Scaffold(
+        backgroundColor: c.bg,
+        resizeToAvoidBottomInset: false,
+        body: SafeArea(
+          bottom: false,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween<double>(end: typingTitle ? 1 : 0),
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            builder: (context, collapse, _) => Stack(
+              children: [
+                Column(
+                  children: [
+                    _EditorHeader(
+                      title: title,
+                      onCancel: _close,
+                      pill: pill == null
+                          ? null
+                          : PocketPill(
+                              pocket: pill,
+                              semanticLabel: _isEdit
+                                  ? 'This expense is in the pocket ${pill.name}. '
+                                        'Tap to move it to another pocket'
+                                  : 'This expense will be saved in the pocket ${pill.name}. '
+                                        'Tap to choose another pocket',
+                              onTap: () => unawaited(_choosePocket(pockets, pill.id)),
+                            ),
                     ),
-                  ),
-                  child: keypadCategory == null
-                      ? quickBottom
-                      : buildKeypad(keypadCategory, collapse),
+                    Expanded(child: buildContent(reserveFor(collapse))),
+                  ],
                 ),
-              ),
-            ],
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: keyboard,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    layoutBuilder: (current, previous) =>
+                        Stack(alignment: Alignment.bottomCenter, children: [...previous, ?current]),
+                    transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, 0.12),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    ),
+                    child: keypadCategory == null
+                        ? quickBottom
+                        : buildKeypad(keypadCategory, collapse),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -651,14 +694,40 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
           showToast(context, 'Saved in ${pocketName(pocketId)}');
         }
       }
-      _close();
+      _leave();
     } finally {
       _busy = false;
     }
   }
 
-  void _close() {
+  /// Cancel and Back: asks first when something was entered or changed (a
+  /// saved expense never asks).
+  Future<void> _close() async {
     FocusScope.of(context).unfocus();
+    if (_saved || !_dirty) {
+      _leave();
+      return;
+    }
+    if (_asking) return;
+    _asking = true;
+    final bool discard;
+    try {
+      discard = await showAppDialog(
+        context,
+        title: _isEdit ? 'Discard changes?' : 'Discard this expense?',
+        quietLine: 'What you entered will be lost.',
+        actionLabel: 'Discard',
+        cancelLabel: 'Keep editing',
+        destructive: true,
+      );
+    } finally {
+      _asking = false;
+    }
+    if (discard && mounted) _leave();
+  }
+
+  /// Closes the screen without asking.
+  void _leave() {
     if (context.canPop()) {
       context.pop();
       return;

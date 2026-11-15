@@ -532,10 +532,273 @@ void main() {
     await settle(tester);
     await tap(tester, find.text('Snacks'));
     await keys(tester, '5');
+    // An amount is typed, so Cancel asks first.
     await tap(tester, find.text('Cancel'));
+    expect(find.text('Discard this expense?'), findsOneWidget);
+    await tap(tester, find.text('Discard'));
     expect(find.byType(AddScreen), findsNothing);
     expect(await allExpenses(tester, db), isEmpty);
     await closeApp(tester, db);
+  });
+
+  group('leaving with something entered', () {
+    const heading = 'Discard this expense?';
+    final dialog = find.text(heading);
+
+    testWidgets('Cancel asks first; Keep editing stays, Discard closes', (tester) async {
+      final db = await emptyDb(tester);
+      await pumpApp(tester, db: db);
+      await openAdd(tester);
+      await tap(tester, find.text('Snacks'));
+      await keys(tester, '5');
+
+      await tap(tester, find.text('Cancel'));
+      expect(dialog, findsOneWidget);
+      expect(find.text('What you entered will be lost.'), findsOneWidget);
+      expect(find.text('Keep editing'), findsOneWidget);
+      expect(find.text('Discard'), findsOneWidget);
+
+      // Keep editing: still here, nothing lost.
+      await tap(tester, find.text('Keep editing'));
+      expect(dialog, findsNothing);
+      expect(find.byType(AddScreen), findsOneWidget);
+      expect(find.text('Save'), findsOneWidget);
+      expect(find.text('5'), findsWidgets);
+
+      // Cancel again, now Discard.
+      await tap(tester, find.text('Cancel'));
+      expect(dialog, findsOneWidget);
+      await tap(tester, find.text('Discard'));
+      expect(find.byType(AddScreen), findsNothing);
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(await allExpenses(tester, db), isEmpty);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('Cancel on an untouched screen closes at once', (tester) async {
+      final db = await emptyDb(tester);
+      await pumpApp(tester, db: db);
+      await openAdd(tester);
+      await tap(tester, find.text('Cancel'));
+      expect(dialog, findsNothing);
+      expect(find.byType(AddScreen), findsNothing);
+
+      // A tile and the same tile again is back to nothing chosen.
+      await openAdd(tester);
+      await tap(tester, find.text('Snacks'));
+      await tap(tester, find.text('Snacks').first);
+      await tap(tester, find.text('Cancel'));
+      expect(dialog, findsNothing);
+      expect(find.byType(AddScreen), findsNothing);
+
+      // Typed words, then cleared again.
+      await openAdd(tester);
+      await typeInBar(tester, 'coffee 5');
+      await typeInBar(tester, '');
+      await tap(tester, find.text('Cancel'));
+      expect(dialog, findsNothing);
+      expect(find.byType(AddScreen), findsNothing);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('a category alone, a typed expense, a title alone each count', (tester) async {
+      final db = await emptyDb(tester);
+      await pumpApp(tester, db: db);
+
+      await openAdd(tester);
+      await tap(tester, find.text('Snacks'));
+      await tap(tester, find.text('Cancel'));
+      expect(dialog, findsOneWidget);
+      await tap(tester, find.text('Discard'));
+      expect(find.byType(AddScreen), findsNothing);
+
+      await openAdd(tester);
+      await typeInBar(tester, 'saree 1200');
+      await tap(tester, find.text('Cancel'));
+      expect(dialog, findsOneWidget);
+      await tap(tester, find.text('Discard'));
+      expect(find.byType(AddScreen), findsNothing);
+
+      // A title, with the category chosen and then taken away again.
+      await openAdd(tester);
+      await tap(tester, find.text('Snacks'));
+      await tester.enterText(find.byType(EditableText).first, 'Coffee');
+      await hideKeyboard(tester);
+      await tap(tester, find.bySemanticsLabel('Category: Snacks'));
+      expect(find.text('Select a category'), findsOneWidget);
+      await tap(tester, find.text('Cancel'));
+      expect(dialog, findsOneWidget);
+      await tap(tester, find.text('Discard'));
+      expect(find.byType(AddScreen), findsNothing);
+      expect(await allExpenses(tester, db), isEmpty);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('the system Back button asks the same way', (tester) async {
+      final db = await emptyDb(tester);
+      await pumpApp(tester, db: db);
+      await openAdd(tester);
+
+      // Untouched: Back just closes.
+      await tester.binding.handlePopRoute();
+      await settle(tester);
+      expect(find.byType(AddScreen), findsNothing);
+      expect(dialog, findsNothing);
+
+      await openAdd(tester);
+      await tap(tester, find.text('Snacks'));
+      await keys(tester, '5');
+      await tester.binding.handlePopRoute();
+      await settle(tester);
+      expect(dialog, findsOneWidget);
+      expect(find.byType(AddScreen), findsOneWidget);
+
+      await tap(tester, find.text('Keep editing'));
+      expect(dialog, findsNothing);
+      expect(find.byType(AddScreen), findsOneWidget);
+
+      await tester.binding.handlePopRoute();
+      await settle(tester);
+      expect(dialog, findsOneWidget);
+      await tap(tester, find.text('Discard'));
+      expect(find.byType(AddScreen), findsNothing);
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(await allExpenses(tester, db), isEmpty);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('a title alone turns Back into a question too', (tester) async {
+      final db = await emptyDb(tester);
+      await pumpApp(tester, db: db);
+      await openAdd(tester);
+      await tap(tester, find.text('Snacks'));
+      // The title is typed last, with no screen update of its own after it.
+      await tester.enterText(find.byType(EditableText).first, 'Coffee');
+      await hideKeyboard(tester);
+      await tap(tester, find.bySemanticsLabel('Category: Snacks'));
+      await tester.binding.handlePopRoute();
+      await settle(tester);
+      expect(dialog, findsOneWidget);
+      await tap(tester, find.text('Keep editing'));
+      await closeApp(tester, db);
+    });
+
+    testWidgets('opened as the first screen, Discard goes home', (tester) async {
+      final db = await emptyDb(tester);
+      await pumpApp(tester, db: db, location: Routes.add());
+      await tap(tester, find.text('Snacks'));
+      await keys(tester, '5');
+      await tester.binding.handlePopRoute();
+      await settle(tester);
+      expect(dialog, findsOneWidget);
+      await tap(tester, find.text('Discard'));
+      expect(find.byType(AddScreen), findsNothing);
+      expect(find.byType(HomeScreen), findsOneWidget);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('after Save nothing is asked', (tester) async {
+      final db = await emptyDb(tester);
+      await pumpApp(tester, db: db);
+      await openAdd(tester);
+      await tap(tester, find.text('Snacks'));
+      await keys(tester, '5');
+      await tap(tester, find.text('Save'));
+      expect(dialog, findsNothing);
+      expect(find.byType(AddScreen), findsNothing);
+      expect(await allExpenses(tester, db), hasLength(1));
+      await closeApp(tester, db);
+    });
+
+    testWidgets('Edit: untouched closes at once, a change asks "Discard changes?"', (
+      tester,
+    ) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db);
+      await pushRoute(tester, Routes.editExpense(doctorVisitId));
+      expect(find.text('Edit expense'), findsOneWidget);
+      await tap(tester, find.text('Cancel'));
+      expect(find.text('Discard changes?'), findsNothing);
+      expect(find.byType(AddScreen), findsNothing);
+
+      // 1,180 -> 118: a change.
+      await pushRoute(tester, Routes.editExpense(doctorVisitId));
+      await tap(tester, find.bySemanticsLabel('Delete'));
+      await tap(tester, find.text('Cancel'));
+      expect(find.text('Discard changes?'), findsOneWidget);
+      expect(find.text('What you entered will be lost.'), findsOneWidget);
+      expect(find.text('Keep editing'), findsOneWidget);
+      await tap(tester, find.text('Keep editing'));
+      expect(find.byType(AddScreen), findsOneWidget);
+
+      // Typing the zero back makes it the original again: not a change.
+      await tap(tester, find.text('0').last);
+      expect(find.text('1,180'), findsOneWidget);
+      await tap(tester, find.text('Cancel'));
+      expect(find.text('Discard changes?'), findsNothing);
+      expect(find.byType(AddScreen), findsNothing);
+      final unchanged = await tester.runAsync(() => db.select(db.expenses).get());
+      expect(unchanged!.firstWhere((e) => e.id == doctorVisitId).amount, 118000);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('Edit: a new title, day or category counts; Discard keeps the original', (
+      tester,
+    ) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db);
+
+      // Title.
+      await pushRoute(tester, Routes.editExpense(doctorVisitId));
+      await tester.enterText(find.byType(EditableText).first, 'Doctor visit, follow-up');
+      await hideKeyboard(tester);
+      await tap(tester, find.text('Cancel'));
+      expect(find.text('Discard changes?'), findsOneWidget);
+      await tap(tester, find.text('Discard'));
+      expect(find.byType(AddScreen), findsNothing);
+
+      // Day.
+      await pushRoute(tester, Routes.editExpense(doctorVisitId));
+      await tap(tester, find.text('Today'));
+      await tap(tester, find.text('12'));
+      await tap(tester, find.text('Confirm'));
+      await tap(tester, find.text('Cancel'));
+      expect(find.text('Discard changes?'), findsOneWidget);
+      await tap(tester, find.text('Discard'));
+      expect(find.byType(AddScreen), findsNothing);
+
+      // Category, and back to the first one.
+      await pushRoute(tester, Routes.editExpense(doctorVisitId));
+      await tap(tester, find.text('Gifts'));
+      await tester.binding.handlePopRoute();
+      await settle(tester);
+      expect(find.text('Discard changes?'), findsOneWidget);
+      await tap(tester, find.text('Keep editing'));
+      await tap(tester, find.text('Health').first);
+      await tap(tester, find.text('Cancel'));
+      expect(find.text('Discard changes?'), findsNothing);
+      expect(find.byType(AddScreen), findsNothing);
+
+      final rows = await tester.runAsync(() => db.select(db.expenses).get());
+      final visit = rows!.firstWhere((e) => e.id == doctorVisitId);
+      expect(visit.note, 'Doctor visit');
+      expect(visit.amount, 118000);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('Edit: a new pocket counts', (tester) async {
+      final db = await sampleDatabase(tester);
+      await addSamplePockets(tester, db);
+      await pumpApp(tester, db: db);
+      await pushRoute(tester, Routes.editExpense(doctorVisitId));
+      await tap(tester, find.text('Personal'));
+      await tap(tester, find.text('Business'));
+      await tap(tester, find.text('Cancel'));
+      expect(find.text('Discard changes?'), findsOneWidget);
+      await tap(tester, find.text('Discard'));
+      expect(find.byType(AddScreen), findsNothing);
+      await closeApp(tester, db);
+    });
   });
 }
 
