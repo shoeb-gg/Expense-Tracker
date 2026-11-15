@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/data/db.dart';
 import 'package:spill_the_bills/data/pockets_repo.dart';
+import 'package:spill_the_bills/features/add/category_grid.dart';
+import 'package:spill_the_bills/features/add/quick_area.dart';
 import 'package:spill_the_bills/router.dart';
 import 'package:spill_the_bills/state/providers.dart';
 import 'package:spill_the_bills/theme/app_theme.dart';
@@ -11,6 +13,7 @@ import 'package:spill_the_bills/theme/tokens.dart';
 import 'package:spill_the_bills/widgets/kit.dart';
 
 import '../support/add_support.dart';
+import '../support/board.dart';
 import '../support/shots.dart';
 
 /// Add / Edit expense at the default and the largest text size, with the
@@ -158,6 +161,83 @@ void main() {
       expect(pill.width, lessThanOrEqualTo(140));
       expect(paragraph(tester, find.text('The Smiths family holiday')).didExceedMaxLines, isTrue);
       showsInFull(tester, find.text('Add expense'));
+      await closeApp(tester, db);
+    });
+  });
+
+  group('the hint card of the opening state', () {
+    const hint = 'Tap one above, or just type below';
+    final card = find.byType(GuideCard);
+    final bar = find.byType(TypingBar);
+
+    /// The text is whole: not cut with "…", not clipped at the side.
+    void notCut(WidgetTester tester, Finder text) {
+      final p = paragraph(tester, text);
+      final length = p.text.toPlainText().length;
+      final boxes = p.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: length));
+      final right = boxes.map((b) => b.right).fold<double>(0, (a, b) => a > b ? a : b);
+      expect(p.didExceedMaxLines, isFalse, reason: 'ellipsis');
+      expect(right, lessThanOrEqualTo(p.size.width + 0.5), reason: 'clipped');
+    }
+
+    testWidgets('default text: the card stays where it was, on one line', (tester) async {
+      final db = await openAdd(tester);
+      expect(tester.getRect(card), const Rect.fromLTRB(16, 630, 344, 698));
+      expect(tester.getRect(find.text('Select a category')).top, 645);
+      final sub = tester.getRect(find.text(hint));
+      expect(sub.top, 667);
+      expect(sub.height, 16);
+      expect(lineCount(paragraph(tester, find.text(hint))), 1);
+      expect(tester.getRect(bar), const Rect.fromLTRB(16, 708, 344, 764));
+      expect(tester.getSize(find.byKey(const ValueKey('quick'))).height, 162);
+      await closeApp(tester, db);
+    });
+
+    testWidgets('largest text: the hint shows in full, over two lines', (tester) async {
+      final db = await openAdd(tester, settings: largest);
+      notCut(tester, find.text(hint));
+      expect(lineCount(paragraph(tester, find.text(hint))), 2);
+      showsInFull(tester, find.text('Select a category'));
+      await closeApp(tester, db);
+    });
+
+    testWidgets('largest text: the card grows, nothing overlaps', (tester) async {
+      final db = await openAdd(tester, settings: largest);
+      final c = tester.getRect(card);
+      final sub = tester.getRect(find.text(hint));
+      final title = tester.getRect(find.text('Select a category'));
+      // The text stays inside the card, below its top padding.
+      expect(title.top, greaterThanOrEqualTo(c.top + 12));
+      expect(title.bottom, lessThanOrEqualTo(sub.top + 1));
+      expect(sub.bottom, lessThanOrEqualTo(c.bottom - 12 + 0.5));
+      // The card, the 10 px gap, the bar, the 16 px under it.
+      expect(tester.getRect(bar).top, closeTo(c.bottom + 10, 0.5));
+      expect(tester.getRect(bar).bottom, 764);
+      // And the card is below the header and the grid at the top.
+      expect(c.top, greaterThan(tester.getRect(find.text('Cancel')).bottom));
+      await closeApp(tester, db);
+    });
+
+    testWidgets('largest text: the grid scrolls clear of the taller card', (tester) async {
+      final db = await openAdd(tester, settings: largest);
+      // A short phone, so the grid has to scroll.
+      await boardHeight(tester, 600);
+      await tester.drag(find.text('Groceries'), const Offset(0, -2000));
+      await settle(tester);
+      // The end of the grid (its last row) is above the whole quick area.
+      final quickTop = tester.getRect(find.byKey(const ValueKey('quick'))).top;
+      expect(tester.getRect(find.byType(CategoryGrid)).bottom, lessThanOrEqualTo(quickTop + 0.5));
+      expect(tester.getRect(find.text('Manage')).bottom, lessThanOrEqualTo(tester.getRect(card).top));
+      await closeApp(tester, db);
+    });
+
+    testWidgets('largest text: "Now add the amount" shows in full too', (tester) async {
+      final db = await openAdd(tester, settings: largest);
+      await tester.enterText(find.byType(EditableText).last, 'coffee');
+      await settle(tester);
+      showsInFull(tester, find.text('Now add the amount'));
+      notCut(tester, find.textContaining('Like'));
+      expect(tester.getRect(bar).top, closeTo(tester.getRect(card).bottom + 10, 0.5));
       await closeApp(tester, db);
     });
   });

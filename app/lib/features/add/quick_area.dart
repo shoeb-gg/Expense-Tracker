@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import '../../data/db.dart';
 import '../../theme/symbols.dart';
@@ -11,16 +13,29 @@ import 'keypad_panel.dart';
 
 /// The bottom of Add expense while no category is chosen: a card (the
 /// guide, or the preview of a typed expense) above the typing bar.
+///
+/// The card grows with large text (a hint that wraps), so the area reports
+/// its height through [onHeight] (without [bottomInset]) and the screen keeps
+/// the grid clear of it.
 class QuickArea extends StatelessWidget {
-  const QuickArea({super.key, required this.card, required this.bar, required this.bottomInset});
+  const QuickArea({
+    super.key,
+    required this.card,
+    required this.bar,
+    required this.bottomInset,
+    this.onHeight,
+  });
 
   final Widget card;
   final Widget bar;
   final double bottomInset;
 
+  /// Told the area's height, less [bottomInset], after a layout that changed it.
+  final ValueChanged<double>? onHeight;
+
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
+    final area = ColoredBox(
       color: context.colors.bg,
       child: Padding(
         padding: EdgeInsets.fromLTRB(16, 12, 16, 16 + bottomInset),
@@ -31,6 +46,43 @@ class QuickArea extends StatelessWidget {
         ),
       ),
     );
+    final report = onHeight;
+    if (report == null) return area;
+    return HeightReporter(onHeight: (height) => report(height - bottomInset), child: area);
+  }
+}
+
+/// Tells [onHeight] its child's height after the frame in which that height
+/// changed (and after the first layout).
+class HeightReporter extends SingleChildRenderObjectWidget {
+  const HeightReporter({super.key, required this.onHeight, super.child});
+
+  final ValueChanged<double> onHeight;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderHeightReporter(onHeight);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    (renderObject as _RenderHeightReporter).onHeight = onHeight;
+  }
+}
+
+class _RenderHeightReporter extends RenderProxyBox {
+  _RenderHeightReporter(this.onHeight);
+
+  ValueChanged<double> onHeight;
+  double? _reported;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    final height = size.height;
+    if (height == _reported) return;
+    _reported = height;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (attached) onHeight(height);
+    });
   }
 }
 
@@ -59,10 +111,11 @@ class GuideCard extends StatelessWidget {
               children: [
                 Text(title, maxLines: 1, style: AppText.cardTitle),
                 const SizedBox(height: 2),
+                // Wraps onto a second line in large text (the card grows, see
+                // QuickArea); ends in "..." only after two lines.
                 Text(
                   subtitle,
-                  maxLines: 1,
-                  softWrap: false,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppText.sub.copyWith(color: c.text3),
                 ),

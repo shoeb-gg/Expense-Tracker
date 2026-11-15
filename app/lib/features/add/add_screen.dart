@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:io' show FileSystemException;
 
 import 'package:drift/drift.dart' show Value;
@@ -84,6 +85,11 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
   /// Whether the last build found something entered (see [_dirty]).
   bool _wasDirty = false;
 
+  /// How tall the opening state's bottom area (card and typing bar) really
+  /// is, without the bottom inset: the card grows when its hint wraps in
+  /// large text. 0 until the first layout.
+  double _quickHeight = 0;
+
   /// Photos picked on this screen, removed again unless saved.
   final Set<String> _newPhotos = {};
   PhotoStore? _store;
@@ -147,6 +153,10 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
     _noteFocus.dispose();
     _typedFocus.dispose();
     super.dispose();
+  }
+
+  void _onQuickHeight(double height) {
+    if (mounted && height != _quickHeight) setState(() => _quickHeight = height);
   }
 
   /// The title field gained or lost focus: the keys fold away or come back.
@@ -240,8 +250,9 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
         (keypadMode
             ? KeypadPanel.height - KeypadPanel.keysHeight * collapse
             // The card grows by its "Next time" line, or by the prompt of
-            // a typed word that has no category yet.
-            : (hint == null && !unknown ? 162.0 : 198.0)) +
+            // a typed word that has no category yet; and, in large text,
+            // by a hint that wraps (the measured height, when it is more).
+            : math.max(hint == null && !unknown ? 162.0 : 198.0, _quickHeight)) +
         navInset +
         keyboard;
 
@@ -339,6 +350,7 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
       key: const ValueKey('quick'),
       card: card,
       bottomInset: navInset,
+      onHeight: _onQuickHeight,
       bar: TypingBar(
         controller: _typed,
         focusNode: _typedFocus,
