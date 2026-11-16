@@ -569,8 +569,8 @@ class _Base {
   final Color? mutedBar;
   final Color? toast;
 
-  /// Solid replacements for the accent's soft and wash tints (Coral: the
-  /// deep accent over the cool page turns dusty mauve).
+  /// The light accent tints: solid and light enough that the deep accent
+  /// reads on them at 4.5:1 (the accent fill's hue at low strength).
   final Color? soft;
   final Color? wash;
 }
@@ -652,6 +652,8 @@ const Map<Mood, _Base> _lightBases = {
     strip: Color(0xFF2F6F69),
     stripStrong: Color(0xFF07524C),
     mutedBar: Color(0xFF7CCBC2),
+    soft: Color(0xFFD8F5F2),
+    wash: Color(0xFFDFF7F5),
     toast: Color(0xFF1E3236),
   ),
   Mood.coral: _Base(
@@ -677,9 +679,9 @@ const Map<Mood, _Base> _lightBases = {
     strip: Color(0xFF8E3346),
     stripStrong: Color(0xFF6E1E30),
     mutedBar: Color(0xFFFB9E89),
+    soft: Color(0xFFFCE4DD),
+    wash: Color(0xFFFFE7E2),
     toast: Color(0xFF272C40),
-    soft: Color(0xFFFBDDD4),
-    wash: Color(0xFFFCE3DC),
   ),
   Mood.iris: _Base(
     bg: Color(0xFFF1F0FA),
@@ -704,6 +706,8 @@ const Map<Mood, _Base> _lightBases = {
     strip: Color(0xFF5C52B3),
     stripStrong: Color(0xFF423293),
     mutedBar: Color(0xFFB8AFF7),
+    soft: Color(0xFFEFECFF),
+    wash: Color(0xFFF1EFFF),
     toast: Color(0xFF2A263E),
   ),
 };

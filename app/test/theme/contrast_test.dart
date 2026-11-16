@@ -221,20 +221,24 @@ void main() {
         expect(c.sheen.a, 0);
       });
 
-      test('the deep accent reads on its soft tints (bold labels and numbers)', () {
+      test('the deep accent reads on its soft tints at 4.5:1', () {
         // The soft tints (selected tabs, day chips, the nav pill, the Today
-        // key) carry bold day numbers and labels, not body text: 4:1 is the
-        // floor (Aqua and Iris sit at 4.05-4.2). Coral's are solid peach (the
-        // deep accent over the cool page turned dusty mauve) at 4.3.
-        final min = mood == Mood.coral ? 4.2 : 4.0;
+        // key) are solid and light: any text on them, bold or not, is 4.5:1.
         for (final tint in [c.accentSoft, c.wash]) {
-          final onPage = over(tint, c.surface);
+          expect(tint.a, 1, reason: 'a solid tint');
           expect(
-            contrast(c.accent, onPage),
-            greaterThanOrEqualTo(min),
-            reason: 'accent ${hex(c.accent)} on ${hex(onPage)}',
+            contrast(c.accent, tint),
+            greaterThanOrEqualTo(body),
+            reason: 'accent ${hex(c.accent)} on ${hex(tint)}',
           );
+          // Still a tint: it shows against the white card.
+          expect(contrast(tint, c.surface), greaterThanOrEqualTo(1.05));
         }
+        expect(
+          contrast(c.accentSoft, c.surface),
+          greaterThanOrEqualTo(contrast(c.wash, c.surface)),
+          reason: 'the wash is the lighter of the two',
+        );
       });
 
       test('the muted bars are one tone, clearer than before', () {
@@ -406,14 +410,20 @@ void main() {
       expect(contrast(c.accent, c.surface2), greaterThanOrEqualTo(4.9));
     });
 
-    test('the soft tints are solid peach; the other moods keep the formula', () {
-      expect(c.accentSoft, const Color(0xFFFBDDD4));
-      expect(c.wash, const Color(0xFFFCE3DC));
-      for (final mood in [Mood.aqua, Mood.iris]) {
-        final l = AppColors.of(mood, brightness: Brightness.light);
-        expect(l.accentSoft, l.accent.withAlpha(0x2E), reason: mood.name);
-        expect(l.wash, l.accent.withAlpha(0x29), reason: mood.name);
-      }
+    test('the soft tints are solid peach, not a dusty mauve', () {
+      expect(c.accentSoft, const Color(0xFFFCE4DD));
+      expect(c.wash, const Color(0xFFFFE7E2));
+    });
+  });
+
+  group('light tints of Aqua and Iris', () {
+    test('are solid, in the accent fill hue', () {
+      final aqua = AppColors.of(Mood.aqua, brightness: Brightness.light);
+      expect(aqua.accentSoft, const Color(0xFFD8F5F2));
+      expect(aqua.wash, const Color(0xFFDFF7F5));
+      final iris = AppColors.of(Mood.iris, brightness: Brightness.light);
+      expect(iris.accentSoft, const Color(0xFFEFECFF));
+      expect(iris.wash, const Color(0xFFF1EFFF));
     });
   });
 
