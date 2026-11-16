@@ -99,8 +99,23 @@ class _AppearanceCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // No Light / System / Dark choice here until a light theme is
-          // built: the app always renders dark (the stored value still loads).
+          BottomHairline(
+            child: ListRow(
+              title: 'Theme',
+              height: 68,
+              divider: false,
+              trailing: AppSegmented<AppThemeMode>(
+                size: SegmentedSize.compact,
+                segmentWidth: 64,
+                trackColor: c.bg,
+                segments: [
+                  for (final m in AppThemeMode.values) Segment(m, m.label),
+                ],
+                value: s.themeMode,
+                onChanged: notifier.setThemeMode,
+              ),
+            ),
+          ),
           Padding(
             // 15 + the 1 px divider below = the board's 16 px.
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 15),

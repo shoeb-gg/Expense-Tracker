@@ -27,8 +27,8 @@ enum CalcKeys {
   final String label;
 }
 
-/// Dark / Light / System. Only Dark is built, so Settings offers no theme
-/// choice yet; the value is still stored and loaded, and the app stays dark.
+/// Dark / Light / System (System follows the phone's own setting). Dark is
+/// the default, so an existing install looks the same.
 enum AppThemeMode {
   dark('Dark'),
   light('Light'),
@@ -72,7 +72,7 @@ class AppSettings {
   /// Colour theme (Aqua, Coral, Iris).
   final Mood mood;
 
-  /// Dark / Light / System (only Dark is built; not offered in Settings).
+  /// Dark / Light / System.
   final AppThemeMode themeMode;
 
   /// Text scale, one of [textScaleSteps]; applied app-wide.

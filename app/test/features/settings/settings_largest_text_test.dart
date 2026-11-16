@@ -66,7 +66,8 @@ void main() {
   group('at the default size nothing moves', () {
     testWidgets('the toggle rows: texts and switches keep their places', (tester) async {
       final db = await openSettings(tester);
-      const titleTops = [503.0, 571.0, 639.0, 707.0];
+      // The Theme row (68 px) is the first row of Appearance.
+      const titleTops = [571.0, 639.0, 707.0, 775.0];
       for (var i = 0; i < toggles.length; i++) {
         final (title, sub) = toggles[i];
         final t = tester.getRect(find.text(title));
@@ -89,15 +90,15 @@ void main() {
 
     testWidgets('the other rows keep their places', (tester) async {
       final db = await openSettings(tester);
-      expect(tester.getRect(find.text('Manage pockets')).top, 891);
-      expect(tester.getRect(find.text('Add, edit, delete')).top, 913);
-      expect(tester.getRect(find.text('Manage categories')).top, 1019);
-      expect(tester.getRect(find.text('Add, edit, delete, reorder')).top, 1041);
-      expect(tester.getRect(find.text('Export')).top, 1375);
-      expect(tester.getRect(find.text('Automatic backup')).top, 1511);
-      expect(tester.getRect(find.text('Phone and Google Drive')).top, 1533);
-      expect(tester.getRect(find.text('Delete all data')).top, 1647);
-      expect(tester.getRect(find.text('This can’t be undone')).top, 1669);
+      expect(tester.getRect(find.text('Manage pockets')).top, 959);
+      expect(tester.getRect(find.text('Add, edit, delete')).top, 981);
+      expect(tester.getRect(find.text('Manage categories')).top, 1087);
+      expect(tester.getRect(find.text('Add, edit, delete, reorder')).top, 1109);
+      expect(tester.getRect(find.text('Export')).top, 1443);
+      expect(tester.getRect(find.text('Automatic backup')).top, 1579);
+      expect(tester.getRect(find.text('Phone and Google Drive')).top, 1601);
+      expect(tester.getRect(find.text('Delete all data')).top, 1715);
+      expect(tester.getRect(find.text('This can’t be undone')).top, 1737);
       expect(cutTexts(tester, find.byType(Scaffold)), isEmpty);
       await closeApp(tester, db);
     });

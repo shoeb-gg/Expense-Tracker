@@ -144,38 +144,97 @@ void main() {
     await closeApp(tester, db);
   });
 
-  testWidgets('there is no Light / System / Dark choice until Light exists', (
+  testWidgets('the Theme row offers Dark, Light and System; Dark is chosen', (
     tester,
   ) async {
     final db = await openSettings(tester);
     expect(find.text('Appearance'), findsOneWidget);
+    expect(find.text('Theme'), findsOneWidget);
     expect(find.text('Color theme'), findsOneWidget, reason: 'mood stays');
     expect(find.text('Text size'), findsOneWidget);
-    expect(find.text('Theme'), findsNothing);
-    expect(find.text('Light'), findsNothing);
-    expect(find.text('System'), findsNothing);
-    expect(find.text('Dark'), findsNothing);
-    expect(find.byType(AppSegmented<AppThemeMode>), findsNothing);
+    for (final label in ['Dark', 'Light', 'System']) {
+      expect(find.text(label), findsOneWidget);
+    }
+    expect(find.byType(AppSegmented<AppThemeMode>), findsOneWidget);
+    expect(
+      tester
+          .widget<AppSegmented<AppThemeMode>>(
+            find.byType(AppSegmented<AppThemeMode>),
+          )
+          .value,
+      AppThemeMode.dark,
+      reason: 'the default stays Dark',
+    );
+    expect(settingsOf(tester).themeMode, AppThemeMode.dark);
     await closeApp(tester, db);
   });
 
-  testWidgets('a stored Light or System choice still renders dark', (
+  testWidgets('Light, System and Dark switch the theme and are saved', (
     tester,
   ) async {
-    for (final mode in [AppThemeMode.light, AppThemeMode.system]) {
+    // The phone is dark: System follows it.
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+    final db = await openSettings(tester);
+    Brightness shown() =>
+        Theme.of(tester.element(find.byType(SettingsScreen))).brightness;
+    expect(shown(), Brightness.dark);
+
+    await tester.tap(find.text('Light'));
+    await settle(tester);
+    expect(settingsOf(tester).themeMode, AppThemeMode.light);
+    expect(shown(), Brightness.light);
+    expect(
+      tester.element(find.byType(SettingsScreen)).colors.bg,
+      AppColors.of(Mood.aqua, brightness: Brightness.light).bg,
+    );
+    expect((await stored(tester, db))[AppSettings.kThemeMode], 'light');
+
+    // System follows the (dark) phone.
+    await tester.tap(find.text('System'));
+    await settle(tester);
+    expect(settingsOf(tester).themeMode, AppThemeMode.system);
+    expect(shown(), Brightness.dark);
+    expect((await stored(tester, db))[AppSettings.kThemeMode], 'system');
+
+    await tester.tap(find.text('Dark'));
+    await settle(tester);
+    expect(settingsOf(tester).themeMode, AppThemeMode.dark);
+    expect(shown(), Brightness.dark);
+    expect((await stored(tester, db))[AppSettings.kThemeMode], 'dark');
+    await closeApp(tester, db);
+  });
+
+  for (final brightness in Brightness.values) {
+    testWidgets('the colour theme tiles preview each mood in ${brightness.name}', (
+      tester,
+    ) async {
       final db = await openSettings(
         tester,
-        settings: AppSettings(themeMode: mode),
+        settings: AppSettings(
+          themeMode: brightness == Brightness.light
+              ? AppThemeMode.light
+              : AppThemeMode.dark,
+        ),
       );
-      final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
-      expect(app.themeMode, ThemeMode.dark);
-      expect(
-        tester.element(find.byType(SettingsScreen)).colors.bg,
-        AppColors.of(Mood.aqua).bg,
-      );
+      final tiles = tester
+          .widgetList<Pressable>(
+            find.descendant(
+              of: find.byType(MoodTiles),
+              matching: find.byType(Pressable),
+            ),
+          )
+          .toList();
+      expect(tiles, hasLength(Mood.values.length));
+      for (var i = 0; i < Mood.values.length; i++) {
+        expect(
+          tiles[i].color,
+          AppColors.of(Mood.values[i], brightness: brightness).surface2,
+        );
+      }
       await closeApp(tester, db);
-    }
-  });
+    });
+  }
 
   testWidgets('delete all data needs the tick, then starts again', (
     tester,

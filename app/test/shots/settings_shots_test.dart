@@ -19,8 +19,7 @@ void main() {
     final db = await sampleDatabase(tester);
     await addMockupPockets(tester, db);
     await pumpApp(tester, db: db, location: Routes.settings);
-    // The board minus its Theme row (68 px): that choice is hidden for now.
-    await boardHeight(tester, 1740 + 128 - 68);
+    await boardHeight(tester, 1740 + 128);
     expect(find.text('34,555'), findsOneWidget);
     expect(find.text('+13'), findsOneWidget);
     await takeShot(tester, 'settings_default');
@@ -88,7 +87,7 @@ void main() {
         thousandsSeparator: false,
       ),
     );
-    await boardHeight(tester, 1960 - 68);
+    await boardHeight(tester, 1960);
     expect(find.text('1234567.89'), findsOneWidget);
     await takeShot(tester, 'settings_coral_large');
     await closeApp(tester, db);
