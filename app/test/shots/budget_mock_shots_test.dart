@@ -17,9 +17,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
+import 'package:spill_the_bills/core/days.dart';
 import 'package:spill_the_bills/data/budgets_repo.dart';
 import 'package:spill_the_bills/data/categories_repo.dart';
 import 'package:spill_the_bills/data/db.dart';
+import 'package:spill_the_bills/data/expenses_repo.dart';
 import 'package:spill_the_bills/data/pockets_repo.dart';
 import 'package:spill_the_bills/router.dart';
 import 'package:spill_the_bills/state/budgets.dart';
@@ -175,6 +177,64 @@ void main() {
     await boardHeight(tester, 791);
     await _save(tester, 'form_largest_dark_aqua');
     await closeApp(tester, db);
+  }, skip: !_enabled);
+
+  /// Sample data plus a Snacks budget just above or below this month's spend,
+  /// then [amount] saved on the keypad: Home with the toast.
+  Future<void> toastShot(
+    WidgetTester tester,
+    String name, {
+    required int headroom,
+    required String amount,
+    AppSettings settings = const AppSettings(),
+  }) async {
+    final db = await sampleDatabase(tester);
+    await tester.runAsync(() async {
+      final pocket = (await PocketsRepo(db).defaultPocket()).id;
+      final cat = (await CategoriesRepo(db).all()).firstWhere((c) => c.name == 'Snacks').id;
+      final spent = await ExpensesRepo(db).categoryTotal(pocket, cat, dayOf(2026, 10, 1), dayOf(2026, 10, 31));
+      await BudgetsRepo(db).set(pocket, cat, spent + headroom);
+    });
+    await pumpApp(tester, db: db, location: Routes.add(), settings: settings);
+    await boardHeight(tester, 791);
+    await tester.tap(find.text('Snacks').first);
+    await settle(tester);
+    for (final k in amount.split('')) {
+      await tester.tap(find.text(k).last);
+      await tester.pump();
+    }
+    await settle(tester);
+    await tester.tap(find.text('Save'));
+    await settle(tester);
+    await tester.pump(const Duration(milliseconds: 300));
+    await _save(tester, name);
+    await tester.pump(const Duration(seconds: 6));
+    await closeApp(tester, db);
+  }
+
+  testWidgets('budget toast: over, dark Aqua', (tester) async {
+    await toastShot(tester, 'toast_over_dark_aqua', headroom: 20000, amount: '800');
+  }, skip: !_enabled);
+
+  testWidgets('budget toast: over, light Iris', (tester) async {
+    await toastShot(
+      tester,
+      'toast_over_light_iris',
+      headroom: 20000,
+      amount: '800',
+      settings: const AppSettings(mood: Mood.iris, themeMode: AppThemeMode.light),
+    );
+  }, skip: !_enabled);
+
+  testWidgets('budget toast: passing 90%, dark Coral', (tester) async {
+    // Spent + headroom is the budget; 950 more lands between 90% and 100%.
+    await toastShot(
+      tester,
+      'toast_near_dark_coral',
+      headroom: 100000,
+      amount: '950',
+      settings: const AppSettings(mood: Mood.coral),
+    );
   }, skip: !_enabled);
 
   testWidgets('budget rings, largest text, dark Aqua', (tester) async {

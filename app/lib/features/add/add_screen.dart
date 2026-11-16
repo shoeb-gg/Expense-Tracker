@@ -25,6 +25,7 @@ import '../expense/photo_screen.dart';
 import '../expense/receipt.dart';
 import 'add_events.dart';
 import 'add_logic.dart';
+import 'budget_alert.dart';
 import 'category_grid.dart';
 import 'keypad_panel.dart';
 import 'photo_picker.dart';
@@ -670,10 +671,50 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
       return '';
     }
 
+    // Budget toasts: the category's spending in the expense's month, right
+    // before and right after the save.
+    final budgetsRepo = ref.read(budgetsRepoProvider);
+    final fmt = ref.read(amountFormatProvider);
+    final today = ref.read(todayProvider);
+    final categoryName = ref.read(categoriesByIdProvider)[categoryId]?.name ?? '';
+    final first = dateOfDay(_day);
+    final monthFrom = monthStartOfDay(_day);
+    final monthTo = monthEnd(first.year, first.month);
+    Future<int?> spentBefore(int pocketId) async {
+      final budget = await budgetsRepo.get(pocketId, categoryId);
+      if (budget == null) return null;
+      return repo.categoryTotal(pocketId, categoryId, monthFrom, monthTo);
+    }
+
+    Future<BudgetAlert?> alertAfter(int pocketId, int? before) async {
+      if (before == null) return null;
+      final budget = await budgetsRepo.get(pocketId, categoryId);
+      if (budget == null) return null;
+      final after = await repo.categoryTotal(pocketId, categoryId, monthFrom, monthTo);
+      return budgetAlert(
+        category: categoryName,
+        before: before,
+        after: after,
+        budget: budget,
+        day: _day,
+        today: today,
+        fmt: fmt,
+      );
+    }
+
+    void showAlert(BudgetAlert alert, {String? inPocket}) => showToast(
+      context,
+      alert.title,
+      detail: inPocket == null ? alert.detail : '${alert.detail} in $inPocket',
+      leading: BudgetAlertMark(level: alert.level),
+      duration: const Duration(seconds: 5),
+    );
+
     try {
       final original = _original;
       if (original != null) {
         final pocketId = _pocketId ?? original.pocketId;
+        final before = await spentBefore(pocketId);
         await repo.update(
           original.copyWith(
             categoryId: categoryId,
@@ -688,19 +729,25 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
         if (oldPhoto != null && oldPhoto != _photo) unawaited(_quietly(photos.delete(oldPhoto)));
         _saved = true;
         events.saved((id: original.id, pocketId: pocketId, day: _day));
+        final alert = await alertAfter(pocketId, before);
         if (!mounted) return;
         if (pocketId != original.pocketId) {
+          // Undo matters most: the budget news rides along as its second line.
           final id = original.id;
           final from = original.pocketId;
           showToast(
             context,
             'Moved to ${pocketName(pocketId)}',
+            detail: alert?.title,
             onUndo: () => unawaited(repo.moveToPocket(id, from)),
           );
+        } else if (alert != null) {
+          showAlert(alert);
         }
       } else {
         final pocketId = _pocketId ?? currentPocketId;
         if (pocketId == null) return;
+        final before = await spentBefore(pocketId);
         final id = await repo.add(
           pocketId: pocketId,
           categoryId: categoryId,
@@ -712,8 +759,12 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
         if (learn.isNotEmpty) await words.learnAll(learn, categoryId);
         _saved = true;
         events.saved((id: id, pocketId: pocketId, day: _day));
+        final alert = await alertAfter(pocketId, before);
         if (!mounted) return;
-        if (pocketId != currentPocketId) {
+        final elsewhere = pocketId != currentPocketId;
+        if (alert != null) {
+          showAlert(alert, inPocket: elsewhere ? pocketName(pocketId) : null);
+        } else if (elsewhere) {
           showToast(context, 'Saved in ${pocketName(pocketId)}');
         }
       }

@@ -312,7 +312,7 @@ void main() {
       expect(await db.recolourDefaultCategories(), 0);
     });
 
-    test('opening a schema 1 database file upgrades it to schema 2', () async {
+    test('opening a schema 1 database file upgrades it to the latest schema', () async {
       final dir = Directory.systemTemp.createTempSync('stb_upgrade_');
       addTearDown(() => dir.deleteSync(recursive: true));
       final file = File(p.join(dir.path, 'spill.sqlite'));
@@ -339,8 +339,10 @@ void main() {
           .customSelect('PRAGMA user_version')
           .map((r) => r.read<int>('user_version'))
           .getSingle();
-      expect(version, 2);
-      expect(db.schemaVersion, 2);
+      // Schema 2's recolour ran, then schema 3 added the budgets table.
+      expect(version, 3);
+      expect(db.schemaVersion, 3);
+      expect(await db.select(db.categoryBudgets).get(), isEmpty);
     });
 
     test('a fresh install is already schema 2 and is not recoloured', () async {

@@ -17,12 +17,18 @@ Timer? _timer;
 ///
 /// Not in the mockup; designed to match it: `tile` card, radius 16, 14/20
 /// w600 white text, "Undo" in accent w800, the pop-up shadow.
+///
+/// [detail] adds a quieter second line and [leading] a 24 px mark before
+/// the text (the budget toasts' status icon); without them the toast is
+/// exactly as before.
 void showToast(
   BuildContext context,
   String message, {
   VoidCallback? onUndo,
   Duration? duration,
   double bottom = 88,
+  String? detail,
+  Widget? leading,
 }) {
   hideToast();
   final overlay = Overlay.of(context, rootOverlay: true);
@@ -30,6 +36,8 @@ void showToast(
   entry = OverlayEntry(
     builder: (ctx) => _ToastView(
       message: message,
+      detail: detail,
+      leading: leading,
       bottom: bottom,
       onUndo: onUndo == null
           ? null
@@ -61,9 +69,13 @@ class _ToastView extends StatefulWidget {
     required this.message,
     required this.bottom,
     required this.onUndo,
+    this.detail,
+    this.leading,
   });
 
   final String message;
+  final String? detail;
+  final Widget? leading;
   final double bottom;
   final VoidCallback? onUndo;
 
@@ -119,13 +131,38 @@ class _ToastViewState extends State<_ToastView>
                 ),
                 child: Row(
                   children: [
+                    if (widget.leading case final leading?) ...[
+                      SizedBox.square(dimension: 24, child: leading),
+                      const SizedBox(width: 12),
+                    ],
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        child: Text(
-                          widget.message,
-                          style: AppText.label.copyWith(color: c.toastText),
-                        ),
+                        child: widget.detail == null
+                            ? Text(
+                                widget.message,
+                                style: AppText.label.copyWith(color: c.toastText),
+                              )
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    widget.message,
+                                    style: AppText.label.copyWith(
+                                      color: c.toastText,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    widget.detail!,
+                                    style: AppText.sub.copyWith(
+                                      color: c.toastText.withValues(alpha: 0.78),
+                                    ),
+                                  ),
+                                ],
+                              ),
                       ),
                     ),
                     if (widget.onUndo != null)
