@@ -20,6 +20,7 @@ import 'package:spill_the_bills/widgets/kit.dart';
 
 import '../../support/pocket_samples.dart';
 import '../../support/shots.dart';
+import '../../support/text_cut.dart';
 
 ProviderContainer _container(WidgetTester tester) => ProviderScope.containerOf(
   tester.element(find.byType(HomeScreen, skipOffstage: false)),
@@ -599,7 +600,7 @@ void main() {
       await _open(tester, db, Routes.editPocket(999));
       expect(find.byType(NotFoundCard), findsOneWidget);
       expect(find.text('Pocket not found'), findsOneWidget);
-      expect(find.text('It may have been deleted.'), findsOneWidget);
+      expect(noteText('It may have been deleted.'), findsOneWidget);
       expect(find.text('Save'), findsNothing);
       await closeApp(tester, db);
     });

@@ -19,6 +19,7 @@ import '../../support/board.dart';
 import '../../support/import_files.dart';
 import '../../support/shots.dart';
 import '../../support/test_db.dart';
+import '../../support/text_cut.dart';
 
 /// Overrides the file picker and the share sheet; shared files land in
 /// [shared].
@@ -151,8 +152,8 @@ void main() {
     await tester.tap(find.text('Next'));
     await settleUntil(tester, find.text('Import 2 expenses'));
     expect(find.text('1 row can’t be read'), findsOneWidget);
-    expect(find.text('Row 4 · no date'), findsOneWidget);
-    expect(find.text('Pets will be created'), findsOneWidget);
+    expect(noteText('Row 4 · no date'), findsOneWidget);
+    expect(noteText('Pets will be created'), findsOneWidget);
     expect(find.text('New'), findsOneWidget);
     // Nothing is saved before the button.
     expect(await tester.runAsync(() => ExpensesRepo(db).count(1)), 0);
@@ -262,13 +263,13 @@ void main() {
     await tester.tap(find.text('Choose a file').last);
     await settle(tester);
     expect(
-      find.text('05/03/2025 is read as March 5, 2025', findRichText: true),
+      noteText('05/03/2025 is read as March 5, 2025'),
       findsOneWidget,
     );
     await tester.tap(find.text('Month first'));
     await settle(tester);
     expect(
-      find.text('05/03/2025 is read as May 3, 2025', findRichText: true),
+      noteText('05/03/2025 is read as May 3, 2025'),
       findsOneWidget,
     );
     await closeApp(tester, db);

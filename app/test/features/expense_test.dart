@@ -14,6 +14,7 @@ import 'package:spill_the_bills/widgets/kit.dart';
 
 import '../support/add_support.dart';
 import '../support/shots.dart';
+import '../support/text_cut.dart';
 
 const int gifts = 14;
 const int health = 10;
@@ -203,7 +204,7 @@ void main() {
     // The app's one "not found" card.
     expect(find.byType(NotFoundCard), findsOneWidget);
     expect(find.text('Expense not found'), findsOneWidget);
-    expect(find.text('It may have been deleted.'), findsOneWidget);
+    expect(noteText('It may have been deleted.'), findsOneWidget);
     await pushRoute(tester, Routes.editExpense(424242));
     expect(find.text('Expense not found'), findsWidgets);
     expect(find.byType(NotFoundCard), findsWidgets);

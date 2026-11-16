@@ -177,9 +177,8 @@ class _AppearanceCard extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Text(
+                CenteredNote(
                   'Preview. The whole app uses this size.',
-                  textAlign: TextAlign.center,
                   style: AppText.caption.copyWith(color: c.text3),
                 ),
               ],

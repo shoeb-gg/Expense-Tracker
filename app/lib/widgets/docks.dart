@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/text.dart';
 import '../theme/tokens.dart';
+import 'cards.dart' show CenteredNote;
 
 /// A bar docked at the bottom of a sub-screen (Export, Import, Details):
 /// `nav` background, 1 px `line` on top, padding 12 16 14 plus the system
@@ -42,11 +43,7 @@ class DockedBar extends StatelessWidget {
             child,
             if (hint != null) ...[
               const SizedBox(height: 8),
-              Text(
-                hint!,
-                textAlign: TextAlign.center,
-                style: AppText.sub.copyWith(color: c.text3),
-              ),
+              CenteredNote(hint!, style: AppText.sub.copyWith(color: c.text3)),
             ],
           ],
         ),

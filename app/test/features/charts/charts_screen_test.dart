@@ -18,6 +18,7 @@ import 'package:spill_the_bills/widgets/kit.dart';
 
 import '../../support/shots.dart';
 import '../../support/test_db.dart';
+import '../../support/text_cut.dart';
 
 AppSettings _settings(WidgetTester tester) => ProviderScope.containerOf(
       tester.element(find.byType(ChartsScreen)),
@@ -990,7 +991,7 @@ void main() {
       await pumpApp(tester, db: db, location: Routes.category(999));
       expect(find.byType(NotFoundCard), findsOneWidget);
       expect(find.text('Category not found'), findsOneWidget);
-      expect(find.text('It may have been deleted.'), findsOneWidget);
+      expect(noteText('It may have been deleted.'), findsOneWidget);
       await closeApp(tester, db);
     });
   });

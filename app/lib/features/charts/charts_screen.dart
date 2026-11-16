@@ -1059,11 +1059,7 @@ class _Hint extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SizedBox(
         width: double.infinity,
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: ChartText.hint(context.colors),
-        ),
+        child: CenteredNote(text, style: ChartText.hint(context.colors)),
       );
 }
 

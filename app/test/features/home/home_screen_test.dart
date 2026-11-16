@@ -14,6 +14,7 @@ import 'package:spill_the_bills/widgets/kit.dart';
 
 import '../../support/pocket_samples.dart';
 import '../../support/shots.dart';
+import '../../support/text_cut.dart';
 
 ProviderContainer _container(WidgetTester tester) => ProviderScope.containerOf(
   tester.element(find.byType(HomeScreen, skipOffstage: false)),
@@ -514,7 +515,7 @@ void main() {
       await settle(tester);
       expect(find.text('Savings'), findsOneWidget);
       expect(find.text('Nothing in Savings yet'), findsOneWidget);
-      expect(find.text('Tap + to add its first expense.'), findsOneWidget);
+      expect(noteText('Tap + to add its first expense.'), findsOneWidget);
       expect(find.text('0'), findsOneWidget);
       await closeApp(tester, db);
     });

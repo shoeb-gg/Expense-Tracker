@@ -23,3 +23,38 @@ bool isCut(WidgetTester tester, Finder text) {
   }
   return false;
 }
+
+/// The text widget whose text is [text], whether or not its words are joined
+/// by no-break spaces (U+00A0) and break marks (U+200B) for display.
+Finder noteText(String text) => find.byWidgetPredicate((w) {
+  if (w is! Text) return false;
+  final shown = w.data ?? w.textSpan?.toPlainText() ?? '';
+  return shown.replaceAll(' ', ' ').replaceAll('​', '') == text;
+});
+
+/// The words on the last line of the one text widget [text] finds. A
+/// no-break space counts as the gap it looks like, so two joined words are
+/// still two words.
+List<String> lastLineWords(WidgetTester tester, Finder text) {
+  expect(text, findsOneWidget, reason: '$text');
+  final paragraph = tester.renderObject<RenderParagraph>(
+    find.descendant(of: text, matching: find.byType(RichText)).first,
+  );
+  final plain = paragraph.text.toPlainText();
+  // Each letter's line is where its box sits; the last line is the lowest.
+  final tops = <int, double>{};
+  for (var i = 0; i < plain.length; i++) {
+    final boxes = paragraph.getBoxesForSelection(
+      TextSelection(baseOffset: i, extentOffset: i + 1),
+    );
+    if (boxes.isNotEmpty && plain[i].trim().isNotEmpty) tops[i] = boxes.first.top;
+  }
+  final lowest = tops.values.reduce((a, b) => a > b ? a : b);
+  final line = StringBuffer();
+  for (var i = 0; i < plain.length; i++) {
+    final top = tops[i];
+    if (top != null && top == lowest) line.write(plain[i]);
+    if (top == null && line.isNotEmpty) line.write(' ');
+  }
+  return line.toString().trim().split(RegExp(r'\s+'));
+}

@@ -402,13 +402,12 @@ class _Body extends ConsumerWidget {
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
-                  child: Text(
+                  child: CenteredNote(
                     total == 0
                         ? emptyColumnsHint(byMonth: byYear)
                         : byYear
                             ? 'Tap a column to see that month.'
                             : 'Tap a column to see that day.',
-                    textAlign: TextAlign.center,
                     style: ChartText.hint(c),
                   ),
                 ),

@@ -142,12 +142,18 @@ class _ReadAs extends StatelessWidget {
     final c = context.colors;
     final day = parseDateText(example, order);
     final style = AppText.tabular(AppText.sub.copyWith(color: c.text3));
+    // The last two words stay together (one space changes, so the bold part
+    // starts where it did).
+    final lead = '$example is read as ';
+    final line = keepLastWordsTogether(
+      '$lead${day == null ? 'no date' : fullDate(day)}',
+    );
     return Text.rich(
       TextSpan(
         children: [
-          TextSpan(text: '$example is read as '),
+          TextSpan(text: line.substring(0, lead.length)),
           TextSpan(
-            text: day == null ? 'no date' : fullDate(day),
+            text: line.substring(lead.length),
             style: TextStyle(fontWeight: FontWeight.w800, color: c.text),
           ),
         ],
@@ -312,9 +318,8 @@ class NoImportFile extends StatelessWidget {
               child: Center(
                 child: Padding(
                   padding: const EdgeInsets.all(32),
-                  child: Text(
+                  child: CenteredNote(
                     'Choose a file first.',
-                    textAlign: TextAlign.center,
                     style: AppText.body.copyWith(color: c.text2),
                   ),
                 ),

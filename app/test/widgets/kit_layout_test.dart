@@ -15,6 +15,7 @@ import 'package:spill_the_bills/theme/tokens.dart';
 import 'package:spill_the_bills/widgets/kit.dart';
 
 import '../support/shots.dart' show loadShotFonts;
+import '../support/text_cut.dart';
 import 'pickers_test.dart' show pumpBare;
 
 void main() {
@@ -97,7 +98,7 @@ void main() {
       ),
     );
     expect(find.text('Pocket not found'), findsOneWidget);
-    expect(find.text('It may have been deleted.'), findsOneWidget);
+    expect(noteText('It may have been deleted.'), findsOneWidget);
     final card = tester.getRect(find.byType(MessageCard));
     final width = tester.view.physicalSize.width / tester.view.devicePixelRatio;
     // Full width less the 16 px gutters, 2 px under the header, and only

@@ -8,6 +8,7 @@ import 'package:spill_the_bills/widgets/kit.dart';
 
 import '../../support/board.dart';
 import '../../support/shots.dart';
+import '../../support/text_cut.dart';
 
 /// Settings and its choice sheets at the default and the largest text size,
 /// with the real font (the row widths need it): nothing is cut off with "…"
@@ -51,8 +52,8 @@ void main() {
   ];
 
   Future<void> openSheet(WidgetTester tester, String row) async {
-    await revealRow(tester, find.text(row));
-    await tester.tap(find.text(row));
+    await revealRow(tester, noteText(row));
+    await tester.tap(noteText(row));
     await settle(tester);
   }
 
@@ -70,8 +71,8 @@ void main() {
       const titleTops = [571.0, 639.0, 707.0, 775.0];
       for (var i = 0; i < toggles.length; i++) {
         final (title, sub) = toggles[i];
-        final t = tester.getRect(find.text(title));
-        final s = tester.getRect(find.text(sub));
+        final t = tester.getRect(noteText(title));
+        final s = tester.getRect(noteText(sub));
         expect(t.left, 32, reason: title);
         expect(t.top, titleTops[i], reason: title);
         expect(s.top, titleTops[i] + 22, reason: sub);
@@ -91,14 +92,14 @@ void main() {
     testWidgets('the other rows keep their places', (tester) async {
       final db = await openSettings(tester);
       expect(tester.getRect(find.text('Manage pockets')).top, 959);
-      expect(tester.getRect(find.text('Add, edit, delete')).top, 981);
+      expect(tester.getRect(noteText('Add, edit, delete')).top, 981);
       expect(tester.getRect(find.text('Manage categories')).top, 1087);
-      expect(tester.getRect(find.text('Add, edit, delete, reorder')).top, 1109);
+      expect(tester.getRect(noteText('Add, edit, delete, reorder')).top, 1109);
       expect(tester.getRect(find.text('Export')).top, 1443);
       expect(tester.getRect(find.text('Automatic backup')).top, 1579);
-      expect(tester.getRect(find.text('Phone and Google Drive')).top, 1601);
+      expect(tester.getRect(noteText('Phone and Google Drive')).top, 1601);
       expect(tester.getRect(find.text('Delete all data')).top, 1715);
-      expect(tester.getRect(find.text('This can’t be undone')).top, 1737);
+      expect(tester.getRect(noteText('This can’t be undone')).top, 1737);
       expect(cutTexts(tester, find.byType(Scaffold)), isEmpty);
       await closeApp(tester, db);
     });
@@ -114,9 +115,9 @@ void main() {
     testWidgets('the two long subtitles wrap, and the switch stays centred', (tester) async {
       final db = await openSettings(tester, settings: largest);
       for (final (title, sub) in toggles) {
-        final t = tester.getRect(find.text(title));
-        final s = tester.getRect(find.text(sub));
-        final p = paragraphOf(tester, find.text(sub));
+        final t = tester.getRect(noteText(title));
+        final s = tester.getRect(noteText(sub));
+        final p = paragraphOf(tester, noteText(sub));
         expect(isCut(p), isFalse, reason: sub);
         if (title == 'Monthly total on Home' || title == 'Privacy hide') {
           expect(layoutOf(p).lines, greaterThanOrEqualTo(2), reason: '$sub wraps');
@@ -141,7 +142,7 @@ void main() {
       final db = await openSettings(tester, settings: largest);
       final rows = [
         for (final (title, sub) in toggles)
-          (tester.getRect(find.text(title)), tester.getRect(find.text(sub))),
+          (tester.getRect(noteText(title)), tester.getRect(noteText(sub))),
       ];
       for (var i = 0; i < rows.length - 1; i++) {
         final (_, sub) = rows[i];
@@ -160,7 +161,7 @@ void main() {
         'Add, edit, delete, reorder',
         'Phone and Google Drive',
       ]) {
-        expect(isCut(paragraphOf(tester, find.text(text))), isFalse, reason: text);
+        expect(isCut(paragraphOf(tester, noteText(text))), isFalse, reason: text);
       }
       // The tiles and the "Coming later" pill keep to the right edge.
       expect(tester.getRect(find.text('Coming later')).right, lessThanOrEqualTo(328));

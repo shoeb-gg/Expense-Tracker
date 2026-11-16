@@ -14,6 +14,7 @@ import 'package:spill_the_bills/widgets/kit.dart';
 import '../../support/board.dart';
 import '../../support/shots.dart';
 import '../../support/test_db.dart';
+import '../../support/text_cut.dart';
 
 Future<List<ExpenseCategory>> cats(WidgetTester tester, AppDatabase db) async =>
     (await tester.runAsync(() => CategoriesRepo(db).all()))!;
@@ -336,7 +337,7 @@ void main() {
     await pumpApp(tester, db: db, location: '/settings/categories/999');
     expect(find.byType(NotFoundCard), findsOneWidget);
     expect(find.text('Category not found'), findsOneWidget);
-    expect(find.text('It may have been deleted.'), findsOneWidget);
+    expect(noteText('It may have been deleted.'), findsOneWidget);
     await closeApp(tester, db);
   });
 

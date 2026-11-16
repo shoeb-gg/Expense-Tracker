@@ -20,7 +20,33 @@ void main() {
       expect(keepLastWordsTogether('Hello'), 'Hello');
       expect(keepLastWordsTogether(''), '');
       expect(keepLastWordsTogether('   '), '   ');
-      expect(keepLastWordsTogether('Hello world '), 'Hello\u00A0world ');
+      expect(keepLastWordsTogether('Hello big world '), 'Hello big world ');
+    });
+
+    test('a text of two words stays as it is', () {
+      expect(keepLastWordsTogether('Hello world'), 'Hello world');
+      expect(keepLastWordsTogether('Hello world '), 'Hello world ');
+      expect(keepLastWordsTogether(' Hello world'), ' Hello world');
+    });
+
+    test('the last two words join only when they are short enough to share a line', () {
+      // 18 characters with the space between: joined.
+      expect(
+        keepLastWordsTogether('See the abcdefgh ijklmnopq'),
+        'See the abcdefgh ijklmnopq',
+      );
+      // 19 characters: left alone, so two long words can still split.
+      expect(
+        keepLastWordsTogether('See the abcdefgh ijklmnopqr'),
+        'See the abcdefgh ijklmnopqr',
+      );
+      expect(lastWordsMaxLength, 18);
+    });
+
+    test('words already joined stay joined, and nothing is joined twice', () {
+      const joined = 'Tap to add an expense';
+      expect(keepLastWordsTogether(joined), joined);
+      expect(keepLastWordsTogether(keepLastWordsTogether('One two three')), 'One two three');
     });
   });
 

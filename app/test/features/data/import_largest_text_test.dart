@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:spill_the_bills/core/text_wrap.dart';
 import 'package:spill_the_bills/data/db.dart';
 import 'package:spill_the_bills/data/pockets_repo.dart';
 import 'package:spill_the_bills/features/data/data_parts.dart' show NewBadge;
@@ -66,9 +65,9 @@ void main() {
       'See what will be added before it is saved',
       'In every row',
       'Blank ones go to Miscellaneous',
-      keepLastWordsTogether('A file exported from this app works as it is.'),
+      'A file exported from this app works as it is.',
     ]) {
-      expect(isCut(tester, find.text(text)), isFalse, reason: text);
+      expect(isCut(tester, noteText(text)), isFalse, reason: text);
     }
     await closeApp(tester, db);
   });
@@ -85,14 +84,14 @@ void main() {
     await tester.tap(find.text('Choose a file').last);
     await settle(tester);
     await boardHeight(tester, 1700);
-    expect(isCut(tester, find.text(breakableFileName('expenses-2025.csv'))), isFalse);
+    expect(isCut(tester, noteText('expenses-2025.csv')), isFalse);
     await closeApp(tester, db);
   });
 
   testWidgets('step 2: the column heading shows in full', (tester) async {
     final db = await openStep(tester, 'expenses-2025.csv', step2File());
     for (final text in ['In the app', 'Column in your file', 'Date', 'e.g. 05/03/2025']) {
-      expect(isCut(tester, find.text(text)), isFalse, reason: text);
+      expect(isCut(tester, noteText(text)), isFalse, reason: text);
     }
     await closeApp(tester, db);
   });
@@ -106,7 +105,7 @@ void main() {
       'Left blank',
       'None',
     ]) {
-      expect(isCut(tester, find.text(text)), isFalse, reason: text);
+      expect(isCut(tester, noteText(text)), isFalse, reason: text);
     }
     await closeApp(tester, db);
   });
@@ -114,7 +113,7 @@ void main() {
   testWidgets('step 2: a file with only date and amount shows in full', (tester) async {
     final db = await openStep(tester, 'plain.csv', dateAndAmountFile());
     for (final text in ['All go to Miscellaneous', 'Left blank', 'None']) {
-      expect(isCut(tester, find.text(text)), isFalse, reason: text);
+      expect(isCut(tester, noteText(text)), isFalse, reason: text);
     }
     await closeApp(tester, db);
   });
@@ -146,7 +145,7 @@ void main() {
       'Rows 14, 87, 203 · no date or amount',
       'Pets and Travel will be created',
     ]) {
-      expect(isCut(tester, find.text(text)), isFalse, reason: text);
+      expect(isCut(tester, noteText(text)), isFalse, reason: text);
     }
     await tester.pump(const Duration(seconds: 7));
     await closeApp(tester, db);
@@ -162,13 +161,13 @@ void main() {
       'Cat food', 'Pets', '· Mar 3, 2025',
     ];
     for (final text in shown) {
-      expect(isCut(tester, find.text(text)), isFalse, reason: text);
+      expect(isCut(tester, noteText(text)), isFalse, reason: text);
     }
     // The three rows sit one under the other and the amounts line up on the
     // right edge of the card, each beside its own row.
-    final amounts = ['2,450', '600', '890'].map((a) => tester.getRect(find.text(a))).toList();
+    final amounts = ['2,450', '600', '890'].map((a) => tester.getRect(noteText(a))).toList();
     final titles = ['Weekly bazaar', 'Bus pass', 'Cat food']
-        .map((t) => tester.getRect(find.text(t)))
+        .map((t) => tester.getRect(noteText(t)))
         .toList();
     for (var i = 0; i < 3; i++) {
       expect(amounts[i].right, closeTo(amounts[0].right, 0.5));
@@ -194,7 +193,7 @@ void main() {
       'Opens in Excel and Google Sheets',
       'CSV (.csv)',
       'Plain text, opens in almost any app',
-      keepLastWordsTogether('One row per expense. Photos are left out.'),
+      'One row per expense. Photos are left out.',
       'This month',
       'This year',
       'Everything',
@@ -202,7 +201,7 @@ void main() {
       'Oct 18, 2026',
       'Next, you choose where to save or share it.',
     ]) {
-      expect(isCut(tester, find.text(text)), isFalse, reason: text);
+      expect(isCut(tester, noteText(text)), isFalse, reason: text);
     }
     await closeApp(tester, db);
   });
@@ -246,7 +245,7 @@ void main() {
       'Nothing to import',
       'Go back to check the columns, or choose another file.',
     ]) {
-      expect(isCut(tester, find.text(text)), isFalse, reason: text);
+      expect(isCut(tester, noteText(text)), isFalse, reason: text);
     }
     await tester.pump(const Duration(seconds: 7));
     await closeApp(tester, db);
@@ -259,7 +258,7 @@ void main() {
     await tester.tap(find.text('Everything'));
     await settle(tester);
     for (final text in ['Which expenses', '1,266 expenses', 'Export 1,266 expenses']) {
-      expect(isCut(tester, find.text(text)), isFalse, reason: text);
+      expect(isCut(tester, noteText(text)), isFalse, reason: text);
     }
     await closeApp(tester, db);
 
@@ -272,7 +271,7 @@ void main() {
       'Nothing to export',
       'No expenses in these dates. Try other dates.',
     ]) {
-      expect(isCut(tester, find.text(text)), isFalse, reason: text);
+      expect(isCut(tester, noteText(text)), isFalse, reason: text);
     }
     await closeApp(tester, empty);
   });
@@ -281,7 +280,7 @@ void main() {
     final db = await openStep(tester, 'bank.csv', longFile(5000), next: true);
     await settleFor(tester, rounds: 40);
     for (final text in ['What happens', '5,000 rows in the file', 'A first look']) {
-      expect(isCut(tester, find.text(text)), isFalse, reason: text);
+      expect(isCut(tester, noteText(text)), isFalse, reason: text);
     }
     await tester.pump(const Duration(seconds: 7));
     await closeApp(tester, db);

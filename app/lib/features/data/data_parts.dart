@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/text_wrap.dart';
 import '../../data/db.dart';
 import '../../theme/symbols.dart';
 import '../../theme/text.dart';
@@ -164,7 +165,7 @@ class ChoiceRow extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      subtitle,
+                      keepLastWordsTogether(subtitle),
                       style: AppText.sub.copyWith(color: c.text3),
                     ),
                   ],

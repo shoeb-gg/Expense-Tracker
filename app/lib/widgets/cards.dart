@@ -335,11 +335,7 @@ class MessageCard extends StatelessWidget {
             style: AppText.cardTitle.copyWith(color: c.text),
           ),
           const SizedBox(height: 4),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: AppText.body.copyWith(color: c.text3),
-          ),
+          CenteredNote(message, style: AppText.body.copyWith(color: c.text3)),
         ],
       ),
     );
@@ -384,7 +380,9 @@ class NotFoundCard extends StatelessWidget {
 /// With [wrap] that is the least height: the title and the subtitle wrap
 /// instead of ending in "…", and the row grows to hold them (10 px of room
 /// above and below the text), so large text shows in full. Text that fits
-/// one line leaves the row as it was.
+/// one line leaves the row as it was. A wrapped subtitle keeps its last two
+/// words together ([keepLastWordsTogether]), so it never ends on a lone word:
+/// keep user-typed text out of [subtitle] when [wrap] is on.
 /// [divider] draws a 1 px `line` at the bottom (leave it off on the last row).
 /// Right side: [trailing] widget, or [trailingText] as a 15/20 w700 amount.
 class ListRow extends StatelessWidget {
@@ -453,7 +451,8 @@ class ListRow extends StatelessWidget {
         if (subtitle != null) ...[
           const SizedBox(height: 2),
           Text(
-            subtitle!,
+            // A wrapped subtitle never leaves one word alone on its last line.
+            wrap ? keepLastWordsTogether(subtitle!) : subtitle!,
             maxLines: wrap ? null : 1,
             overflow: wrap ? TextOverflow.clip : TextOverflow.ellipsis,
             style: AppText.sub.copyWith(color: subtitleColor ?? c.text3),

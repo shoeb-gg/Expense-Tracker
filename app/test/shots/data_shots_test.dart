@@ -18,6 +18,7 @@ import 'package:spill_the_bills/widgets/kit.dart';
 import '../support/board.dart';
 import '../support/import_files.dart';
 import '../support/shots.dart';
+import '../support/text_cut.dart';
 
 List<Override> picking(String name, Uint8List bytes) => [
   importFilePickerProvider.overrideWithValue(
@@ -114,7 +115,7 @@ void main() {
     await settle(tester);
     expect(find.text('4 of 4 found'), findsOneWidget);
     expect(
-      find.text('05/03/2025 is read as March 5, 2025', findRichText: true),
+      noteText('05/03/2025 is read as March 5, 2025'),
       findsOneWidget,
     );
     await takeShot(tester, 'data_import_2');
@@ -156,8 +157,8 @@ void main() {
     expect(find.text('412,560'), findsOneWidget);
     expect(find.text('Mar 2 to Dec 30, 2025'), findsOneWidget);
     expect(find.text('11 already in the app'), findsOneWidget);
-    expect(find.text('Rows 14, 87, 203 · no date or amount'), findsOneWidget);
-    expect(find.text('Pets and Travel will be created'), findsOneWidget);
+    expect(noteText('Rows 14, 87, 203 · no date or amount'), findsOneWidget);
+    expect(noteText('Pets and Travel will be created'), findsOneWidget);
     await takeShot(tester, 'data_import_3');
 
     await tester.tap(find.text('Import 298 expenses'));
