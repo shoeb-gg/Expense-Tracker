@@ -434,8 +434,8 @@ class AppColors extends ThemeExtension<AppColors> {
   Color get budgetOk => _isLight ? const Color(0xFF2FB45A) : const Color(0xFF6CCB5F);
 
   /// Budget ring, 90% to 100% used. On light a true yellow: the deep amber
-  /// read as brown. It is faint on white (1.9:1) but thick and saturated.
-  Color get budgetNear => _isLight ? const Color(0xFFF4B400) : const Color(0xFFF2C230);
+  /// read as brown. Lightened again on request; faint on white (1.6:1) but thick and saturated.
+  Color get budgetNear => _isLight ? const Color(0xFFFFC933) : const Color(0xFFF2C230);
 
   /// Budget ring, over budget. A crimson red, so it stays apart from Coral's
   /// accent; on light a lighter crimson than [bad].
