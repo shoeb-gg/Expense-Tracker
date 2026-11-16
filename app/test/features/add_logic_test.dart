@@ -153,6 +153,13 @@ void main() {
       expect(v.hint('Transportation'), 'Next time, “taxi” goes to Transportation.');
     });
 
+    test('a category word kept in the title is not learned for another category', () {
+      final v = view('250 gift for mom', pick: 2);
+      expect(v.parsed.title, 'Gift for mom');
+      expect(v.wordsToLearn, ['mom']);
+      expect(v.hint('Snacks'), 'Next time, “mom” goes to Snacks.');
+    });
+
     test('the hint lists several learned words naturally', () {
       final two = view('taxi uber 250', pick: 14);
       expect(two.wordsToLearn, ['taxi', 'uber']);

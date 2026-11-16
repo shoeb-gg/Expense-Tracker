@@ -16,6 +16,9 @@
 ///   user's own case kept otherwise. Words that matched the winning category
 ///   by its NAME are left out of the title ("snacks 555" has no title);
 ///   learned words stay in it ("saree 1200" keeps the title "Saree").
+///   Exception: a category-name word that a linking word ties to the words
+///   after it stays, with them, as one phrase ("gift for mom" is "Gift for
+///   mom", not "Mom"; "groceries aldi" is still "Aldi").
 /// * Small linking words ([stopWords]: "for", "on", "the" ...) at the start
 ///   or the end of the title are dropped ("250 for taxi" is "Taxi"); in the
 ///   middle they stay ("Present for mom").
@@ -54,7 +57,9 @@ class TypedExpense {
   final List<String> categoryWords;
 
   /// Lower-case words of [title]. When the user picks or changes the
-  /// category by hand, learn these words for that category.
+  /// category by hand, learn these words for that category. A word of the
+  /// category's own name that stays in the title as part of a phrase
+  /// ("gift" in "Gift for mom") is not in the list: it is never learned.
   final List<String> titleWords;
 
   /// Whether the category came from a learned word (not a name match).
@@ -95,6 +100,10 @@ class _Word {
   final String key;
   Set<int> candidates = const {};
   bool learned = false;
+
+  /// A word of the winning category's name that stays in the title because
+  /// a linking word ties it to the words after it.
+  bool keptNameWord = false;
 }
 
 /// Parses type-to-add [text]. [learned] maps lower-case words to category
@@ -164,6 +173,32 @@ TypedExpense parseTypeToAdd(
     winner = ranked.first;
   }
 
+  bool namesWinner(_Word w) =>
+      winner != null && w.candidates.contains(winner) && !w.learned;
+
+  // "gift for mom": a run of category-name words, then a linking word, then
+  // more words. The run stays in the title with them.
+  for (var i = 0; i < words.length;) {
+    if (!namesWinner(words[i])) {
+      i++;
+      continue;
+    }
+    var end = i;
+    while (end < words.length && namesWinner(words[end])) {
+      end++;
+    }
+    var rest = end;
+    while (rest < words.length && stopWords.contains(words[rest].key)) {
+      rest++;
+    }
+    if (rest > end && rest < words.length) {
+      for (var k = i; k < end; k++) {
+        words[k].keptNameWord = true;
+      }
+    }
+    i = end;
+  }
+
   final titleParts = <_Word>[];
   final categoryWords = <String>[];
   var byLearned = false;
@@ -173,7 +208,7 @@ TypedExpense parseTypeToAdd(
       categoryWords.add(w.key);
       if (w.learned) byLearned = true;
     }
-    if (pointsToWinner && !w.learned) continue;
+    if (pointsToWinner && !w.learned && !w.keptNameWord) continue;
     titleParts.add(w);
   }
   // "250 for taxi": the title is "Taxi", not "For taxi".
@@ -193,7 +228,10 @@ TypedExpense parseTypeToAdd(
     categoryId: winner,
     title: title,
     categoryWords: List.unmodifiable(categoryWords),
-    titleWords: List.unmodifiable(titleParts.map((w) => w.key)),
+    titleWords: List.unmodifiable([
+      for (final w in titleParts)
+        if (!w.keptNameWord) w.key,
+    ]),
     byLearnedWord: byLearned,
   );
 }

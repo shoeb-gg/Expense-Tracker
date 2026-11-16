@@ -127,8 +127,63 @@ void main() {
     expect(parse('Present for mom 500').title, 'Present for mom');
     expect(parse('Present for mom 500').titleWords, ['present', 'for', 'mom']);
     expect(parse('250 for taxi to the airport').title, 'Taxi to the airport');
-    // A category word leaves the title first, then the ends are trimmed.
-    expect(parse('snacks for kids 120').title, 'Kids');
+    // A category word standing alone leaves the title first, then the ends
+    // are trimmed.
+    expect(parse('snacks aldi for kids 120').title, 'Aldi for kids');
+  });
+
+  group('a category word joined to the rest by a linking word', () {
+    test('keeps the whole phrase as the title', () {
+      final r = parse('250 gift for mom');
+      expect(r.amount, 25000);
+      expect(r.categoryId, idOf('Gifts'));
+      expect(r.title, 'Gift for mom');
+      expect(r.categoryWords, ['gift']);
+      // The user's own case stays, the first letter is capitalised.
+      expect(parse('gift for Mom 250').title, 'Gift for Mom');
+      expect(parse('snacks for kids 120').title, 'Snacks for kids');
+      expect(parse('snacks for kids 120').categoryId, idOf('Snacks'));
+    });
+
+    test('works with every linking word and with words before the phrase', () {
+      expect(parse('birthday gift to mom 500').title, 'Birthday gift to mom');
+      expect(parse('rent from Sam 15000').title, 'Rent from Sam');
+      expect(parse('gift with love 300').title, 'Gift with love');
+      expect(parse('gift for the kids 300').title, 'Gift for the kids');
+      expect(parse('gift for the kids 300').categoryId, idOf('Gifts'));
+    });
+
+    test('a category name of two words stays whole in the phrase', () {
+      final r = parse('internet bill for dad 900');
+      expect(r.categoryId, idOf('Internet Bill'));
+      expect(r.title, 'Internet bill for dad');
+      expect(r.categoryWords, ['internet', 'bill']);
+    });
+
+    test('a category word standing alone is still left out', () {
+      expect(parse('groceries 250').title, '');
+      expect(parse('groceries aldi 250').title, 'Aldi');
+      expect(parse('250 aldi groceries').title, 'Aldi');
+      // The next word is not a linking word, so the category word goes.
+      expect(parse('gift aldi for mom 250').title, 'Aldi for mom');
+    });
+
+    test('a linking word with nothing after it does not keep the category word', () {
+      expect(parse('gift for 250').title, '');
+      expect(parse('groceries for the 250').title, '');
+      expect(parse('gift for 250').categoryId, idOf('Gifts'));
+    });
+
+    test('learned words behave as before', () {
+      final r = parse('250 for taxi', learned: {'taxi': idOf('Transportation')});
+      expect(r.categoryId, idOf('Transportation'));
+      expect(r.title, 'Taxi');
+      expect(r.titleWords, ['taxi']);
+    });
+
+    test('the category word is not offered for learning', () {
+      expect(parse('gift for mom 250').titleWords, ['for', 'mom']);
+    });
   });
 
   test('no amount yet, but a known word already picks the category', () {
