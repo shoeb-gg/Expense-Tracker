@@ -191,10 +191,11 @@ class DetailsPill extends StatelessWidget {
 /// It sits in the box in the middle of the ring ([RingChart] centres it).
 /// Each of the three lines is as wide as the hole of the ring is at that
 /// height (the chord of the inner circle at the line's far edge, and no wider
-/// than the box). A line that needs more, a long name, a big amount or large
-/// text, is drawn in a smaller font until it fits, never cut. A line that fits
-/// is a plain text where it always was; the lines keep their places whatever
-/// their size.
+/// than the box). A line that needs more, a big amount or large text, is drawn
+/// in a smaller font until it fits, never cut. The title (a category's name)
+/// shrinks to 75% of its size at most: a name that needs less stays at 75% and
+/// ends in "..." on its one line. A line that fits is a plain text where it
+/// always was; the lines keep their places whatever their size.
 class RingCenter extends StatelessWidget {
   const RingCenter({
     super.key,
@@ -211,6 +212,9 @@ class RingCenter extends StatelessWidget {
 
   /// Space between the three lines.
   static const double _gap = 2;
+
+  /// The smallest the title is drawn, as a share of its size.
+  static const double _titleFloor = 0.75;
 
   /// Space between the lines and the Details pill, and the pill's height.
   static const double _pillGap = 6;
@@ -254,11 +258,18 @@ class RingCenter extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _line(title, titleStyle, heights[0], rooms[0], TextAlign.center),
+                  _line(
+                    title,
+                    titleStyle,
+                    heights[0],
+                    rooms[0],
+                    TextAlign.center,
+                    _titleFloor,
+                  ),
                   const SizedBox(height: _gap),
-                  _line(value, valueStyle, heights[1], rooms[1], TextAlign.start),
+                  _line(value, valueStyle, heights[1], rooms[1], TextAlign.start, 0),
                   const SizedBox(height: _gap),
-                  _line(sub, subStyle, heights[2], rooms[2], TextAlign.start),
+                  _line(sub, subStyle, heights[2], rooms[2], TextAlign.start, 0),
                 ],
               ),
             ),
@@ -282,13 +293,20 @@ class RingCenter extends StatelessWidget {
     double height,
     double room,
     TextAlign align,
+    double minScale,
   ) {
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: room),
       child: SizedBox(
         height: height,
         child: Center(
-          child: FitTitle(text, style: style, resizeFont: true, textAlign: align),
+          child: FitTitle(
+            text,
+            style: style,
+            resizeFont: true,
+            textAlign: align,
+            minScale: minScale,
+          ),
         ),
       ),
     );

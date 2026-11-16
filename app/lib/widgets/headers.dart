@@ -296,8 +296,9 @@ class SubHeader extends StatelessWidget {
 ///
 /// Used for figures too (a total, an amount in a column, a chip's note). With
 /// [resizeFont] the scaled text is a smaller font rather than a shrunk
-/// picture of the text, so its baseline is where the layout put it: use it
-/// when the text sits on a baseline shared with other text.
+/// picture of the text (also at [minScale], where it ends in "..."), so its
+/// baseline is where the layout put it: use it when the text sits on a
+/// baseline shared with other text.
 class FitTitle extends StatelessWidget {
   const FitTitle(
     this.text, {
@@ -333,6 +334,18 @@ class FitTitle extends StatelessWidget {
         }
         if (box.maxWidth / natural < minScale) {
           // Too long even at [minScale]: that scale, and the end cut.
+          if (resizeFont) {
+            return Text(
+              text,
+              textAlign: textAlign,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textScaler: TextScaler.linear(
+                MediaQuery.textScalerOf(context).scale(1) * minScale,
+              ),
+              style: style,
+            );
+          }
           return FittedBox(
             fit: BoxFit.scaleDown,
             child: SizedBox(
