@@ -113,7 +113,7 @@ class PocketsScreen extends ConsumerWidget {
                         context,
                       ).copyWith(scrollbars: false),
                       child: ListView(
-                        padding: const EdgeInsets.fromLTRB(16, 2, 16, 96),
+                        padding: EdgeInsets.fromLTRB(16, 2, 16, FadeDock.listRoom(context)),
                         children: [
                           if (pockets != null)
                             BandCard(

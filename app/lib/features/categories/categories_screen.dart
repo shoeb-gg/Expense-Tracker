@@ -87,7 +87,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                     child: CustomScrollView(
                       slivers: [
                         SliverPadding(
-                          padding: const EdgeInsets.fromLTRB(16, 2, 16, 96),
+                          padding: EdgeInsets.fromLTRB(16, 2, 16, FadeDock.listRoom(context)),
                           sliver: SliverMainAxisGroup(
                             slivers: [
                               SliverToBoxAdapter(

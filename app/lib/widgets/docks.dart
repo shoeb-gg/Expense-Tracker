@@ -55,9 +55,15 @@ class DockedBar extends StatelessWidget {
 /// A floating bottom action over a fade (Categories "Add category",
 /// Pockets "Add pocket"): put it in a `Stack` as
 /// `Positioned(left: 0, right: 0, bottom: 0, child: FadeDock(...))` and give
-/// the list 96 px of bottom padding. Use a `PrimaryButton(glow: true)` inside.
+/// the list [listRoom] of bottom padding. Use a `PrimaryButton(glow: true)`
+/// inside.
 class FadeDock extends StatelessWidget {
   const FadeDock({super.key, required this.child});
+
+  /// Bottom padding for the list under the dock, so its end scrolls clear of
+  /// the fade and the button: 96 px plus the phone's bottom bar (a gesture
+  /// bar or the three-button bar lifts the dock by its height).
+  static double listRoom(BuildContext context) => 96 + MediaQuery.viewPaddingOf(context).bottom;
 
   final Widget child;
 
