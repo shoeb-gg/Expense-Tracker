@@ -186,5 +186,6 @@ Dropped at first. Brought back on 2026-11-14 as "Pockets". The user chose the na
 - **Current round:** pocket name on Calendar, Charts and Reports, shown only when there are two or more pockets (the same rule as Add and Edit expense). Being worked out: a clearer Number format choice (the Thousands separator switch may fold into it) and a new option to show or hide decimals.
 - **Next round:** a new idea from the user's wife, to be described by the user.
 - **After that:** automatic backup.
+- **Last of all:** a very thorough test of the whole app on the phone. Type every kind of text and number in every field (expenses, categories, pockets and the rest), and follow every path, both the ones that should work and the ones that should fail, to find anything that breaks in the screens or the flow.
 - **Postponed:** the combined view of all pockets (postponed again on 2026-11-16), AI assistant, PDF and photo import, the monthly PDF report.
 - **Only if ever needed:** an iPhone version and Play Store testing. The user doesn't use an iPhone.
