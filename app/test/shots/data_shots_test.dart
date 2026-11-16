@@ -4,9 +4,12 @@ library;
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart' show Scaffold;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:spill_the_bills/data/pockets_repo.dart';
 import 'package:spill_the_bills/features/data/data_providers.dart';
 import 'package:spill_the_bills/router.dart';
 import 'package:spill_the_bills/state/settings.dart';
@@ -161,6 +164,120 @@ void main() {
     await settle(tester);
     expect(find.text('298 expenses added'), findsOneWidget);
     await takeShot(tester, 'data_import_done');
+    await tester.pump(const Duration(seconds: 7));
+    await closeApp(tester, db);
+  });
+
+  // The same screens at the largest text size, on a tall board so the whole
+  // screen shows: every text is whole there (see import_largest_text_test).
+  final largest = AppSettings(textScale: textScaleSteps.last);
+
+  testWidgets('export, largest text', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(tester, db: db, location: Routes.export, settings: largest);
+    await boardHeight(tester, 1700);
+    await takeShot(tester, 'data_export_largest');
+    await closeApp(tester, db);
+  });
+
+  testWidgets('import step 1, largest text', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(tester, db: db, location: Routes.importStart, settings: largest);
+    await boardHeight(tester, 1700);
+    await takeShot(tester, 'data_import_1_largest');
+    await closeApp(tester, db);
+  });
+
+  testWidgets('import step 2, largest text', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(
+      tester,
+      db: db,
+      location: Routes.importStart,
+      settings: largest,
+      overrides: picking('expenses-2025.csv', step2File()),
+    );
+    await tester.tap(find.text('Choose a file').last);
+    await settle(tester);
+    await boardHeight(tester, 1700);
+    await takeShot(tester, 'data_import_2_largest');
+    await closeApp(tester, db);
+  });
+
+  testWidgets('import step 2: amount column not found, largest text', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(
+      tester,
+      db: db,
+      location: Routes.importStart,
+      settings: largest,
+      overrides: picking('shops.csv', noAmountFile()),
+    );
+    await tester.tap(find.text('Choose a file').last);
+    await settle(tester);
+    await boardHeight(tester, 1700);
+    await takeShot(tester, 'data_import_2_missing_largest');
+    await closeApp(tester, db);
+  });
+
+  testWidgets('import step 3, largest text', (tester) async {
+    final db = await sampleDatabase(tester);
+    final file = await tester.runAsync(() => step3File(db));
+    await pumpApp(
+      tester,
+      db: db,
+      location: Routes.importStart,
+      settings: largest,
+      overrides: picking('expenses-2025.csv', file!),
+    );
+    await tester.tap(find.text('Choose a file').last);
+    await settle(tester);
+    await tester.tap(find.text('Next'));
+    await settle(tester);
+    await boardHeight(tester, 1700);
+    await takeShot(tester, 'data_import_3_largest');
+    await tester.pump(const Duration(seconds: 7));
+    await closeApp(tester, db);
+  });
+
+  testWidgets('import step 2 and export, largest text, a long pocket name', (tester) async {
+    final db = await sampleDatabase(tester);
+    final id = await tester.runAsync(
+      () => PocketsRepo(db).add(name: 'Wedding planning', emoji: '\u{1F4BC}'),
+    );
+    final settings = AppSettings(textScale: textScaleSteps.last, currentPocketId: id);
+    await pumpApp(
+      tester,
+      db: db,
+      location: Routes.importStart,
+      settings: settings,
+      overrides: picking('expenses-2025.csv', step2File()),
+    );
+    await tester.tap(find.text('Choose a file').last);
+    await settle(tester);
+    await takeShot(tester, 'data_import_2_long_pocket_largest');
+    final router = GoRouter.of(tester.element(find.byType(Scaffold).first));
+    router.go(Routes.export);
+    await settle(tester);
+    await takeShot(tester, 'data_export_long_pocket_largest');
+    await closeApp(tester, db);
+  });
+
+  testWidgets('import step 3, largest text, thousands of rows', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(
+      tester,
+      db: db,
+      location: Routes.importStart,
+      settings: largest,
+      overrides: picking('bank.csv', longFile(5000)),
+    );
+    await tester.tap(find.text('Choose a file').last);
+    await settle(tester);
+    await tester.tap(find.text('Next'));
+    await settleFor(tester, rounds: 40);
+    await boardHeight(tester, 1700);
+    await takeShot(tester, 'data_import_3_long_largest');
     await tester.pump(const Duration(seconds: 7));
     await closeApp(tester, db);
   });

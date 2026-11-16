@@ -116,8 +116,9 @@ class PlainCard extends StatelessWidget {
   }
 }
 
-/// A 64 px two-line choice (Export's file type): tinted with a 2 px accent
-/// ring and a ticked circle when chosen.
+/// A two-line choice (Export's file type), at least 64 px high: tinted with a
+/// 2 px accent ring and a ticked circle when chosen. Large text wraps and the
+/// row grows to hold it.
 class ChoiceRow extends StatelessWidget {
   const ChoiceRow({
     super.key,
@@ -135,8 +136,8 @@ class ChoiceRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return SizedBox(
-      height: 64,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 64),
       child: Pressable(
         onTap: onTap,
         selected: selected,
@@ -145,18 +146,16 @@ class ChoiceRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: selected ? Border.all(color: c.accent, width: 2) : null,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
             children: [
               Expanded(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                       style: AppText.rowTitle.copyWith(
                         fontWeight: selected
                             ? FontWeight.w800
@@ -166,8 +165,6 @@ class ChoiceRow extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                       style: AppText.sub.copyWith(color: c.text3),
                     ),
                   ],
@@ -278,7 +275,8 @@ class SmallTileButton extends StatelessWidget {
   }
 }
 
-/// The 40 px column picker of "Check the columns" (at least 124 px wide).
+/// The column picker of "Check the columns": at least 124 px wide and 40 px
+/// high. A long label wraps and the button grows to hold it.
 class ColumnButton extends StatelessWidget {
   const ColumnButton({
     super.key,
@@ -307,30 +305,24 @@ class ColumnButton extends StatelessWidget {
     // As wide as its label needs, at least the board's 124 px.
     return IntrinsicWidth(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 124, maxWidth: 176),
-        child: SizedBox(
-          height: 40,
-          child: Pressable(
-            onTap: onTap,
-            semanticLabel: semanticLabel,
-            color: c.tile,
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 6, 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: style,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(Symbols.expand_more_rounded, size: 20, color: c.text3),
-                ],
-              ),
+        constraints: const BoxConstraints(
+          minWidth: 124,
+          maxWidth: 176,
+          minHeight: 40,
+        ),
+        child: Pressable(
+          onTap: onTap,
+          semanticLabel: semanticLabel,
+          color: c.tile,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 6, 8),
+            child: Row(
+              children: [
+                Expanded(child: Text(label, style: style)),
+                const SizedBox(width: 4),
+                Icon(Symbols.expand_more_rounded, size: 20, color: c.text3),
+              ],
             ),
           ),
         ),
@@ -379,19 +371,23 @@ class NewBadge extends StatelessWidget {
     return Container(
       height: 16,
       padding: const EdgeInsets.symmetric(horizontal: 6),
-      alignment: Alignment.center,
       decoration: BoxDecoration(
         color: c.surface2,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Text(
-        'New',
-        style: TextStyle(
-          fontFamily: kFontFamily,
-          fontSize: 11,
-          height: 16 / 11,
-          fontWeight: FontWeight.w800,
-          color: c.accent,
+      // As wide as the word, also where the line gives it all the room
+      // (a Container's `alignment` would stretch it across the line).
+      child: Center(
+        widthFactor: 1,
+        child: Text(
+          'New',
+          style: TextStyle(
+            fontFamily: kFontFamily,
+            fontSize: 11,
+            height: 16 / 11,
+            fontWeight: FontWeight.w800,
+            color: c.accent,
+          ),
         ),
       ),
     );

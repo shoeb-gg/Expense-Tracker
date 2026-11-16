@@ -149,10 +149,12 @@ class SubHeader extends StatelessWidget {
                   // A title too wide for its column (large text) scales
                   // down instead of ending in "...".
                   FitTitle(title, style: titleStyle),
+                  // Like the title: a subtitle too wide for the column (a long
+                  // pocket name at large text) scales down to one line instead
+                  // of wrapping out of the 60 px header.
                   if (subtitle != null)
-                    Text(
+                    FitTitle(
                       subtitle!,
-                      textAlign: TextAlign.center,
                       style: AppText.overline.copyWith(color: c.text3),
                     ),
                 ],

@@ -68,6 +68,7 @@ class ImportColumnsScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: Text(
@@ -82,7 +83,6 @@ class ImportColumnsScreen extends ConsumerWidget {
                       width: 124,
                       child: Text(
                         'Column in your file',
-                        maxLines: 1,
                         style: AppText.caption.copyWith(
                           fontWeight: FontWeight.w600,
                           color: c.text3,
@@ -188,9 +188,11 @@ class _FieldRow extends ConsumerWidget {
       label = 'None';
       tone = ColumnButtonTone.unused;
     }
+    // At least 64 px high; large text wraps and the row grows to hold it.
     return Container(
-      height: 64,
+      constraints: const BoxConstraints(minHeight: 64),
       margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       foregroundDecoration: last
           ? null
           : BoxDecoration(
@@ -200,15 +202,19 @@ class _FieldRow extends ConsumerWidget {
         children: [
           Expanded(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(field.label, style: AppText.rowTitle),
                 const SizedBox(height: 2),
                 Text(
                   sub,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  // A sample from the file is cut after two lines; the
+                  // app's own words always show in full.
+                  maxLines: sample == null ? null : 2,
+                  overflow: sample == null
+                      ? TextOverflow.clip
+                      : TextOverflow.ellipsis,
                   style: AppText.tabular(AppText.sub.copyWith(color: c.text3)),
                 ),
               ],

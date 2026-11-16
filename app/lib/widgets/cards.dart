@@ -1,7 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../theme/text.dart';
 import '../theme/tokens.dart';
+import 'headers.dart' show titleWidth;
 import 'pressable.dart';
 
 /// A card (radius 20, `surface`) with a title band (`surface2`, 48 px; 56 px
@@ -61,30 +64,7 @@ class BandCard extends StatelessWidget {
                     Icon(icon, size: 20, color: c.accent),
                     const SizedBox(width: 8),
                   ],
-                  Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Expanded(
-                          child: titleWidget ??
-                              Text(
-                                title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppText.cardTitle,
-                              ),
-                        ),
-                        if (trailingText != null) ...[
-                          const SizedBox(width: 12),
-                          Text(
-                            trailingText!,
-                            style: AppText.sub.copyWith(color: c.text3),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
+                  Expanded(child: _titleLine(c)),
                   if (trailing != null) ...[
                     const SizedBox(width: 12),
                     trailing!,
@@ -96,6 +76,69 @@ class BandCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// The title with [trailingText] on its baseline. When the two do not fit
+  /// on one line (large text), the title keeps its room and the text wraps,
+  /// right-aligned, to a second line beside it (two lines fit the band)
+  /// instead of the title ending in "...".
+  Widget _titleLine(AppColors c) {
+    final noteStyle = AppText.sub.copyWith(color: c.text3);
+    Widget oneLine() => Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Expanded(
+              child: titleWidget ??
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.cardTitle,
+                  ),
+            ),
+            if (trailingText != null) ...[
+              const SizedBox(width: 12),
+              Text(trailingText!, style: noteStyle),
+            ],
+          ],
+        );
+    final note = trailingText;
+    if (note == null || titleWidget != null) return oneLine();
+    return LayoutBuilder(
+      builder: (context, box) {
+        final titleW = titleWidth(context, title, AppText.cardTitle);
+        final noteW = titleWidth(context, note, noteStyle);
+        if (!box.maxWidth.isFinite || titleW + 12 + noteW <= box.maxWidth) {
+          return oneLine();
+        }
+        // The title gets what it needs, the note at least 96 px.
+        final titleRoom = math.min(titleW + 1, box.maxWidth - 12 - math.min(noteW, 96));
+        return Row(
+          children: [
+            SizedBox(
+              width: titleRoom,
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppText.cardTitle,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                note,
+                textAlign: TextAlign.right,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: noteStyle,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

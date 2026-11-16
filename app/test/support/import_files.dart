@@ -89,3 +89,43 @@ Uint8List noAmountFile() => _csv([
   ['2025-03-05', 'Bazaar'],
   ['2025-03-06', 'Pharmacy'],
 ]);
+
+/// A file with the date and amount found, and a Note column with nothing in
+/// it: step 2 says "Empty in this file".
+Uint8List emptyNoteFile() => _csv([
+  ['Date', 'Amount', 'Note'],
+  ['2025-03-05', '120', ''],
+  ['2025-03-06', '80', ''],
+]);
+
+/// A file with only the two columns an import needs: no category, no title.
+Uint8List dateAndAmountFile() => _csv([
+  ['Date', 'Amount'],
+  ['2025-03-05', '120'],
+  ['2025-03-06', '80'],
+]);
+
+/// A file whose date and amount columns are found but nothing in them can be
+/// read: step 3 has nothing to import.
+Uint8List unreadableFile() => _csv([
+  ['Date', 'Amount'],
+  ['sometime', 'a lot'],
+  ['later', 'a few'],
+]);
+
+/// A long file of [rows] new rows (Date, Amount, Type, Note): a bank export
+/// of a few years. Step 3 says "5,000 rows in the file".
+Uint8List longFile(int rows) {
+  const types = ['Groceries', 'Snacks', 'Transportation', 'Health'];
+  final first = dayOf(2022, 1, 1);
+  return _csv([
+    ['Date', 'Amount', 'Type', 'Note'],
+    for (var i = 0; i < rows; i++)
+      [
+        isoDay(first + i ~/ 4),
+        '${100 + i % 900}',
+        types[i % types.length],
+        'Row ${i + 1}',
+      ],
+  ]);
+}

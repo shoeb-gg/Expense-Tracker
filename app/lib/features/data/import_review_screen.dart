@@ -302,74 +302,69 @@ class _PreviewRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final sub = AppText.sub.copyWith(color: c.text3);
-    return SizedBox(
-      height: 68,
-      child: Row(
-        children: [
-          const SizedBox(width: 16),
-          EmojiTile(emoji: emoji),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Container(
-              foregroundDecoration: divider
-                  ? BoxDecoration(
-                      border: Border(bottom: BorderSide(color: c.line)),
-                    )
-                  : null,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          expense.title.isEmpty
-                              ? expense.categoryName
-                              : expense.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppText.rowTitle,
-                        ),
-                        const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                expense.categoryName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: sub,
-                              ),
-                            ),
-                            if (expense.newCategory) ...[
-                              const SizedBox(width: 4),
-                              const NewBadge(),
-                            ],
-                            const SizedBox(width: 4),
-                            Flexible(
-                              child: Text(
-                                '· ${mediumDate(expense.day)}',
-                                maxLines: 1,
-                                softWrap: false,
-                                overflow: TextOverflow.ellipsis,
-                                style: sub,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+    // At least 68 px high. When the category and the date do not fit on one
+    // line the date goes under the category and the row grows to hold both.
+    return Row(
+      children: [
+        const SizedBox(width: 16),
+        EmojiTile(emoji: emoji),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 68),
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            foregroundDecoration: divider
+                ? BoxDecoration(
+                    border: Border(bottom: BorderSide(color: c.line)),
+                  )
+                : null,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        expense.title.isEmpty
+                            ? expense.categoryName
+                            : expense.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.rowTitle,
+                      ),
+                      const SizedBox(height: 2),
+                      Wrap(
+                        spacing: 4,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          // A category name from the file can be long; it
+                          // is cut after two lines.
+                          Text(
+                            expense.categoryName,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: sub,
+                          ),
+                          if (expense.newCategory) const NewBadge(),
+                          Text(
+                            '· ${mediumDate(expense.day)}',
+                            softWrap: false,
+                            style: sub,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Text(amount, style: AppText.rowAmount),
-                ],
-              ),
+                ),
+                const SizedBox(width: 12),
+                Text(amount, style: AppText.rowAmount),
+              ],
             ),
           ),
-          const SizedBox(width: 16),
-        ],
-      ),
+        ),
+        const SizedBox(width: 16),
+      ],
     );
   }
 }
