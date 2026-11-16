@@ -366,12 +366,11 @@ class YearChart extends ConsumerWidget {
                     left: 0,
                     width: 28,
                     top: y(t) - 7,
+                    // A value wider than the 28 px (1500K) scales down to it.
                     child: ExcludeSemantics(
-                      child: Text(
+                      child: FitTitle(
                         tick(t),
                         textAlign: TextAlign.right,
-                        maxLines: 1,
-                        softWrap: false,
                         style: AppText.tabular(
                           AppText.caption.copyWith(
                             fontSize: 10.5,

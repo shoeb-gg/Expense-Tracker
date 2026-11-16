@@ -542,10 +542,9 @@ class _SummaryCard extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Flexible(
-              child: Text(
+              child: FitTitle(
                 summary.hasStarted ? nothingToCompare : notStartedYet,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.start,
                 style: AppText.overline.copyWith(color: c.text2),
               ),
             ),
@@ -575,11 +574,13 @@ class _SummaryCard extends ConsumerWidget {
           children: [
             Icon(icon, size: 18, color: color),
             const SizedBox(width: 6),
+            // A note too long for the chip ("3% more than the same period in
+            // 2025", large text) scales down to fit it instead of ending in
+            // "...".
             Flexible(
-              child: Text(
+              child: FitTitle(
                 delta.text,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.start,
                 style: AppText.overline.copyWith(
                   fontWeight: FontWeight.w700,
                   color: color,
@@ -620,10 +621,13 @@ class _SummaryCard extends ConsumerWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(top: 2),
-                    child: Text(
+                    // A big total scales down to its room. It is the font
+                    // that shrinks, so the average beside it stays on the
+                    // total's baseline.
+                    child: FitTitle(
                       fmt.format(summary.total),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.start,
+                      resizeFont: true,
                       style: ChartText.total,
                     ),
                   ),

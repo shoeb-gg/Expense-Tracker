@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -259,20 +261,6 @@ class _MonthlyStats extends ConsumerWidget {
       cmpColor = trendColor(c, delta.trend);
     }
     final label = AppText.sub.copyWith(color: c.text3);
-    Widget stat(String l, String v, CrossAxisAlignment align, {Color? color}) =>
-        Column(
-          crossAxisAlignment: align,
-          children: [
-            Text(l, maxLines: 1, style: label),
-            const SizedBox(height: 2),
-            Text(
-              v,
-              maxLines: 1,
-              softWrap: false,
-              style: ReportText.stat.copyWith(color: color ?? c.text),
-            ),
-          ],
-        );
     final prevName = monthShortName(monthOfDay(prevWin.from));
     return BandCard(
       title: 'Monthly statistics',
@@ -282,34 +270,23 @@ class _MonthlyStats extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: stat(
-                    'Spent so far',
-                    spent == null ? '' : fmt.formatWhole(spent),
-                    CrossAxisAlignment.start,
-                  ),
+            child: _StatsRow(
+              stats: [
+                _Stat(
+                  'Spent so far',
+                  spent == null ? '' : fmt.formatWhole(spent),
+                  CrossAxisAlignment.start,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: stat(
-                    'Daily average',
-                    spent == null
-                        ? ''
-                        : fmt.formatWhole((spent / days).round()),
-                    CrossAxisAlignment.center,
-                  ),
+                _Stat(
+                  'Daily average',
+                  spent == null ? '' : fmt.formatWhole((spent / days).round()),
+                  CrossAxisAlignment.center,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: stat(
-                    'vs $prevName 1–${prevWin.days}',
-                    cmpText,
-                    CrossAxisAlignment.end,
-                    color: cmpColor,
-                  ),
+                _Stat(
+                  'vs $prevName 1–${prevWin.days}',
+                  cmpText,
+                  CrossAxisAlignment.end,
+                  color: cmpColor,
                 ),
               ],
             ),
@@ -366,6 +343,93 @@ class _MonthlyStats extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// One figure of "Monthly statistics": a label over a value.
+class _Stat {
+  const _Stat(this.label, this.value, this.align, {this.color});
+
+  final String label;
+  final String value;
+
+  /// How the label and the value line up in the stat's column.
+  final CrossAxisAlignment align;
+
+  /// The value's colour (the text colour when null).
+  final Color? color;
+}
+
+/// The three stats of "Monthly statistics" side by side.
+///
+/// While each stat fits a third of the row (the default text size) they take
+/// a third each, the middle one centred. When one does not (large text, big
+/// figures) the columns are only as wide as their texts, spread over the row,
+/// and when even those do not fit, the whole row scales down together, just
+/// enough, so every label and value shows in full at one size.
+class _StatsRow extends StatelessWidget {
+  const _StatsRow({required this.stats});
+
+  final List<_Stat> stats;
+
+  static const double _gap = 8;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final labelStyle = AppText.sub.copyWith(color: c.text3);
+    Widget column(_Stat s) => Column(
+      crossAxisAlignment: s.align,
+      children: [
+        Text(s.label, maxLines: 1, style: labelStyle),
+        const SizedBox(height: 2),
+        Text(
+          s.value,
+          maxLines: 1,
+          softWrap: false,
+          style: ReportText.stat.copyWith(color: s.color ?? c.text),
+        ),
+      ],
+    );
+    return LayoutBuilder(
+      builder: (context, box) {
+        final widths = [
+          for (final s in stats)
+            math.max(
+              titleWidth(context, s.label, labelStyle),
+              titleWidth(context, s.value, ReportText.stat),
+            ),
+        ];
+        final third = (box.maxWidth - 2 * _gap) / 3;
+        if (widths.every((w) => w <= third)) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final (i, s) in stats.indexed) ...[
+                if (i > 0) const SizedBox(width: _gap),
+                Expanded(child: column(s)),
+              ],
+            ],
+          );
+        }
+        // A pixel over, so a rounding error never overflows the row.
+        final need = widths.fold<double>(0, (a, b) => a + b) + 2 * _gap + 1;
+        return Align(
+          alignment: Alignment.topCenter,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: SizedBox(
+              width: math.max(box.maxWidth, need),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [for (final s in stats) column(s)],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -595,11 +659,11 @@ class _MonthRow extends StatelessWidget {
                 ),
             ],
           ),
-          Text(
+          // A figure wider than its column (a big amount, large text) scales
+          // down to it instead of being cut.
+          FitTitle(
             amount,
             textAlign: TextAlign.right,
-            maxLines: 1,
-            softWrap: false,
             style: AppText.rowAmount,
           ),
           d == null

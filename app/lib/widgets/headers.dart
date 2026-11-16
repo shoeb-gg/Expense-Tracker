@@ -293,6 +293,11 @@ class SubHeader extends StatelessWidget {
 /// [minScale] is the smallest scale it may shrink to (0: any). A title that
 /// would need less is drawn at [minScale] and ends in "...". [textAlign] is
 /// how the plain text is aligned in its box.
+///
+/// Used for figures too (a total, an amount in a column, a chip's note). With
+/// [resizeFont] the scaled text is a smaller font rather than a shrunk
+/// picture of the text, so its baseline is where the layout put it: use it
+/// when the text sits on a baseline shared with other text.
 class FitTitle extends StatelessWidget {
   const FitTitle(
     this.text, {
@@ -300,12 +305,17 @@ class FitTitle extends StatelessWidget {
     required this.style,
     this.minScale = 0,
     this.textAlign = TextAlign.center,
+    this.resizeFont = false,
   });
 
   final String text;
   final TextStyle style;
   final double minScale;
   final TextAlign textAlign;
+
+  /// Scale by shrinking the font (the text size setting is a plain factor,
+  /// see `app.dart`), not by drawing the text smaller.
+  final bool resizeFont;
 
   @override
   Widget build(BuildContext context) {
@@ -329,6 +339,21 @@ class FitTitle extends StatelessWidget {
               width: box.maxWidth / minScale,
               child: Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: style),
             ),
+          );
+        }
+        if (resizeFont) {
+          // Half a pixel short of the room, so rounding never ends it in "...".
+          final scale = MediaQuery.textScalerOf(context).scale(1) *
+              (box.maxWidth - 0.5) /
+              natural;
+          return Text(
+            text,
+            textAlign: textAlign,
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.visible,
+            textScaler: TextScaler.linear(scale),
+            style: style,
           );
         }
         return FittedBox(
