@@ -132,6 +132,18 @@ void main() {
     await closeApp(tester, db);
   });
 
+  testWidgets('light: Calendar, a six-week month', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(
+      tester,
+      db: db,
+      location: Routes.calendar(day: dayOf(2026, 8, 31)),
+      settings: _light,
+    );
+    await takeShot(tester, 'light/calendar_six_weeks');
+    await closeApp(tester, db);
+  });
+
   // ---- Charts -------------------------------------------------------------
 
   testWidgets('light: Charts, month views', (tester) async {
