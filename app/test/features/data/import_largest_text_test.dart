@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/core/text_wrap.dart';
@@ -16,6 +15,7 @@ import 'package:spill_the_bills/state/providers.dart';
 import '../../support/board.dart';
 import '../../support/import_files.dart';
 import '../../support/shots.dart';
+import '../../support/text_cut.dart';
 
 /// The Import steps and Export use the kit's list row like Settings does: at
 /// the largest text size every text wraps to more lines instead of ending in
@@ -29,28 +29,6 @@ void main() {
     importFilePickerProvider.overrideWithValue(() async => (name: name, bytes: bytes)),
     exportSharerProvider.overrideWithValue((File file, String mime) async {}),
   ];
-
-  /// The text is whole: not ended with "…", not clipped at the side. Every
-  /// text that matches is looked at.
-  bool isCut(WidgetTester tester, Finder text) {
-    final count = text.evaluate().length;
-    expect(count, greaterThan(0), reason: 'nothing found for $text');
-    for (var i = 0; i < count; i++) {
-      final p = tester.renderObject<RenderParagraph>(
-        find.descendant(of: text.at(i), matching: find.byType(RichText)).first,
-      );
-      if (p.didExceedMaxLines) return true;
-      // The space that ends a wrapped line hangs over the edge; only the
-      // letters count.
-      final plain = p.text.toPlainText();
-      for (var c = 0; c < plain.length; c++) {
-        if (plain[c].trim().isEmpty) continue;
-        final boxes = p.getBoxesForSelection(TextSelection(baseOffset: c, extentOffset: c + 1));
-        if (boxes.any((b) => b.right > p.size.width + 0.5)) return true;
-      }
-    }
-    return false;
-  }
 
   /// Opens step 2 (or, with [next], step 3) on [file] at the largest size.
   Future<AppDatabase> openStep(
