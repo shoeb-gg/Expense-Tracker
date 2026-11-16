@@ -957,6 +957,10 @@ class _LegendItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final nameStyle = AppText.sub.copyWith(fontWeight: FontWeight.w700);
+    final amountStyle = AppText.tabular(
+      AppText.caption.copyWith(color: c.text3),
+    );
     return Pressable(
       onTap: onTap,
       color: on ? c.wash : const Color(0x00000000),
@@ -985,24 +989,31 @@ class _LegendItem extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppText.sub.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                    Text(
-                      amount,
-                      maxLines: 1,
-                      style: AppText.tabular(
-                        AppText.caption.copyWith(color: c.text3),
-                      ),
-                    ),
+                    _fit(context, name, nameStyle),
+                    _fit(context, amount, amountStyle),
                   ],
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  /// One line of the entry in a slot of its own height. A line too long for
+  /// the room ("12 other days" at large text) is drawn in a smaller font
+  /// until it fits; the slot keeps it where it is.
+  static Widget _fit(BuildContext context, String text, TextStyle style) {
+    return SizedBox(
+      height: titleHeight(context, style),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: FitTitle(
+          text,
+          style: style,
+          resizeFont: true,
+          textAlign: TextAlign.start,
         ),
       ),
     );

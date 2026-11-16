@@ -378,6 +378,20 @@ class FitTitle extends StatelessWidget {
   }
 }
 
+/// The height of one line of [style] at the current text size: what a
+/// [FitTitle] in a slot of that height keeps when its text is drawn smaller.
+double titleHeight(BuildContext context, TextStyle style) {
+  final painter = TextPainter(
+    text: TextSpan(text: 'Ag', style: style),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+    maxLines: 1,
+  )..layout();
+  final height = painter.height;
+  painter.dispose();
+  return height;
+}
+
 /// The width [text] takes on one line in [style] at the current text size.
 double titleWidth(BuildContext context, String text, TextStyle style) {
   final painter = TextPainter(

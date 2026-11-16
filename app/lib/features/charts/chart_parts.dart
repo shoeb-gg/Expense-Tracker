@@ -233,7 +233,7 @@ class RingCenter extends StatelessWidget {
     final subStyle = AppText.caption.copyWith(color: c.text3);
     final heights = [
       for (final style in [titleStyle, valueStyle, subStyle])
-        _lineHeight(context, style),
+        titleHeight(context, style),
     ];
     final hasPill = onDetails != null;
 
@@ -310,19 +310,6 @@ class RingCenter extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  /// The height of one line of [style] at the current text size.
-  static double _lineHeight(BuildContext context, TextStyle style) {
-    final painter = TextPainter(
-      text: TextSpan(text: 'Ag', style: style),
-      textDirection: Directionality.of(context),
-      textScaler: MediaQuery.textScalerOf(context),
-      maxLines: 1,
-    )..layout();
-    final height = painter.height;
-    painter.dispose();
-    return height;
   }
 
   /// The widest a line between [from] and [to] (px below the middle of the
