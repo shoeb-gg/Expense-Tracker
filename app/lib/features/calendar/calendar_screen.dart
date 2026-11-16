@@ -17,13 +17,36 @@ import '../../widgets/kit.dart';
 import '../charts/chart_data.dart';
 import 'calendar_data.dart';
 
+/// The tallest a week of the month grid is (it is this high unless the
+/// screen is short).
+const double _weekMax = 64;
+
+/// The shortest a week gets: the day number (4 px above, 26 px) and the
+/// amount strip (22 px), with nothing left over.
+const double _weekMin = 52;
+
+/// Space between two weeks.
+const double _weekGap = 4;
+
+/// Space above the weekday names, and between them and the grid.
+const double _weekdaysTop = 16;
+const double _weekdaysGap = 8;
+
+/// The room the part that scrolls keeps under the grid: its 12 px of
+/// padding, the legend (16) and the gap under it (16), the day card's header
+/// (60) and two expense rows (2 x 68, with 4 px of padding above them).
+const double _dayCardRoom = 12 + 16 + 16 + 60 + 4 + 2 * 68;
+
 /// Calendar (`/calendar?day=`): opens on the month of [day] (today when
 /// null) with that day chosen. A turquoise bar with the month and its total
 /// and arrows, a month grid whose cells get brighter with spending, and the
 /// chosen day's card with its expenses and "Add expense on Oct 18". Swiping
 /// the grid changes the month: finger left to right or top to bottom shows
 /// the previous month, right to left or bottom to top the next one. Arrows,
-/// swipes and the month pop-up have no limit, back or forward.
+/// swipes and the month pop-up have no limit, back or forward. The weeks of
+/// the grid are 64 px high; on a short screen (a six-week month, large text)
+/// they shrink, down to 52 px, so the day card keeps room for its header and
+/// two expenses.
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key, this.day});
 
@@ -137,57 +160,78 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 onLabel: () => unawaited(_pickMonth()),
               ),
             ),
-            // The weekdays and the grid stay in place: a vertical swipe on
-            // the grid changes the month, so the page must not scroll from
-            // there. Only what is below them scrolls.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _WeekdayRow(first: settings.firstDayOfWeek),
-                  const SizedBox(height: 8),
-                  SwipeArea(
-                    onSwipe: (e) => _step(e.next, e.axis),
-                    child: SlideSwitcher(
-                      pageKey: key,
-                      forward: _forward,
-                      axis: _axis,
-                      child: _MonthGrid(
-                        key: ValueKey(key),
-                        ym: _ym,
-                        index: index,
-                        selected: _sel,
-                        onPick: (d) => setState(() => _sel = d),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
             Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(16, 12, 16, 24 + bottom),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _Legend(
-                      // "K = thousand" only when a cell of this month uses K.
-                      amounts: settings.calendarAmounts &&
-                          (index?.dayTotals(first, lastPast).values.any(
-                                    (v) => fmt.short(v).endsWith('K'),
-                                  ) ??
-                              false),
-                    ),
-                    const SizedBox(height: 16),
-                    if (pocketId != null)
-                      _DayCard(
-                        pocketId: pocketId,
-                        day: _sel,
-                        total: index?.dayTotal(_sel) ?? 0,
+              child: LayoutBuilder(
+                builder: (context, box) {
+                  // What the grid may take of the room under the month bar:
+                  // all but the weekday names and what the day card needs.
+                  final room = box.maxHeight -
+                      _weekdaysTop -
+                      _textHeight(context, AppText.caption) -
+                      _weekdaysGap -
+                      _dayCardRoom -
+                      bottom;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // The weekdays and the grid stay in place: a vertical
+                      // swipe on the grid changes the month, so the page
+                      // must not scroll from there. Only what is below them
+                      // scrolls.
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, _weekdaysTop, 16, 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _WeekdayRow(first: settings.firstDayOfWeek),
+                            const SizedBox(height: _weekdaysGap),
+                            SwipeArea(
+                              onSwipe: (e) => _step(e.next, e.axis),
+                              child: SlideSwitcher(
+                                pageKey: key,
+                                forward: _forward,
+                                axis: _axis,
+                                child: _MonthGrid(
+                                  key: ValueKey(key),
+                                  ym: _ym,
+                                  index: index,
+                                  selected: _sel,
+                                  room: room,
+                                  onPick: (d) => setState(() => _sel = d),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                  ],
-                ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: EdgeInsets.fromLTRB(16, 12, 16, 24 + bottom),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _Legend(
+                                // "K = thousand" only when a cell of this month uses K.
+                                amounts: settings.calendarAmounts &&
+                                    (index?.dayTotals(first, lastPast).values.any(
+                                              (v) => fmt.short(v).endsWith('K'),
+                                            ) ??
+                                        false),
+                              ),
+                              const SizedBox(height: 16),
+                              if (pocketId != null)
+                                _DayCard(
+                                  pocketId: pocketId,
+                                  day: _sel,
+                                  total: index?.dayTotal(_sel) ?? 0,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -195,6 +239,19 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       ),
     );
   }
+}
+
+/// The height of one line of [style] at the current text size.
+double _textHeight(BuildContext context, TextStyle style) {
+  final painter = TextPainter(
+    text: TextSpan(text: 'Sun', style: style),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+    maxLines: 1,
+  )..layout();
+  final height = painter.height;
+  painter.dispose();
+  return height;
 }
 
 class _MonthBar extends StatelessWidget {
@@ -333,12 +390,17 @@ class _MonthGrid extends ConsumerWidget {
     required this.ym,
     required this.index,
     required this.selected,
+    required this.room,
     required this.onPick,
   });
 
   final YearMonth ym;
   final SpendIndex? index;
   final int selected;
+
+  /// The height the grid may take. A week is 64 px high when the weeks fit
+  /// in it, else they share it (never less than 52 px each).
+  final double room;
   final ValueChanged<int> onPick;
 
   @override
@@ -351,12 +413,16 @@ class _MonthGrid extends ConsumerWidget {
     final totals = index?.dayTotals(first, lastPast) ?? const <int, int>{};
     final steps = heatSteps(totals.values);
     final weeks = (cells.length / 7).ceil();
+    final week = math.min(
+      _weekMax,
+      math.max(_weekMin, (room - _weekGap * (weeks - 1)) / weeks),
+    );
     return Column(
       children: [
         for (var w = 0; w < weeks; w++) ...[
-          if (w > 0) const SizedBox(height: 4),
+          if (w > 0) const SizedBox(height: _weekGap),
           SizedBox(
-            height: 64,
+            height: week,
             child: Row(
               children: [
                 for (var k = 0; k < 7; k++) ...[
@@ -375,6 +441,7 @@ class _MonthGrid extends ConsumerWidget {
                         today: day == today,
                         selected: day == selected,
                         showAmount: settings.calendarAmounts,
+                        height: week,
                         onPick: onPick,
                       );
                     }(),
@@ -398,6 +465,7 @@ class _DayCell extends ConsumerWidget {
     required this.today,
     required this.selected,
     required this.showAmount,
+    required this.height,
     required this.onPick,
   });
 
@@ -408,6 +476,7 @@ class _DayCell extends ConsumerWidget {
   final bool today;
   final bool selected;
   final bool showAmount;
+  final double height;
   final ValueChanged<int> onPick;
 
   @override
@@ -455,13 +524,15 @@ class _DayCell extends ConsumerWidget {
               ]
             : null,
       ),
-      child: Text(
-        '${dayOfMonth(day)}',
-        maxLines: 1,
-        softWrap: false,
-        overflow: TextOverflow.visible,
-        style: AppText.tabular(
-          AppText.dayTitle.copyWith(color: badgeFg),
+      child: _FitWidth(
+        child: Text(
+          '${dayOfMonth(day)}',
+          maxLines: 1,
+          softWrap: false,
+          overflow: TextOverflow.visible,
+          style: AppText.tabular(
+            AppText.dayTitle.copyWith(color: badgeFg),
+          ),
         ),
       ),
     );
@@ -484,7 +555,7 @@ class _DayCell extends ConsumerWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: SizedBox(
-            height: 64,
+            height: height,
             child: Column(
               mainAxisAlignment: hasAmount
                   ? MainAxisAlignment.spaceBetween
@@ -499,17 +570,20 @@ class _DayCell extends ConsumerWidget {
                     alignment: Alignment.topCenter,
                     child: SizedBox(
                       height: 20,
-                      child: Center(
-                        child: Text(
-                          fmt.short(value),
-                          maxLines: 1,
-                          softWrap: false,
-                          overflow: TextOverflow.visible,
-                          style: AppText.tabular(
-                            AppText.body.copyWith(
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.1,
-                              color: const Color(0xFFFFFFFF),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                        child: _FitWidth(
+                          child: Text(
+                            fmt.short(value),
+                            maxLines: 1,
+                            softWrap: false,
+                            overflow: TextOverflow.visible,
+                            style: AppText.tabular(
+                              AppText.body.copyWith(
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.1,
+                                color: const Color(0xFFFFFFFF),
+                              ),
                             ),
                           ),
                         ),
@@ -523,6 +597,22 @@ class _DayCell extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Centres [child] and, when it is wider than the room it is given, scales
+/// it down to that width. Only the width counts: a line of large text is
+/// taller than the box it sits in, and that is fine, so the height never
+/// shrinks the text.
+class _FitWidth extends StatelessWidget {
+  const _FitWidth({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => OverflowBox(
+        maxHeight: double.infinity,
+        child: FittedBox(fit: BoxFit.scaleDown, child: child),
+      );
 }
 
 class _Legend extends StatelessWidget {
