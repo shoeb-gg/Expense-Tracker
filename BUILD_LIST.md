@@ -187,7 +187,14 @@ Dropped at first. Brought back on 2026-11-14 as "Pockets". The user chose the na
   - Pocket name on Calendar, Charts and Reports, shown only when there are two or more pockets (the same rule as Add and Edit expense). Done.
   - Number format cut to four styles, plus a Show decimals switch. Done.
   - Figures cut off at the largest text size on Reports and Charts. Fixed.
-- **Next round:** a new idea from the user's wife, to be described by the user.
+- **Next round: category budgets** (the user's wife's idea, decided 2026-11-17).
+  - Each category can have an optional monthly budget, for example Snacks 5,000. The same amount repeats every month.
+  - Each pocket has its own budgets: spending in one pocket never counts toward another pocket's budget.
+  - On the Add and Edit expense screens only, a category tile with a budget gets a progress ring along its rounded-square edge. The ring starts at the top and fills clockwise as the month's spending grows, over a faint grey track. It is green below 90%, yellow from 90% to 100%, and red and full once over 100%. A category without a budget has no ring and looks as it does today.
+  - The ring replaces the warning dots first discussed.
+  - After saving an expense, a toast appears once when the category first passes 90% of its budget that month. Each time the category is over budget, a toast says so and how much over it is, for example "Snacks is over budget: 5,600 of 5,000 this month (600 over)".
+  - The month that counts is the month of the expense's date.
+  - The selected tile already has a turquoise ring and glow, so the design must keep both readable. A mockup comes first.
 - **After that:** a very thorough test of the whole app on the phone. Type every kind of text and number in every field (expenses, categories, pockets and the rest), and follow every path, both the ones that should work and the ones that should fail, to find anything that breaks in the screens or the flow.
 - **Then:** automatic backup.
 - **Postponed:** the combined view of all pockets (postponed again on 2026-11-16), AI assistant, PDF and photo import, the monthly PDF report.
