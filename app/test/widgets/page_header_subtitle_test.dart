@@ -56,6 +56,32 @@ void main() {
     expect(title.bottom, 46);
   });
 
+  testWidgets('default text: title 12-40, line 40-56 (was title 18-46)', (
+    tester,
+  ) async {
+    await _pump(tester, subtitle: 'Personal');
+    final title = tester.getRect(find.text('Charts'));
+    final line = tester.getRect(find.text('Personal'));
+    expect(title.top, 12);
+    expect(title.bottom, 40);
+    expect(line.top, 40);
+    expect(line.bottom, 56);
+    expect(tester.getSize(find.byType(PageHeader)).height, 64);
+  });
+
+  testWidgets('largest text: title keeps 7 px above it, the line scales to '
+      'the 14 px left, and nothing is clipped', (tester) async {
+    await _pump(tester, subtitle: 'Personal', scale: textScaleSteps.last);
+    expect(tester.takeException(), isNull);
+    final title = tester.getRect(find.text('Charts'));
+    final line = tester.getRect(find.text('Personal'));
+    expect(title.top, 7);
+    expect(title.bottom, 42);
+    expect(line.top, 42);
+    expect(line.bottom, closeTo(56, 0.01));
+    expect(line.height, closeTo(14, 0.01));
+  });
+
   for (final scale in textScaleSteps) {
     final size = 'text size ${scale.toStringAsFixed(2)}';
 
@@ -70,9 +96,10 @@ void main() {
       expect(title.left, 16);
       expect(line.left, 16);
       expect(line.top, closeTo(title.bottom, 0.01), reason: 'right under it');
-      expect(line.bottom, lessThanOrEqualTo(64 - 2 + 0.01));
-      expect(title.top, greaterThanOrEqualTo(0));
-      // The title moves only when the line would not fit below it.
+      // It ends 8 px above the bottom, and the title keeps 7 px above it.
+      expect(line.bottom, closeTo(56, 0.01), reason: '8 px above the bottom');
+      expect(title.top, greaterThanOrEqualTo(7));
+      // The title moves up, never down, and only as the line needs.
       await _pump(tester, scale: scale);
       final alone = tester.getRect(find.text('Charts'));
       expect(
@@ -80,14 +107,8 @@ void main() {
         lessThanOrEqualTo(alone.top + 0.01),
         reason: 'not down',
       );
-      if (title.top < alone.top - 0.01) {
-        expect(line.bottom, closeTo(62, 0.01), reason: 'moved only to fit');
-      } else {
-        expect(title.top, closeTo(alone.top, 0.01), reason: 'did not need to');
-      }
-      if (scale <= 1) {
-        expect(title.top, closeTo(alone.top, 0.01), reason: 'default or less');
-      }
+      // A line that is too tall for the room left scales down, not out.
+      expect(line.height, lessThanOrEqualTo(16 * scale + 1));
     });
   }
 

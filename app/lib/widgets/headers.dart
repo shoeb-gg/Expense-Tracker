@@ -10,9 +10,9 @@ import 'buttons.dart';
 /// [leading] widget, e.g. the pocket button) and round buttons on the right.
 ///
 /// [subtitle] puts a small line under the title (the pocket of Charts and
-/// Reports). The header stays 64 px and the title stays where it is while the
-/// line fits under it; when it would not (large text) the title moves up by
-/// the least that makes room.
+/// Reports). The header stays 64 px: the title moves up so the line ends 8 px
+/// above the bottom, and never closer than 7 px to the top. At the largest
+/// text sizes the line scales down to the room that is left.
 class PageHeader extends StatelessWidget {
   const PageHeader({
     super.key,
@@ -43,8 +43,13 @@ class PageHeader extends StatelessWidget {
   /// The header's height.
   static const double height = 64;
 
-  /// The least room kept under the subtitle's line.
-  static const double _bottomGap = 2;
+  /// The room kept under the subtitle's line, so it does not crowd what is
+  /// below the header.
+  static const double _bottomGap = 8;
+
+  /// The least room above the title when there is a subtitle: what the title
+  /// had at the largest text size. Past it the subtitle scales down instead.
+  static const double _minTop = 7;
 
   /// The height of one line of [style] at the current text size, as the
   /// text itself is laid out (the engine rounds it to whole pixels).
@@ -64,15 +69,19 @@ class PageHeader extends StatelessWidget {
     final c = context.colors;
     final titleLine = _line(context, AppText.pageTitle);
     final subtitleLine = _line(context, AppText.overline);
-    // Where the title is without a subtitle (centred), or higher only as far
-    // as the subtitle needs to fit above the bottom gap.
+    // The title is where it is without a subtitle (centred) or higher, as far
+    // as the subtitle needs to end [_bottomGap] above the bottom, but not
+    // closer than [_minTop] to the top.
     final top = math.max(
-      0.0,
+      _minTop,
       math.min(
         (height - titleLine) / 2,
         height - _bottomGap - titleLine - subtitleLine,
       ),
     );
+    // What is left for the subtitle between the title and the bottom gap.
+    final room = height - _bottomGap - top - titleLine;
+    final style = AppText.overline.copyWith(color: c.text3);
     return Align(
       alignment: Alignment.topLeft,
       child: Padding(
@@ -89,11 +98,27 @@ class PageHeader extends StatelessWidget {
             ),
             Padding(
               padding: EdgeInsets.only(right: endRoom),
-              child: FitTitle(
-                subtitle!,
-                style: AppText.overline.copyWith(color: c.text3),
-                textAlign: TextAlign.start,
-              ),
+              child: subtitleLine <= room + 0.001
+                  ? FitTitle(
+                      subtitle!,
+                      style: style,
+                      textAlign: TextAlign.start,
+                    )
+                  // Taller than the room left (large text): scaled down to
+                  // that room, and to the width as well.
+                  : ConstrainedBox(
+                      constraints: BoxConstraints(maxHeight: math.max(0, room)),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          subtitle!,
+                          maxLines: 1,
+                          softWrap: false,
+                          style: style,
+                        ),
+                      ),
+                    ),
             ),
           ],
         ),
