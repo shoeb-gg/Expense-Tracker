@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/features/charts/chart_parts.dart';
+import 'package:spill_the_bills/features/charts/column_chart.dart';
 import 'package:spill_the_bills/features/charts/ring_chart.dart';
 import 'package:spill_the_bills/router.dart';
 
@@ -136,4 +137,57 @@ void main() {
     }
     await closeApp(tester, db);
   });
+
+  /// [text] under [within], its box measured from the top left of [origin].
+  void expectUnder(WidgetTester tester, Finder within, Finder origin, String text, Rect rect) {
+    final finder = find.descendant(of: within, matching: find.text(text));
+    expectAt(tester, finder, rect.shift(tester.getTopLeft(origin)), '"$text"');
+  }
+
+  testWidgets('Charts: the Top days legend does not move', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(tester, db: db, location: Routes.charts);
+    await boardHeight(tester, 1000);
+    await tester.tap(find.text('Top days'));
+    await settle(tester);
+    // Measured before the legend fitted its lines (from the ring's top left).
+    final ring = find.byType(RingChart);
+    final card = find.ancestor(of: ring, matching: find.byType(ChartCard)).first;
+    expectUnder(tester, card, ring, 'Thu, Oct 1', const Rect.fromLTRB(24, 290, 83.29, 306));
+    expectUnder(tester, card, ring, '15,090', const Rect.fromLTRB(24, 306, 63.59, 322));
+    expectUnder(tester, card, ring, 'Mon, Oct 12', const Rect.fromLTRB(184, 338, 255.88, 354));
+    expectUnder(tester, card, ring, '12 other days', const Rect.fromLTRB(184, 386, 263.28, 402));
+    expectUnder(tester, card, ring, '8,900', const Rect.fromLTRB(184, 402, 216.39, 418));
+    await closeApp(tester, db);
+  });
+
+  testWidgets('Charts: the Over time axis and labels do not move', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(tester, db: db, location: Routes.charts);
+    await boardHeight(tester, 791);
+    await tester.tap(find.text('Over time'));
+    await settle(tester);
+    // Measured before the axis labels and the peak label fitted themselves
+    // (from the chart's top left).
+    final chart = find.byType(ColumnChart);
+    void at(String text, Rect rect) => expectUnder(tester, chart, chart, text, rect);
+    at('0', const Rect.fromLTRB(0, 187, 28, 201));
+    at('20K', const Rect.fromLTRB(0, 17, 28, 31));
+    at('29', const Rect.fromLTRB(251.52, 202, 291.52, 216));
+    at('Still to come', const Rect.fromLTRB(207.67, 155.68, 269.81, 169.68));
+    at('Peak 15,090', const Rect.fromLTRB(39.1, 47.74, 107.71, 61.74));
+
+    await tester.tap(find.text('Year'));
+    await settle(tester);
+    at('80K', const Rect.fromLTRB(0, 17, 28, 31));
+    at('so far', const Rect.fromLTRB(250.58, 118.57, 290.58, 132.57));
+    at('Peak 54,330', const Rect.fromLTRB(55.67, 60.55, 126.16, 74.55));
+
+    await tester.tap(find.text('Week'));
+    await settle(tester);
+    at('1,500', const Rect.fromLTRB(0, 17, 28, 31));
+    at('Peak 1,180', const Rect.fromLTRB(45.14, 42.27, 103.11, 56.27));
+    await closeApp(tester, db);
+  });
 }
+
