@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,19 +16,46 @@ ThemeMode themeModeOf(AppThemeMode mode) => switch (mode) {
   AppThemeMode.system => ThemeMode.system,
 };
 
+/// The brightness the app starts in: its own choice, or the phone's
+/// ([phone]) for System. Used for the system bars before the first frame.
+Brightness startBrightness(AppThemeMode mode, Brightness phone) =>
+    switch (mode) {
+      AppThemeMode.dark => Brightness.dark,
+      AppThemeMode.light => Brightness.light,
+      AppThemeMode.system => phone,
+    };
+
 /// The app: the chosen colour theme in a dark and a light version (Dark,
 /// Light, or System, which follows the phone), the user's text size, and
 /// the router.
-class SpillTheBillsApp extends ConsumerWidget {
+class SpillTheBillsApp extends ConsumerStatefulWidget {
   const SpillTheBillsApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SpillTheBillsApp> createState() => _SpillTheBillsAppState();
+}
+
+class _SpillTheBillsAppState extends ConsumerState<SpillTheBillsApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Tell Android the app's choice at start-up, so the launch screen of the
+    // next cold start matches it (changes are sent in build).
+    unawaited(
+      ref.read(nightModeProvider).apply(ref.read(settingsProvider).themeMode),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final mood = ref.watch(settingsProvider.select((s) => s.mood));
     final mode = ref.watch(settingsProvider.select((s) => s.themeMode));
     final scale = ref.watch(settingsProvider.select((s) => s.textScale));
     final fallback = ref.watch(fontFallbackProvider);
     final router = ref.watch(routerProvider);
+    ref.listen(settingsProvider.select((s) => s.themeMode), (_, next) {
+      unawaited(ref.read(nightModeProvider).apply(next));
+    });
     return MaterialApp.router(
       title: 'Spill the Bills',
       debugShowCheckedModeBanner: false,

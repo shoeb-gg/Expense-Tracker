@@ -22,6 +22,7 @@ import '../data/settings_store.dart';
 import 'settings.dart';
 
 export '../data/expenses_repo.dart' show CategoryTotal, DaySpan, MonthTotal;
+export 'night_mode.dart';
 export 'settings.dart';
 
 // ------------------------------------------------------------------ basics

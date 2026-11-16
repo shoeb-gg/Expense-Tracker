@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,7 +21,15 @@ Future<void> main() async {
 
   final db = AppDatabase();
   final settings = await AppSettings.load(SettingsStore(db));
-  SystemChrome.setSystemUIOverlayStyle(systemBarsStyle(settings.mood));
+  SystemChrome.setSystemUIOverlayStyle(
+    systemBarsStyle(
+      settings.mood,
+      brightness: startBrightness(
+        settings.themeMode,
+        PlatformDispatcher.instance.platformBrightness,
+      ),
+    ),
+  );
 
   runApp(
     ProviderScope(
