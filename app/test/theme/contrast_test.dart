@@ -188,7 +188,7 @@ void main() {
         expectOn('other', c.other, 1.4, on: {'surface': c.surface});
         expect(
           contrast(c.otherBar, c.track),
-          greaterThanOrEqualTo(1.5),
+          greaterThanOrEqualTo(2.5),
           reason: 'the bars of the rows after the fifth, on their track',
         );
         // The switch knob on its off track.
@@ -219,6 +219,22 @@ void main() {
         expectOn('accent ring', c.accent, muted, on: {'litTile': c.litTile});
         // No rim along the top of the hero card.
         expect(c.sheen.a, 0);
+      });
+
+      test('the deep accent reads on its soft tints (bold labels and numbers)', () {
+        // The soft tints (selected tabs, day chips, the nav pill, the Today
+        // key) carry bold day numbers and labels, not body text: 4:1 is the
+        // floor (Aqua and Iris sit at 4.05-4.2). Coral's are solid peach (the
+        // deep accent over the cool page turned dusty mauve) at 4.3.
+        final min = mood == Mood.coral ? 4.2 : 4.0;
+        for (final tint in [c.accentSoft, c.wash]) {
+          final onPage = over(tint, c.surface);
+          expect(
+            contrast(c.accent, onPage),
+            greaterThanOrEqualTo(min),
+            reason: 'accent ${hex(c.accent)} on ${hex(onPage)}',
+          );
+        }
       });
 
       test('the muted bars are one tone, clearer than before', () {
@@ -369,6 +385,35 @@ void main() {
       await pumpIn(Brightness.light);
       await tester.pumpAndSettle();
       expect(seen, CategoryColor.yellow.lightColor);
+    });
+  });
+
+  group('light Coral', () {
+    final c = AppColors.of(Mood.coral, brightness: Brightness.light);
+
+    test('the deep accent is the last heat step, with berry strips', () {
+      expect(c.accent, const Color(0xFFB9402A));
+      expect(c.heat, const [
+        Color(0xFFFFD9D0),
+        Color(0xFFFFAF9D),
+        Color(0xFFFA826A),
+        Color(0xFFB9402A),
+      ]);
+      expect(c.heat.last, c.accent);
+      expect(c.strip, const Color(0xFF8E3346));
+      expect(c.stripStrong, const Color(0xFF6E1E30));
+      expect(contrast(c.accent, c.surface), greaterThanOrEqualTo(5.4));
+      expect(contrast(c.accent, c.surface2), greaterThanOrEqualTo(4.9));
+    });
+
+    test('the soft tints are solid peach; the other moods keep the formula', () {
+      expect(c.accentSoft, const Color(0xFFFBDDD4));
+      expect(c.wash, const Color(0xFFFCE3DC));
+      for (final mood in [Mood.aqua, Mood.iris]) {
+        final l = AppColors.of(mood, brightness: Brightness.light);
+        expect(l.accentSoft, l.accent.withAlpha(0x2E), reason: mood.name);
+        expect(l.wash, l.accent.withAlpha(0x29), reason: mood.name);
+      }
     });
   });
 

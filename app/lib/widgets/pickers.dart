@@ -698,7 +698,7 @@ class _DayCell extends StatelessWidget {
     final c = context.colors;
     final d = dateOfDay(day);
     final fg = selected
-        ? c.onAccent
+        ? c.onFill
         : isToday
         ? c.accent
         : inMonth
@@ -726,7 +726,9 @@ class _DayCell extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: selected ? c.accent : c.accent.withValues(alpha: 0),
+                color: selected
+                    ? c.accentFill
+                    : c.accentFill.withValues(alpha: 0),
                 shape: BoxShape.circle,
               ),
               child: Stack(
@@ -749,7 +751,7 @@ class _DayCell extends StatelessWidget {
                         width: 4,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: selected ? c.onAccent : c.accent,
+                          color: selected ? c.onFill : c.accent,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -816,7 +818,7 @@ class _Tile extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final fg = data.selected
-        ? c.onAccent
+        ? c.onFill
         : data.isNow
         ? c.accent
         : c.text;
@@ -828,7 +830,7 @@ class _Tile extends StatelessWidget {
         },
         selected: data.selected,
         semanticLabel: data.semanticLabel,
-        color: data.selected ? c.accent : c.tile,
+        color: data.selected ? c.accentFill : c.tile,
         borderRadius: BorderRadius.circular(16),
         child: Center(
           child: Text(

@@ -144,9 +144,9 @@ class AppColors extends ThemeExtension<AppColors> {
       onAccent: base.onAccent,
       ink: base.ink,
       tile: tile,
-      accentSoft: accent.withAlpha(0x2E),
+      accentSoft: (light ? base.soft : null) ?? accent.withAlpha(0x2E),
       accentGlow: base.accentFill.withAlpha(0x59),
-      wash: accent.withAlpha(0x29),
+      wash: (light ? base.wash : null) ?? accent.withAlpha(0x29),
       other: mix(base.text3, surface, light ? 0.30 : 0.5),
       barSoft: muted ?? mix(accent, surface, 0.6),
       barDim: muted ?? mix(accent, surface, 0.36),
@@ -203,7 +203,7 @@ class AppColors extends ThemeExtension<AppColors> {
       litTile: light ? mix(accent, surface, 0.135) : mix(accent, tile, 0.15),
       stripStrong: light ? base.stripStrong! : base.onAccent.withAlpha(0x8C),
       heatStrongFrom: light ? 4 : 3,
-      otherBar: mix(base.text3, surface, light ? 0.55 : 0.5),
+      otherBar: mix(base.text3, surface, light ? 0.8 : 0.5),
       toastText: light ? const Color(0xFFFFFFFF) : base.text,
       toastAction: light ? base.accentFill : accent,
       shadowToast: shade.withAlpha(light ? 0x38 : 0x80),
@@ -544,6 +544,8 @@ class _Base {
     this.stripStrong,
     this.mutedBar,
     this.toast,
+    this.soft,
+    this.wash,
   });
 
   final Color bg;
@@ -566,6 +568,11 @@ class _Base {
   final Color? stripStrong;
   final Color? mutedBar;
   final Color? toast;
+
+  /// Solid replacements for the accent's soft and wash tints (Coral: the
+  /// deep accent over the cool page turns dusty mauve).
+  final Color? soft;
+  final Color? wash;
 }
 
 const Map<Mood, _Base> _darkBases = {
@@ -656,7 +663,7 @@ const Map<Mood, _Base> _lightBases = {
     text: Color(0xFF161B2E),
     text2: Color(0xFF434A66),
     text3: Color(0xFF606886),
-    accent: Color(0xFFB5481F),
+    accent: Color(0xFFB9402A),
     onAccent: Color(0xFFFFFFFF),
     accentFill: Color(0xFFFF7A5F),
     onFill: Color(0xFF1A1F33),
@@ -665,12 +672,14 @@ const Map<Mood, _Base> _lightBases = {
       Color(0xFFFFD9D0),
       Color(0xFFFFAF9D),
       Color(0xFFFA826A),
-      Color(0xFFB5481F),
+      Color(0xFFB9402A),
     ],
-    strip: Color(0xFF97492E),
-    stripStrong: Color(0xFF772B0E),
+    strip: Color(0xFF8E3346),
+    stripStrong: Color(0xFF6E1E30),
     mutedBar: Color(0xFFFB9E89),
     toast: Color(0xFF272C40),
+    soft: Color(0xFFFBDDD4),
+    wash: Color(0xFFFCE3DC),
   ),
   Mood.iris: _Base(
     bg: Color(0xFFF1F0FA),

@@ -383,7 +383,7 @@ class _YearGrid extends StatelessWidget {
                         final now = y == current;
                         return Pressable(
                           onTap: () => onPick(y),
-                          color: on ? c.accent : c.tile,
+                          color: on ? c.accentFill : c.tile,
                           borderRadius: BorderRadius.circular(16),
                           selected: on,
                           semanticLabel: '$y',
@@ -395,7 +395,7 @@ class _YearGrid extends StatelessWidget {
                                     ? FontWeight.w800
                                     : FontWeight.w600,
                                 color: on
-                                    ? c.onAccent
+                                    ? c.onFill
                                     : now
                                     ? c.accent
                                     : c.text,

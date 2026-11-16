@@ -144,6 +144,18 @@ void main() {
     await closeApp(tester, db);
   });
 
+  testWidgets('light: Calendar in Coral (the berry strips)', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(
+      tester,
+      db: db,
+      location: Routes.calendar(),
+      settings: _lightIn(Mood.coral),
+    );
+    await takeShot(tester, 'light/calendar_coral');
+    await closeApp(tester, db);
+  });
+
   // ---- Charts -------------------------------------------------------------
 
   testWidgets('light: Charts, month views', (tester) async {
