@@ -17,8 +17,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
+import 'package:spill_the_bills/data/budgets_repo.dart';
 import 'package:spill_the_bills/data/categories_repo.dart';
 import 'package:spill_the_bills/data/db.dart';
+import 'package:spill_the_bills/data/pockets_repo.dart';
 import 'package:spill_the_bills/router.dart';
 import 'package:spill_the_bills/state/budgets.dart';
 import 'package:spill_the_bills/state/providers.dart';
@@ -114,6 +116,66 @@ void main() {
       await closeApp(tester, db);
     }, skip: !_enabled);
   }
+
+  Future<(AppDatabase, int)> formDb(WidgetTester tester, {bool twoPockets = false}) async {
+    final db = await sampleDatabase(tester);
+    final snacks = await tester.runAsync(() async {
+      final pocket = (await PocketsRepo(db).defaultPocket()).id;
+      final cat = (await CategoriesRepo(db).all()).firstWhere((c) => c.name == 'Snacks').id;
+      await BudgetsRepo(db).set(pocket, cat, 500000);
+      if (twoPockets) await PocketsRepo(db).add(name: 'Business', emoji: '💼');
+      return cat;
+    });
+    return (db, snacks!);
+  }
+
+  for (final theme in ['dark_aqua', 'light_iris']) {
+    testWidgets('budget form: edit Snacks with a budget, $theme', (tester) async {
+      final (db, snacks) = await formDb(tester);
+      await pumpApp(tester, db: db, location: Routes.editCategory(snacks), settings: themes[theme]!);
+      await boardHeight(tester, 791);
+      await _save(tester, 'form_edit_$theme');
+      await closeApp(tester, db);
+    }, skip: !_enabled);
+
+    testWidgets('budget form: add category, empty, $theme', (tester) async {
+      final db = await sampleDatabase(tester);
+      await pumpApp(tester, db: db, location: Routes.newCategory, settings: themes[theme]!);
+      await boardHeight(tester, 791);
+      await _save(tester, 'form_add_$theme');
+      await closeApp(tester, db);
+    }, skip: !_enabled);
+  }
+
+  testWidgets('budget form: two pockets, dark Aqua', (tester) async {
+    final (db, snacks) = await formDb(tester, twoPockets: true);
+    await pumpApp(tester, db: db, location: Routes.editCategory(snacks));
+    await boardHeight(tester, 791);
+    await _save(tester, 'form_two_pockets_dark_aqua');
+    await closeApp(tester, db);
+  }, skip: !_enabled);
+
+  testWidgets('budget form: not an amount, dark Aqua', (tester) async {
+    final (db, snacks) = await formDb(tester);
+    await pumpApp(tester, db: db, location: Routes.editCategory(snacks));
+    await boardHeight(tester, 791);
+    await tester.enterText(find.byType(EditableText).at(1), '50..0');
+    await _save(tester, 'form_invalid_dark_aqua');
+    await closeApp(tester, db);
+  }, skip: !_enabled);
+
+  testWidgets('budget form: largest text, dark Aqua', (tester) async {
+    final (db, snacks) = await formDb(tester, twoPockets: true);
+    await pumpApp(
+      tester,
+      db: db,
+      location: Routes.editCategory(snacks),
+      settings: const AppSettings(textScale: 19 / 15),
+    );
+    await boardHeight(tester, 791);
+    await _save(tester, 'form_largest_dark_aqua');
+    await closeApp(tester, db);
+  }, skip: !_enabled);
 
   testWidgets('budget rings, largest text, dark Aqua', (tester) async {
     final db = await open(tester, const AppSettings(textScale: 19 / 15));

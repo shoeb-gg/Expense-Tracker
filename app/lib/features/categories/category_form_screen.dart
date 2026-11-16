@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/format.dart';
 import '../../data/db.dart';
+import '../../state/budgets.dart';
+import '../../state/pocket_line.dart';
 import '../../state/providers.dart';
 import '../../theme/symbols.dart';
 import '../../theme/text.dart';
@@ -27,6 +31,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   final _name = TextEditingController();
   final _nameFocus = FocusNode();
   final _emojiFocus = FocusNode();
+  final _budget = TextEditingController();
+  final _budgetFocus = FocusNode();
   String _emoji = newCategoryEmoji;
 
   /// The color the user picked, or (edit) the category's own. Null on Add
@@ -46,6 +52,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   void initState() {
     super.initState();
     _name.addListener(() => setState(() {}));
+    _budget.addListener(() => setState(() {}));
     _seeded = !_isEdit;
   }
 
@@ -54,6 +61,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
     _name.dispose();
     _nameFocus.dispose();
     _emojiFocus.dispose();
+    _budget.dispose();
+    _budgetFocus.dispose();
     super.dispose();
   }
 
@@ -64,6 +73,40 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
     _picked = cat.color;
     _seeded = true;
   }
+
+  /// Whether the budget field got the category's stored budget (Edit).
+  bool _budgetSeeded = false;
+
+  /// Edit: once the pocket and its budgets have loaded, fills the budget
+  /// field with this category's budget there (after the frame, since the
+  /// field's listener rebuilds the form).
+  void _seedBudget() {
+    final editing = _editing;
+    if (_budgetSeeded || editing == null) return;
+    final pocketId = ref.watch(currentPocketIdProvider);
+    if (pocketId == null) return;
+    final budgets = ref.watch(pocketBudgetsProvider(pocketId)).value;
+    if (budgets == null) return;
+    _budgetSeeded = true;
+    final amount = budgets[editing.id];
+    if (amount == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _budget.text.isEmpty) {
+        _budget.text = budgetText(amount, ref.read(amountFormatProvider));
+      }
+    });
+  }
+
+  /// The typed budget in minor units: null for an empty field (no budget),
+  /// [_invalidBudget] when the text is not an amount.
+  int? _parsedBudget() {
+    final text = _budget.text.trim();
+    if (text.isEmpty) return null;
+    final amount = ref.read(amountFormatProvider).parse(text);
+    return amount == null || amount <= 0 ? _invalidBudget : amount;
+  }
+
+  static const int _invalidBudget = -1;
 
   /// The color shown and saved.
   int _colorFor(List<ExpenseCategory>? all) {
@@ -87,7 +130,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
 
   Future<void> _save() async {
     final name = _name.text.trim().replaceAll(RegExp(r'\s+'), ' ');
-    if (name.isEmpty || _saving) return;
+    final budget = _parsedBudget();
+    if (name.isEmpty || _saving || budget == _invalidBudget) return;
     final repo = ref.read(categoriesRepoProvider);
     setState(() => _saving = true);
     try {
@@ -99,12 +143,18 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
       }
       final editing = _editing;
       final color = _colorFor(ref.read(categoriesProvider).value);
+      final int id;
       if (editing == null) {
-        await repo.add(name: name, emoji: _emoji, color: color);
+        id = await repo.add(name: name, emoji: _emoji, color: color);
       } else {
         await repo.update(
           editing.copyWith(name: name, emoji: _emoji, color: color),
         );
+        id = editing.id;
+      }
+      final pocketId = ref.read(currentPocketIdProvider);
+      if (pocketId != null) {
+        await ref.read(budgetsRepoProvider).set(pocketId, id, budget);
       }
       if (mounted) await Navigator.of(context).maybePop();
     } finally {
@@ -127,8 +177,12 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
         return Scaffold(backgroundColor: c.bg);
       }
     }
-    final canSave = _name.text.trim().isNotEmpty && !_saving;
+    _seedBudget();
+    final budgetInvalid = _parsedBudget() == _invalidBudget;
+    final canSave = _name.text.trim().isNotEmpty && !_saving && !budgetInvalid;
     final all = ref.watch(categoriesProvider).value;
+    final pockets = ref.watch(pocketsProvider).value ?? const <Pocket>[];
+    final budgetPocket = pocketWhenSeveral(pockets, ref.watch(currentPocketProvider));
     final color = _colorFor(all);
     return Scaffold(
       backgroundColor: c.bg,
@@ -159,6 +213,14 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                       focusNode: _nameFocus,
                       emoji: _emoji,
                       color: context.categoryColor(color),
+                      onSubmit: _save,
+                    ),
+                    const SizedBox(height: 12),
+                    _BudgetCard(
+                      controller: _budget,
+                      focusNode: _budgetFocus,
+                      pocket: budgetPocket,
+                      invalid: budgetInvalid,
                       onSubmit: _save,
                     ),
                     const SizedBox(height: 12),
@@ -270,6 +332,92 @@ class _NameCard extends StatelessWidget {
                 ).copyWith(counterText: ''),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A stored budget as the field shows it: grouped like every amount in the
+/// app, with decimals only when it has them ("5,000", "2,500.50").
+String budgetText(int minor, AmountFormat fmt) {
+  final whole = fmt.group(minor ~/ 100);
+  final cents = minor % 100;
+  return cents == 0 ? whole : '$whole.${cents.toString().padLeft(2, '0')}';
+}
+
+/// "Monthly budget": an optional amount for the category in the pocket in
+/// use. [pocket] is that pocket when there are two or more (the band then
+/// names it), else null.
+class _BudgetCard extends StatelessWidget {
+  const _BudgetCard({
+    required this.controller,
+    required this.focusNode,
+    required this.pocket,
+    required this.invalid,
+    required this.onSubmit,
+  });
+
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final Pocket? pocket;
+
+  /// The typed text is not an amount: the note says so in red.
+  final bool invalid;
+  final VoidCallback onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final style = AppText.rowTitle.copyWith(
+      fontSize: 16,
+      height: 24 / 16,
+      fontWeight: FontWeight.w700,
+      color: c.text,
+    );
+    final pocket = this.pocket;
+    final note = invalid
+        ? 'Type an amount, like 5000 or 2500.50.'
+        : pocket == null
+        ? 'The same amount every month. Leave it empty for no budget.'
+        : 'Only for ${pocketLabel(pocket)}. Each pocket has its own budgets.';
+    return BandCard(
+      title: 'Monthly budget',
+      trailingText: 'Optional',
+      bodyPadding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            height: 56,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            alignment: Alignment.centerLeft,
+            decoration: BoxDecoration(
+              color: c.bg,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              style: style,
+              maxLength: 15,
+              maxLines: 1,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => onSubmit(),
+              cursorColor: c.text,
+              decoration: InputDecoration.collapsed(
+                hintText: 'No budget',
+                hintStyle: style.copyWith(color: c.text3),
+              ).copyWith(counterText: ''),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            note,
+            style: AppText.body.copyWith(color: invalid ? c.bad : c.text2),
           ),
         ],
       ),
