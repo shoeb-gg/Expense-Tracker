@@ -9,6 +9,7 @@ import '../../core/days.dart';
 import '../../core/format.dart';
 import '../../data/db.dart';
 import '../../router.dart';
+import '../../state/pocket_line.dart';
 import '../../state/providers.dart';
 import '../../theme/symbols.dart';
 import '../../theme/text.dart';
@@ -119,6 +120,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final lastPast = math.min(monthEnd(_ym.year, _ym.month), today);
     final monthTotal = index?.sum(first, lastPast) ?? 0;
     final bottom = MediaQuery.paddingOf(context).bottom;
+    // The pocket in use, under the title, once there are two or more pockets.
+    final pocketLine = ref.watch(pocketLineProvider);
 
     return Scaffold(
       backgroundColor: c.bg,
@@ -129,7 +132,15 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           children: [
             Stack(
               children: [
-                const SubHeader(title: 'Calendar'),
+                SubHeader(
+                  title: 'Calendar',
+                  subtitle: pocketLine,
+                  // The centred text stays clear of the "Today" pill, which
+                  // is wider than the 48 px a subtitle leaves at the sides.
+                  sideWidth: pocketLine == null
+                      ? null
+                      : math.max(48, NowPill.widthFor(context, 'Today') + 8),
+                ),
                 // At the right of the header, where the title leaves room:
                 // shown once the month is not this one or today is not the
                 // chosen day.

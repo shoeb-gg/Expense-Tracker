@@ -13,6 +13,7 @@ import '../../core/type_to_add.dart';
 import '../../data/db.dart';
 import '../../data/photo_store.dart';
 import '../../router.dart';
+import '../../state/pocket_line.dart';
 import '../../state/providers.dart';
 import '../../theme/symbols.dart';
 import '../../theme/text.dart';
@@ -238,7 +239,7 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
     for (final p in pockets) {
       if (p.id == targetId) target = p;
     }
-    final pill = pockets.length >= 2 && target != null ? target : null;
+    final pill = pocketWhenSeveral(pockets, target);
 
     final mq = MediaQuery.of(context);
     final keyboard = mq.viewInsets.bottom;

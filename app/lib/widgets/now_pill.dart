@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../theme/symbols.dart';
+import '../theme/text.dart';
 import '../theme/tokens.dart';
 import 'buttons.dart';
+import 'headers.dart' show titleWidth;
 
 /// The "back to now" pill: a small accent [Pill] with a calendar icon that
 /// takes you back to the current period ("This month", "Today", "This year").
@@ -46,6 +48,21 @@ class NowPill extends StatefulWidget {
 
   /// The pill's height.
   static const double height = 32;
+
+  /// The width a pill that says [label] takes at the current text size: its
+  /// 14 px of padding each side, the 16 px icon, 6 px, and the label (the
+  /// pill is an accent [Pill], so the label is w800). A screen header uses it
+  /// to keep its own text clear of the pill, whether or not it is showing.
+  static double widthFor(BuildContext context, String label) =>
+      14 +
+      16 +
+      6 +
+      titleWidth(
+        context,
+        label,
+        AppText.pill.copyWith(fontWeight: FontWeight.w800),
+      ) +
+      14;
 
   @override
   State<NowPill> createState() => _NowPillState();

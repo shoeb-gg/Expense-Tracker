@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../theme/text.dart';
@@ -6,41 +8,120 @@ import 'buttons.dart';
 
 /// The 64 px title row of the four tab screens: a 21/28 w800 title (or any
 /// [leading] widget, e.g. the pocket button) and round buttons on the right.
+///
+/// [subtitle] puts a small line under the title (the pocket of Charts and
+/// Reports). The header stays 64 px and the title stays where it is while the
+/// line fits under it; when it would not (large text) the title moves up by
+/// the least that makes room.
 class PageHeader extends StatelessWidget {
   const PageHeader({
     super.key,
     this.title,
     this.leading,
+    this.subtitle,
+    this.endRoom = 0,
     this.actions = const [],
-  }) : assert(title != null || leading != null);
+  }) : assert(title != null || leading != null),
+       assert(subtitle == null || title != null);
 
   final String? title;
 
   /// Replaces the title (Home's pocket button).
   final Widget? leading;
 
+  /// A second line under [title], in the style of [SubHeader]'s subtitle.
+  /// A line too wide for the room it has scales down to one line.
+  final String? subtitle;
+
+  /// Room kept free at the right end of the [subtitle] for something drawn
+  /// over the header (the back-to-now pill), so the two never touch.
+  final double endRoom;
+
   /// Right side, 8 px apart (usually [RoundIconButton]s).
   final List<Widget> actions;
+
+  /// The header's height.
+  static const double height = 64;
+
+  /// The least room kept under the subtitle's line.
+  static const double _bottomGap = 2;
+
+  /// The height of one line of [style] at the current text size, as the
+  /// text itself is laid out (the engine rounds it to whole pixels).
+  static double _line(BuildContext context, TextStyle style) {
+    final painter = TextPainter(
+      text: TextSpan(text: 'Ag', style: style),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    final line = painter.height;
+    painter.dispose();
+    return line;
+  }
+
+  Widget _titleBlock(BuildContext context) {
+    final c = context.colors;
+    final titleLine = _line(context, AppText.pageTitle);
+    final subtitleLine = _line(context, AppText.overline);
+    // Where the title is without a subtitle (centred), or higher only as far
+    // as the subtitle needs to fit above the bottom gap.
+    final top = math.max(
+      0.0,
+      math.min(
+        (height - titleLine) / 2,
+        height - _bottomGap - titleLine - subtitleLine,
+      ),
+    );
+    return Align(
+      alignment: Alignment.topLeft,
+      child: Padding(
+        padding: EdgeInsets.only(top: top),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppText.pageTitle,
+            ),
+            Padding(
+              padding: EdgeInsets.only(right: endRoom),
+              child: FitTitle(
+                subtitle!,
+                style: AppText.overline.copyWith(color: c.text3),
+                textAlign: TextAlign.start,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: SizedBox(
-        height: 64,
+        height: height,
         child: Row(
           children: [
             Expanded(
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: leading ??
-                    Text(
-                      title!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppText.pageTitle,
+              child: subtitle != null
+                  ? _titleBlock(context)
+                  : Align(
+                      alignment: Alignment.centerLeft,
+                      child: leading ??
+                          Text(
+                            title!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.pageTitle,
+                          ),
                     ),
-              ),
             ),
             for (var i = 0; i < actions.length; i++) ...[
               if (i > 0) const SizedBox(width: 8),
@@ -62,12 +143,13 @@ class PageHeader extends StatelessWidget {
 /// * `SubHeader.cancel(...)` - an auto-width Cancel pill (Add/Edit expense)
 ///   and an optional right widget (the pocket pill).
 /// * [subtitle] - a second line under the title ("Step 1 of 3"); the side
-///   columns become 48 px.
+///   columns become 48 px, or [sideWidth].
 class SubHeader extends StatelessWidget {
   const SubHeader({
     super.key,
     required this.title,
     this.subtitle,
+    this.sideWidth,
     this.leading,
     this.trailing,
     this.showBack = true,
@@ -113,6 +195,11 @@ class SubHeader extends StatelessWidget {
   final String title;
   final String? subtitle;
 
+  /// Width of the two side columns: 88 px, or 48 px with a [subtitle]. A
+  /// screen that draws something over one side of the header (the back-to-now
+  /// pill) sets it so the centred text stays clear of that.
+  final double? sideWidth;
+
   /// Replaces the back button.
   final Widget? leading;
   final Widget? trailing;
@@ -124,7 +211,7 @@ class SubHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final side = subtitle == null ? 88.0 : 48.0;
+    final side = sideWidth ?? (subtitle == null ? 88.0 : 48.0);
     final left = leading ?? (showBack ? BackRoundButton(onTap: onBack) : null);
     final titleStyle = subtitle == null
         ? AppText.screenTitle

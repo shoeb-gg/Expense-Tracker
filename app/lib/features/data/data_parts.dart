@@ -2,20 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../core/text_wrap.dart';
 import '../../data/db.dart';
+import '../../state/pocket_line.dart';
 import '../../theme/symbols.dart';
 import '../../theme/text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/kit.dart';
-
-/// "👛 Personal" for a header subtitle; long names are cut with "…" so the
-/// subtitle stays on one line.
-String pocketLabel(Pocket? pocket) {
-  if (pocket == null) return '';
-  final name = pocket.name.characters.length > 16
-      ? '${pocket.name.characters.take(15)}…'
-      : pocket.name;
-  return '${pocket.emoji} $name';
-}
 
 /// "Step 2 of 3 · 👛 Personal": the step and the pocket the import goes to.
 String stepSubtitle(int step, Pocket? pocket) {
