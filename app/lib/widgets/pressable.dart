@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/tokens.dart';
+
 /// A CSS `box-shadow` as a Flutter [BoxShadow]. CSS blurs with a Gaussian
 /// of sigma = blur / 2; Flutter's blurRadius maps to sigma = r * 0.57735 + 0.5,
 /// so the radius is converted to match the mockup.
@@ -20,13 +22,15 @@ BoxShadow cssShadow({
   );
 }
 
-/// Shadow of pop-up cards: 0 16px 40px rgba(0,0,0,0.5).
-final BoxShadow popupShadow =
-    cssShadow(y: 16, blur: 40, color: const Color(0x80000000));
+/// Shadow of pop-up cards: 0 16px 40px rgba(0,0,0,0.5) on dark (a lighter
+/// ink tone on light).
+BoxShadow popupShadow(AppColors c) =>
+    cssShadow(y: 16, blur: 40, color: c.shadowLg);
 
-/// Shadow of bottom sheets: 0 -12px 40px rgba(0,0,0,0.45).
-final BoxShadow sheetShadow =
-    cssShadow(y: -12, blur: 40, color: const Color(0x73000000));
+/// Shadow of bottom sheets: 0 -12px 40px rgba(0,0,0,0.45) on dark (a lighter
+/// ink tone on light).
+BoxShadow sheetShadow(AppColors c) =>
+    cssShadow(y: -12, blur: 40, color: c.shadowMd);
 
 /// Glow under accent buttons: 0 8px 22px -2px accentGlow.
 BoxShadow accentGlowShadow(Color glow) =>

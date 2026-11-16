@@ -196,7 +196,7 @@ class AddFab extends StatelessWidget {
         borderRadius: BorderRadius.circular(29),
         shadows: [
           accentGlowShadow(c.accentGlow),
-          cssShadow(y: 2, blur: 6, color: const Color(0x59000000)),
+          cssShadow(y: 2, blur: 6, color: c.shadowSm),
         ],
         child: Center(
           child: Icon(Symbols.add_rounded, size: 30, color: c.onAccent),

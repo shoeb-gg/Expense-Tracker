@@ -164,7 +164,7 @@ class AppSwitch extends StatelessWidget {
                   width: 22,
                   height: 22,
                   decoration: BoxDecoration(
-                    color: value ? c.onAccent : c.text,
+                    color: value ? c.onAccent : c.thumb,
                     shape: BoxShape.circle,
                   ),
                 ),

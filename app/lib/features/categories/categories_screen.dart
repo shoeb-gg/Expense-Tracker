@@ -246,7 +246,7 @@ class _CategoryRow extends StatelessWidget {
       child: Row(
         children: [
           const SizedBox(width: 16),
-          EmojiTile(emoji: category.emoji, dotColor: Color(category.color)),
+          EmojiTile(emoji: category.emoji, dotColor: context.categoryColor(category.color)),
           const SizedBox(width: 12),
           Expanded(
             child: Stack(
@@ -371,7 +371,7 @@ class _DragProxy extends StatelessWidget {
         decoration: BoxDecoration(
           color: c.surface2,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [popupShadow],
+          boxShadow: [popupShadow(context.colors)],
         ),
         child: child,
       ),

@@ -21,9 +21,6 @@ import 'column_chart.dart';
 import 'range_popups.dart';
 import 'ring_chart.dart';
 
-/// Warm colour of "N% more than ..." (the mockup's own, not a token).
-const Color _moreColor = Color(0xFFFF9A8F);
-
 /// Charts (tab): Week / Month / Year / Custom, period tabs, the summary,
 /// three charts (Categories ring, Top days ring, Over time columns) and the
 /// ranked list of categories. Swiping across the screen moves to the
@@ -542,7 +539,7 @@ class _SummaryCard extends ConsumerWidget {
       );
     } else {
       final color = switch (delta.trend) {
-        Trend.up => _moreColor,
+        Trend.up => c.more,
         Trend.down => c.good,
         Trend.flat => c.text2,
       };
@@ -708,7 +705,7 @@ class _CategoriesRing extends ConsumerWidget {
         RingSlice(
           key: 'c${r.category.id}',
           value: r.amount,
-          color: Color(r.category.color),
+          color: context.categoryColor(r.category.color),
           tag: r.category.emoji,
           isEmoji: true,
         ),
@@ -1146,7 +1143,7 @@ class _RankedList extends ConsumerWidget {
                         share: shareText(ranked[i].amount, total, fmt),
                         fraction: ranked[i].amount / maxAmount,
                         color: i < 5
-                            ? Color(ranked[i].category.color)
+                            ? context.categoryColor(ranked[i].category.color)
                             : c.other,
                         on: selected == 'c${ranked[i].category.id}',
                         divider: i < ranked.length - 1,

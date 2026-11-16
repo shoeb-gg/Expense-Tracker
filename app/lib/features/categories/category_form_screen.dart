@@ -158,7 +158,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                       controller: _name,
                       focusNode: _nameFocus,
                       emoji: _emoji,
-                      color: Color(color),
+                      color: context.categoryColor(color),
                       onSubmit: _save,
                     ),
                     const SizedBox(height: 12),

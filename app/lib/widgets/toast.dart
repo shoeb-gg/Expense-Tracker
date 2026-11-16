@@ -109,9 +109,9 @@ class _ToastViewState extends State<_ToastView>
                   right: widget.onUndo == null ? 16 : 6,
                 ),
                 decoration: BoxDecoration(
-                  color: c.tile,
+                  color: c.raised,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [popupShadow],
+                  boxShadow: [popupShadow(context.colors)],
                 ),
                 child: Row(
                   children: [

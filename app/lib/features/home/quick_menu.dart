@@ -23,7 +23,7 @@ Future<QuickAction?> showQuickMenu(
     useRootNavigator: true,
     barrierDismissible: true,
     barrierLabel: 'Close',
-    barrierColor: c.scrim.withValues(alpha: 0.68),
+    barrierColor: c.scrimMenu,
     transitionDuration: const Duration(milliseconds: 160),
     pageBuilder: (ctx, _, _) => _QuickMenuLayer(rowRect: rowRect, row: row),
     transitionBuilder: (ctx, animation, _, child) {
@@ -66,7 +66,7 @@ class _QuickMenuLayer extends StatelessWidget {
                 color: c.surface2,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
-                  cssShadow(y: 10, blur: 28, color: const Color(0x73000000)),
+                  cssShadow(y: 10, blur: 28, color: c.shadowMd),
                 ],
               ),
               child: ExcludeSemantics(child: row),
@@ -89,7 +89,7 @@ class _QuickMenuLayer extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: c.surface2,
                   borderRadius: BorderRadius.circular(18),
-                  boxShadow: [popupShadow],
+                  boxShadow: [popupShadow(c)],
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

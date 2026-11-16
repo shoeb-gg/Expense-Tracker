@@ -495,12 +495,12 @@ class _DayCell extends ConsumerWidget {
             ? c.onAccent
             : c.text;
     final badgeBg = selected
-        ? const Color(0xFFFFFFFF)
+        ? c.inverse
         : today
             ? (dark ? c.onAccent : c.accent)
             : const Color(0x00000000);
     final badgeFg = selected
-        ? c.onAccent
+        ? c.onInverse
         : today
             ? (dark ? c.accent : c.onAccent)
             : fg;
@@ -566,7 +566,7 @@ class _DayCell extends ConsumerWidget {
                   Container(
                     height: 22,
                     width: double.infinity,
-                    color: c.onAccent.withAlpha(0x8C),
+                    color: c.strip,
                     alignment: Alignment.topCenter,
                     child: SizedBox(
                       height: 20,

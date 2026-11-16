@@ -1,4 +1,4 @@
-/// The dark ThemeData built from the colour tokens of a mood.
+/// The dark or light ThemeData built from the colour tokens of a mood.
 library;
 
 import 'package:flutter/material.dart';
@@ -7,30 +7,45 @@ import 'package:flutter/services.dart';
 import 'text.dart';
 import 'tokens.dart';
 
-/// Builds the app theme for [mood]. [fontFamilyFallback] is empty in the app
-/// (the phone draws emojis with its own font); screenshot tests pass the name
-/// of the emoji font they load.
+/// Builds the app theme for [mood] in [brightness] (dark unless asked).
+/// [fontFamilyFallback] is empty in the app (the phone draws emojis with its
+/// own font); screenshot tests pass the name of the emoji font they load.
 ThemeData buildAppTheme(
   Mood mood, {
+  Brightness brightness = Brightness.dark,
   List<String> fontFamilyFallback = const [],
 }) {
-  final c = AppColors.of(mood);
-  final scheme = ColorScheme.dark(
-    primary: c.accent,
-    onPrimary: c.onAccent,
-    secondary: c.accent,
-    onSecondary: c.onAccent,
-    surface: c.surface,
-    onSurface: c.text,
-    surfaceContainerHighest: c.surface2,
-    error: c.bad,
-    onError: c.onBad,
-    outline: c.line,
-    outlineVariant: c.line,
-  );
+  final c = AppColors.of(mood, brightness: brightness);
+  final scheme = brightness == Brightness.light
+      ? ColorScheme.light(
+          primary: c.accent,
+          onPrimary: c.onAccent,
+          secondary: c.accent,
+          onSecondary: c.onAccent,
+          surface: c.surface,
+          onSurface: c.text,
+          surfaceContainerHighest: c.surface2,
+          error: c.bad,
+          onError: c.onBad,
+          outline: c.line,
+          outlineVariant: c.line,
+        )
+      : ColorScheme.dark(
+          primary: c.accent,
+          onPrimary: c.onAccent,
+          secondary: c.accent,
+          onSecondary: c.onAccent,
+          surface: c.surface,
+          onSurface: c.text,
+          surfaceContainerHighest: c.surface2,
+          error: c.bad,
+          onError: c.onBad,
+          outline: c.line,
+          outlineVariant: c.line,
+        );
   final base = ThemeData(
     useMaterial3: true,
-    brightness: Brightness.dark,
+    brightness: brightness,
     colorScheme: scheme,
     fontFamily: kFontFamily,
     fontFamilyFallback: fontFamilyFallback.isEmpty ? null : fontFamilyFallback,
@@ -107,16 +122,23 @@ ThemeData buildAppTheme(
 }
 
 /// System bar colours: status bar over the page background, navigation bar
-/// on the nav colour, light icons on both.
-SystemUiOverlayStyle systemBarsStyle(Mood mood) {
-  final c = AppColors.of(mood);
+/// on the nav colour. The icons are light on a dark theme and dark on a light
+/// one (Android's `statusBarIconBrightness` is the icons' own brightness;
+/// iOS's `statusBarBrightness` is the bar's background brightness).
+SystemUiOverlayStyle systemBarsStyle(
+  Mood mood, {
+  Brightness brightness = Brightness.dark,
+}) {
+  final c = AppColors.of(mood, brightness: brightness);
+  final iconBrightness =
+      brightness == Brightness.light ? Brightness.dark : Brightness.light;
   return SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.light,
-    statusBarBrightness: Brightness.dark,
+    statusBarIconBrightness: iconBrightness,
+    statusBarBrightness: brightness,
     systemNavigationBarColor: c.nav,
     systemNavigationBarDividerColor: Colors.transparent,
-    systemNavigationBarIconBrightness: Brightness.light,
+    systemNavigationBarIconBrightness: iconBrightness,
     systemNavigationBarContrastEnforced: false,
     systemStatusBarContrastEnforced: false,
   );

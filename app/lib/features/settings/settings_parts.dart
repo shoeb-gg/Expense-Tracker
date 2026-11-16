@@ -220,7 +220,9 @@ class _MoodTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final m = AppColors.of(mood);
+    // The preview is drawn in the brightness the app has now, so Light shows
+    // the light version of each colour theme.
+    final m = AppColors.of(mood, brightness: context.colors.brightness);
     const heights = [10.0, 24.0, 16.0, 20.0];
     return Semantics(
       button: true,
@@ -412,13 +414,13 @@ class TextSizeSlider extends StatelessWidget {
                           height: 20,
                           child: DecoratedBox(
                             decoration: BoxDecoration(
-                              color: c.text,
+                              color: c.thumb,
                               shape: BoxShape.circle,
                               boxShadow: [
                                 cssShadow(
                                   y: 2,
                                   blur: 6,
-                                  color: const Color(0x59000000),
+                                  color: c.shadowSm,
                                 ),
                               ],
                             ),

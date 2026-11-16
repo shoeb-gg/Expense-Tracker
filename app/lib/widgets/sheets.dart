@@ -66,7 +66,7 @@ class AppSheet extends StatelessWidget {
         decoration: BoxDecoration(
           color: c.surface2,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          boxShadow: [sheetShadow],
+          boxShadow: [sheetShadow(context.colors)],
         ),
         padding: EdgeInsets.fromLTRB(16, 10, 16, 24 + inset),
         child: DefaultTextStyle.merge(

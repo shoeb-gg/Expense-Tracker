@@ -338,7 +338,7 @@ class _Body extends ConsumerWidget {
     final points = byYear
         ? monthColumns(yearOfDay(range.from), today, index.sum)
         : dayColumns(range.from, range.to, today, ticks, index.dayTotal);
-    final color = Color(category.color);
+    final color = context.categoryColor(category.color);
 
     final sorted = [...expenses]..sort((p, q) {
         if (byDate) {

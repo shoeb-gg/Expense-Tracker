@@ -48,7 +48,7 @@ Future<PocketSwitchChoice?> showPocketSwitch(
     useRootNavigator: true,
     barrierDismissible: true,
     barrierLabel: 'Close',
-    barrierColor: c.scrim.withValues(alpha: 0.80),
+    barrierColor: c.scrimPocket,
     transitionDuration: const Duration(milliseconds: 180),
     pageBuilder: (ctx, _, _) =>
         _PocketSwitchLayer(buttonRect: buttonRect, current: current),
@@ -142,7 +142,7 @@ class PocketSwitchPanel extends ConsumerWidget {
           decoration: BoxDecoration(
             color: c.surface2,
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [popupShadow],
+            boxShadow: [popupShadow(context.colors)],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,

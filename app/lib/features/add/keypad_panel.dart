@@ -80,7 +80,7 @@ class KeypadPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: c.line,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: [cssShadow(y: -12, blur: 32, color: const Color(0x59000000))],
+        boxShadow: [cssShadow(y: -12, blur: 32, color: c.shadowSm)],
       ),
       child: Padding(
         padding: const EdgeInsets.only(top: 1),

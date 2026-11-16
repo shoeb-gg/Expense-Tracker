@@ -352,7 +352,7 @@ class ColumnChart extends ConsumerWidget {
                 color: c.tip,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
-                  cssShadow(y: 6, blur: 16, color: const Color(0x59000000)),
+                  cssShadow(y: 6, blur: 16, color: c.shadowSm),
                 ],
               ),
               child: Column(

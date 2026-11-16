@@ -177,6 +177,13 @@ class ColorSwatches extends StatelessWidget {
 
   Widget _swatch(BuildContext context, CategoryColor color) {
     final c = context.colors;
+    final fill = color.forBrightness(Theme.of(context).brightness);
+    // The tick is dark ink on the dark theme's bright swatches; a light
+    // theme's deeper swatches read better with a white one.
+    final tick =
+        c.brightness == Brightness.light && fill.computeLuminance() < 0.3
+            ? const Color(0xFFFFFFFF)
+            : const Color(0xFF0B1517);
     final selected = color.argb == value;
     final owners = takenBy[color.argb] ?? const <ExpenseCategory>[];
     final line = colorOwnersLine([for (final o in owners) o.name]);
@@ -185,7 +192,7 @@ class ColorSwatches extends StatelessWidget {
       dot = Container(
         width: _dot,
         height: _dot,
-        decoration: BoxDecoration(color: color.color, shape: BoxShape.circle),
+        decoration: BoxDecoration(color: fill, shape: BoxShape.circle),
         padding: const EdgeInsets.all(2),
         child: Container(
           decoration: BoxDecoration(color: c.surface, shape: BoxShape.circle),
@@ -193,13 +200,13 @@ class ColorSwatches extends StatelessWidget {
           child: Container(
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: color.color,
+              color: fill,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Symbols.check_rounded,
               size: 18,
-              color: Color(0xFF0B1517),
+              color: tick,
             ),
           ),
         ),
@@ -210,7 +217,7 @@ class ColorSwatches extends StatelessWidget {
         width: _dot,
         height: _dot,
         alignment: Alignment.center,
-        decoration: BoxDecoration(color: color.color, shape: BoxShape.circle),
+        decoration: BoxDecoration(color: fill, shape: BoxShape.circle),
         child: owners.isEmpty
             ? null
             : ExcludeSemantics(

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
 import '../../state/providers.dart';
+import '../../theme/app_theme.dart';
 import '../../theme/symbols.dart';
 import '../../theme/text.dart';
 import '../../widgets/kit.dart';
@@ -70,7 +72,8 @@ class PhotoViewer extends ConsumerWidget {
   final String title;
   final String caption;
 
-  /// Background of the viewer, the same in every colour theme.
+  /// Background of the viewer, the same in every colour theme and in the
+  /// light theme too (a photo is best seen on near-black).
   static const Color background = Color(0xFF05090A);
 
   @override
@@ -99,6 +102,26 @@ class PhotoViewer extends ConsumerWidget {
     } else {
       photo = const _MissingPhoto();
     }
+    // The viewer is dark on purpose, also when the app is light: it gets the
+    // dark theme of the chosen colour theme (so its header, buttons and text
+    // read on near-black) and light status and navigation bar icons.
+    final mood = ref.watch(settingsProvider.select((s) => s.mood));
+    final fallback = ref.watch(fontFallbackProvider);
+    return Theme(
+      data: buildAppTheme(mood, fontFamilyFallback: fallback),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: systemBarsStyle(mood),
+        child: _viewerScaffold(context, photo, bytes != null, inset),
+      ),
+    );
+  }
+
+  Widget _viewerScaffold(
+    BuildContext context,
+    Widget photo,
+    bool hasPhoto,
+    double inset,
+  ) {
     return Scaffold(
       backgroundColor: background,
       body: SafeArea(
@@ -143,7 +166,7 @@ class PhotoViewer extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  if (bytes != null) ...[
+                  if (hasPhoto) ...[
                     const SizedBox(width: 12),
                     const ExcludeSemantics(child: _PinchHint()),
                   ],

@@ -69,7 +69,7 @@ class AppPopupCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: c.surface2,
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [popupShadow],
+            boxShadow: [popupShadow(context.colors)],
           ),
           child: DefaultTextStyle.merge(
             style: TextStyle(color: c.text),
