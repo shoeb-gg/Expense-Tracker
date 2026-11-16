@@ -494,6 +494,22 @@ void main() {
       expect(const ChartScale(10000, 2500).label(2500, fmt), '2.5K');
       expect(const ChartScale(3000, 1000).label(1000, fmt), '1,000');
     });
+
+    test('axis labels: K below a million, M from a million', () {
+      const half = ChartScale(1500000, 500000);
+      expect(half.label(0, fmt), '0');
+      expect(half.label(500000, fmt), '500K');
+      expect(half.label(1000000, fmt), '1M');
+      expect(half.label(1500000, fmt), '1.5M');
+      const quarter = ChartScale(2000000, 250000);
+      expect(quarter.label(750000, fmt), '750K');
+      expect(quarter.label(1250000, fmt), '1.25M');
+      expect(quarter.label(1750000, fmt), '1.75M');
+      expect(const ChartScale(40000000, 10000000).label(30000000, fmt), '30M');
+      // Below a million nothing changes.
+      expect(const ChartScale(900000, 300000).label(900000, fmt), '900K');
+      expect(const ChartScale(20000, 5000).label(15000, fmt), '15K');
+    });
   });
 
   group('calendar', () {

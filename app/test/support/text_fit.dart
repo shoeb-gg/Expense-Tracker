@@ -138,3 +138,22 @@ Future<AppDatabase> sampleWithBigCategory(WidgetTester tester) async {
   });
   return db;
 }
+
+/// The mockup data plus one more expense of 1,234,567.89 on [day] of
+/// October 2026 (the 1st to the 18th), in the first category: the tallest
+/// column of Over time, wherever [day] puts it.
+Future<AppDatabase> sampleWithBigDay(
+  WidgetTester tester, {
+  required int day,
+}) async {
+  final db = await sampleDatabase(tester);
+  await tester.runAsync(
+    () => ExpensesRepo(db).add(
+      pocketId: 1,
+      categoryId: 1,
+      amount: 123456789,
+      day: dayOf(2026, 10, day),
+    ),
+  );
+  return db;
+}

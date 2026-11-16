@@ -62,18 +62,28 @@ class ChartScale {
         for (var i = 0; i * step <= top + 0.001; i++) i * step,
       ];
 
-  /// Axis label of [v]: "1,000"; "5K" once the top reaches 10,000.
+  /// Axis label of [v]: "1,000"; "5K" once the top reaches 10,000; "1M" and
+  /// "1.5M" from a million up (so a label stays four or five characters).
   String label(double v, AmountFormat fmt) {
     if (v == 0) return '0';
     if (top >= 10000) {
-      final k = v / 1000;
-      final text = k == k.roundToDouble()
-          ? '${k.round()}'
-          : k.toStringAsFixed(1).replaceAll('.', fmt.decimalMark);
-      return '${text}K';
+      if (v >= 1000000) return '${_trim(v / 1000000, 2, fmt)}M';
+      return '${_trim(v / 1000, 1, fmt)}K';
     }
     if (v == v.roundToDouble()) return fmt.formatWhole((v * 100).round());
     return fmt.format((v * 100).round());
+  }
+
+  /// [x] with at most [decimals] decimals, none when it is whole: "5", "2.5",
+  /// "1.25".
+  static String _trim(double x, int decimals, AmountFormat fmt) {
+    if (x == x.roundToDouble()) return '${x.round()}';
+    var text = x.toStringAsFixed(decimals);
+    while (text.endsWith('0')) {
+      text = text.substring(0, text.length - 1);
+    }
+    if (text.endsWith('.')) text = text.substring(0, text.length - 1);
+    return text.replaceAll('.', fmt.decimalMark);
   }
 }
 
@@ -105,6 +115,9 @@ class ColumnChart extends ConsumerWidget {
   static const double categoryPlotHeight = 148;
 
   static const double width = 296;
+
+  /// The column of the axis labels, left of the plot.
+  static const double axisWidth = 28;
   static const double padLeft = 34;
   static const double inset = 4;
 
@@ -175,6 +188,60 @@ class ColumnChart extends ConsumerWidget {
       color: c.text,
     );
 
+    // The axis labels share the 28 px column left of the plot, right
+    // aligned. A label that does not fit it (large text, "1,000", "1500K")
+    // makes all of them smaller by the same factor, so they stay alike.
+    final axisTexts = [for (final v in scale.ticks) scale.label(v, fmt)];
+    var axisFit = 1.0;
+    for (final text in axisTexts) {
+      final natural = titleWidth(context, text, tick);
+      // Half a pixel of rounding is not "too wide": it is invisible.
+      if (natural > axisWidth + 0.5) {
+        axisFit = math.min(axisFit, (axisWidth - 0.5) / natural);
+      }
+    }
+    final axisLine = titleHeight(context, tick);
+    Widget axisLabel(double v) {
+      final text = scale.label(v, fmt);
+      if (axisFit == 1) {
+        return Positioned(
+          left: 0,
+          top: y(v) - 7,
+          width: axisWidth,
+          child: Text(
+            text,
+            style: tick,
+            textAlign: TextAlign.right,
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.visible,
+          ),
+        );
+      }
+      // Smaller, in a slot the height of the normal label so it keeps its
+      // middle on the grid line.
+      return Positioned(
+        left: 0,
+        top: y(v) - 7,
+        width: axisWidth,
+        height: axisLine,
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: Text(
+            text,
+            style: tick,
+            textScaler: TextScaler.linear(
+              MediaQuery.textScalerOf(context).scale(1) * axisFit,
+            ),
+            textAlign: TextAlign.right,
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.visible,
+          ),
+        ),
+      );
+    }
+
     final groups = <BarChartGroupData>[
       for (var i = 0; i < n; i++) _group(i, scale, bw, radius, hi, c),
     ];
@@ -222,20 +289,7 @@ class ColumnChart extends ConsumerWidget {
           duration: const Duration(milliseconds: 150),
         ),
       ),
-      for (final v in scale.ticks)
-        Positioned(
-          left: 0,
-          top: y(v) - 7,
-          width: 28,
-          child: Text(
-            scale.label(v, fmt),
-            style: tick,
-            textAlign: TextAlign.right,
-            maxLines: 1,
-            softWrap: false,
-            overflow: TextOverflow.visible,
-          ),
-        ),
+      for (final v in scale.ticks) axisLabel(v),
       for (var i = 0; i < n; i++)
         if (points[i].tick.isNotEmpty)
           Positioned(
@@ -300,28 +354,32 @@ class ColumnChart extends ConsumerWidget {
     }
 
     // "Peak 15,090" over the tallest column (hidden while one is pinned).
+    // A figure too wide for the usual 120 px ("Peak 1,237,672.89" at large
+    // text) gets the room it needs, kept inside the chart.
     if (pinned == null && peak != null) {
       final px = x(peak);
       final top = y(points[peak].value! / 100) - 18;
-      final double left;
-      final TextAlign align;
+      final text = 'Peak ${fmt.format(points[peak].value!)}';
+      final natural = titleWidth(context, text, peakStyle);
+      final wide = natural + 1 > 120;
+      final room = wide ? math.min(natural + 1, width) : 120.0;
+      var left = px - room / 2;
+      var align = TextAlign.center;
       if (px - 44 < padLeft) {
         left = px - bw / 2;
         align = TextAlign.left;
       } else if (px + 44 > width) {
-        left = px + bw / 2 - 120;
+        left = px + bw / 2 - room;
         align = TextAlign.right;
-      } else {
-        left = px - 60;
-        align = TextAlign.center;
       }
+      if (wide) left = left.clamp(0.0, width - room).toDouble();
       children.add(
         _label(
           left: left,
           top: top,
-          width: 120,
+          width: room,
           align: align,
-          text: 'Peak ${fmt.format(points[peak].value!)}',
+          text: text,
           style: peakStyle,
           fill: c.surface,
         ),
