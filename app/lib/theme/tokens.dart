@@ -428,16 +428,18 @@ class AppColors extends ThemeExtension<AppColors> {
   bool get _isLight => brightness == Brightness.light;
 
   /// Budget ring, under 90% used. A yellow-leaning green, so it stays apart
-  /// from Aqua's turquoise accent (at least 3:1 on the tile in every mood).
-  Color get budgetOk => _isLight ? const Color(0xFF1E8A4C) : const Color(0xFF6CCB5F);
+  /// from Aqua's turquoise accent. On light a bright green: the user found
+  /// the deeper steps too dark (2026-11-17), so the ring trades contrast on
+  /// white (2.7:1) for a cheerful colour; its length carries the meaning too.
+  Color get budgetOk => _isLight ? const Color(0xFF2FB45A) : const Color(0xFF6CCB5F);
 
-  /// Budget ring, 90% to 100% used. On light the light step of the Yellow
-  /// category colour (3.2:1 on a white tile; brighter yellows are under 3:1).
-  Color get budgetNear => _isLight ? const Color(0xFFB08A00) : const Color(0xFFF2C230);
+  /// Budget ring, 90% to 100% used. On light a true yellow: the deep amber
+  /// read as brown. It is faint on white (1.9:1) but thick and saturated.
+  Color get budgetNear => _isLight ? const Color(0xFFF4B400) : const Color(0xFFF2C230);
 
   /// Budget ring, over budget. A crimson red, so it stays apart from Coral's
-  /// accent. On light the same crimson as [bad].
-  Color get budgetOver => _isLight ? const Color(0xFFC22D4A) : const Color(0xFFFF4D73);
+  /// accent; on light a lighter crimson than [bad].
+  Color get budgetOver => _isLight ? const Color(0xFFEF4565) : const Color(0xFFFF4D73);
 
   /// The faint full track under a budget ring.
   Color get budgetTrack => _isLight ? ink.withAlpha(0x1A) : const Color(0x24FFFFFF);
