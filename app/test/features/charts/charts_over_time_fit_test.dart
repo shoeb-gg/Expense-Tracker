@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/core/days.dart';
 import 'package:spill_the_bills/core/format.dart';
@@ -55,6 +56,29 @@ void main() {
     expect(chart, findsOneWidget);
     final box = tester.getRect(chart);
     expect(cutTexts(tester, within: chart), isEmpty);
+    // The axis labels (right aligned in the 28 px column left of the plot)
+    // are all drawn at one font size.
+    final sizes = <String, double>{};
+    for (final element in find
+        .descendant(of: chart, matching: find.byType(RichText))
+        .evaluate()) {
+      final p = element.renderObject;
+      if (p is! RenderParagraph) continue;
+      final rect = MatrixUtils.transformRect(
+        p.getTransformTo(null),
+        Offset.zero & p.size,
+      );
+      if ((rect.right - (box.left + ColumnChart.axisWidth)).abs() > 0.6) continue;
+      sizes[p.text.toPlainText()] = p.textScaler.scale(p.text.style!.fontSize!);
+    }
+    expect(sizes.length, greaterThanOrEqualTo(3), reason: 'the axis labels');
+    for (final MapEntry(key: text, value: size) in sizes.entries) {
+      expect(
+        size,
+        closeTo(sizes.values.first, 0.01),
+        reason: 'axis label "$text" is drawn at $size px, the others at ${sizes.values.first}: $sizes',
+      );
+    }
     for (final label in [
       find.ancestor(of: find.textContaining('Peak'), matching: find.byType(Positioned)),
       find.descendant(
