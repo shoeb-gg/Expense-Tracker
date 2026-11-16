@@ -256,6 +256,8 @@ class _Header extends StatelessWidget {
               onTap: onPill,
               color: c.surface,
               borderRadius: BorderRadius.circular(20),
+              border: edgeBorder(c),
+              shadows: liftShadows(c),
               semanticLabel: 'Choose month, $pill',
               child: SizedBox(
                 height: 40,
@@ -415,7 +417,7 @@ class _Body extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 12),
-          ClipRRect(
+          CardClip(
             borderRadius: BorderRadius.circular(20),
             child: ColoredBox(
               color: c.surface,

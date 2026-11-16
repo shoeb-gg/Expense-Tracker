@@ -140,7 +140,7 @@ class PocketSwitchPanel extends ConsumerWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: c.surface2,
+            color: c.pop,
             borderRadius: BorderRadius.circular(24),
             boxShadow: [popupShadow(context.colors)],
           ),

@@ -88,6 +88,9 @@ class _CustomRangeDialogState extends ConsumerState<CustomRangeDialog> {
           Semantics(
             label: 'Quick choices, ending today',
             child: AppSegmented<int?>(
+              // On the white pop-up of the light theme the track is the page
+              // colour (the dark pop-up keeps the card colour).
+              trackColor: c.brightness == Brightness.light ? c.bg : null,
               segments: [for (final n in _quick) Segment<int?>(n, '$n days')],
               value: quick,
               tabular: true,

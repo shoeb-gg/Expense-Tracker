@@ -24,17 +24,29 @@ TextStyle boardText(
   fontFeatures: tabular ? const [FontFeature.tabularFigures()] : null,
 );
 
-/// Fill of a selected category tile: 15% accent over the neutral tile.
-Color litTileColor(AppColors c) => mix(c.accent, c.tile, 0.15);
+/// Fill of a selected category tile: 15% accent over the neutral tile (on
+/// light, a soft tint of the deeper accent).
+Color litTileColor(AppColors c) => c.litTile;
 
 /// Ring and glow of a selected category tile, CSS
 /// `0 0 0 3px bg, 0 0 0 5px accent, 0 0 18px 7px accent/0x96`
-/// (Flutter paints the list bottom-up, so the order is reversed).
-List<BoxShadow> selectedTileShadows(AppColors c) => [
-  cssShadow(blur: 18, spread: 7, color: c.accent.withAlpha(0x96)),
-  BoxShadow(color: c.accent, spreadRadius: 5),
-  BoxShadow(color: c.bg, spreadRadius: 3),
-];
+/// (Flutter paints the list bottom-up, so the order is reversed). On light
+/// there is no glow (it turns into a grey haze): the tile gets a 2 px ring
+/// inside its edge instead, see [selectedTileRing].
+List<BoxShadow> selectedTileShadows(AppColors c) =>
+    c.brightness == Brightness.light
+    ? const []
+    : [
+        cssShadow(blur: 18, spread: 7, color: c.accent.withAlpha(0x96)),
+        BoxShadow(color: c.accent, spreadRadius: 5),
+        BoxShadow(color: c.bg, spreadRadius: 3),
+      ];
+
+/// Light theme: the 2 px accent ring drawn inside a selected tile. Null on
+/// dark, which has the outside ring and glow of [selectedTileShadows].
+BoxBorder? selectedTileRing(AppColors c) => c.brightness == Brightness.light
+    ? Border.all(color: c.accent, width: 2)
+    : null;
 
 /// Emoji text at a given size ([AppText.emoji], the phone's emoji font).
 TextStyle emojiText(double size) => AppText.emoji.copyWith(fontSize: size);

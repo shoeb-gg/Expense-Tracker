@@ -652,6 +652,8 @@ class _ViewButtons extends StatelessWidget {
               onTap: () => onView(v),
               color: v == view ? c.accentSoft : c.surface,
               borderRadius: BorderRadius.circular(18),
+              border: v == view ? null : edgeBorder(c),
+              shadows: v == view ? null : liftShadows(c),
               selected: v == view,
               semanticLabel: v.label,
               child: SizedBox(
@@ -1085,7 +1087,7 @@ class _RankedList extends ConsumerWidget {
     final c = context.colors;
     final fmt = ref.watch(amountFormatProvider);
     final maxAmount = ranked.isEmpty ? 1 : ranked.first.amount;
-    return ClipRRect(
+    return CardClip(
       borderRadius: BorderRadius.circular(20),
       child: ColoredBox(
         color: c.surface,
@@ -1140,7 +1142,7 @@ class _RankedList extends ConsumerWidget {
                         fraction: ranked[i].amount / maxAmount,
                         color: i < 5
                             ? context.categoryColor(ranked[i].category.color)
-                            : c.other,
+                            : c.otherBar,
                         on: selected == 'c${ranked[i].category.id}',
                         divider: i < ranked.length - 1,
                         onTap: () => onRow('c${ranked[i].category.id}'),

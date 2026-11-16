@@ -192,14 +192,14 @@ class AddFab extends StatelessWidget {
       child: Pressable(
         onTap: onTap,
         semanticLabel: 'Add expense',
-        color: c.accent,
+        color: c.accentFill,
         borderRadius: BorderRadius.circular(29),
         shadows: [
           accentGlowShadow(c.accentGlow),
           cssShadow(y: 2, blur: 6, color: c.shadowSm),
         ],
         child: Center(
-          child: Icon(Symbols.add_rounded, size: 30, color: c.onAccent),
+          child: Icon(Symbols.add_rounded, size: 30, color: c.onFill),
         ),
       ),
     );

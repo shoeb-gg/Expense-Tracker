@@ -68,7 +68,7 @@ class AppSegmented<T> extends StatelessWidget {
       final s = segments[i];
       final on = s.value == value;
       var style = base.copyWith(
-        color: on ? c.onAccent : c.text2,
+        color: on ? c.onFill : c.text2,
         fontWeight: on ? FontWeight.w800 : FontWeight.w600,
         fontSize: fontSize,
       );
@@ -79,7 +79,7 @@ class AppSegmented<T> extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           decoration: BoxDecoration(
-            color: on ? c.accent : c.accent.withValues(alpha: 0),
+            color: on ? c.accentFill : c.accentFill.withValues(alpha: 0),
             borderRadius: BorderRadius.circular(segR),
           ),
           child: Pressable(
@@ -110,7 +110,11 @@ class AppSegmented<T> extends StatelessWidget {
       decoration: BoxDecoration(
         color: trackColor ?? c.surface,
         borderRadius: BorderRadius.circular(regular ? 14 : 12),
+        boxShadow: trackColor == null ? liftShadows(c) : null,
       ),
+      foregroundDecoration: trackColor == null
+          ? edgeDecoration(c, BorderRadius.circular(regular ? 14 : 12))
+          : null,
       child: Row(
         mainAxisSize: segmentWidth == null ? MainAxisSize.max : MainAxisSize.min,
         children: children,

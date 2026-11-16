@@ -112,7 +112,8 @@ class GuideCard extends StatelessWidget {
     final c = context.colors;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(color: c.surface, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(color: c.surface, borderRadius: BorderRadius.circular(20), boxShadow: liftShadows(c)),
+      foregroundDecoration: edgeDecoration(c, BorderRadius.circular(20)),
       child: Row(
         children: [
           IconTile(icon: icon, iconSize: 24),
@@ -194,13 +195,13 @@ class PreviewCard extends StatelessWidget {
           );
     final hintText = hint;
     return Container(
-      decoration: BoxDecoration(color: c.surface, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(color: c.surface, borderRadius: BorderRadius.circular(20), boxShadow: liftShadows(c)),
       foregroundDecoration: cat == null
           ? BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: c.accent.withAlpha(0x8C), width: 1.5),
             )
-          : null,
+          : edgeDecoration(c, BorderRadius.circular(20)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -440,7 +441,7 @@ class _AddButton extends StatelessWidget {
       child: Pressable(
         onTap: onTap,
         semanticLabel: ready ? 'Add' : 'Add, choose a category first',
-        color: ready ? c.accent : c.surface2,
+        color: ready ? c.accentFill : c.surface2,
         borderRadius: BorderRadius.circular(20),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -453,7 +454,7 @@ class _AddButton extends StatelessWidget {
                   14.5,
                   20,
                   FontWeight.w800,
-                  color: ready ? c.onAccent : c.text3,
+                  color: ready ? c.onFill : c.text3,
                 ),
               ),
             ),

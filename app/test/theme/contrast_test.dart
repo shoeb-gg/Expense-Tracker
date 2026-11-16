@@ -105,56 +105,77 @@ void main() {
         expectOn('accent', c.accent, body);
       });
 
-      test('text and icons on the accent reach 4.5:1', () {
+      test('white on the deep accent (tracks, ticks) reaches 4.5:1', () {
         expect(contrast(c.onAccent, c.accent), greaterThanOrEqualTo(body));
         expect(
           contrast(over(c.onAccentDim, c.accent), c.accent),
           greaterThanOrEqualTo(body),
-          reason: 'quiet text on the accent',
+          reason: 'the slider stops on the filled track',
         );
-        // The Home month chip: white, with accent and muted text on it.
-        expectOn('accent', c.accent, body, on: {'chip': c.onAccent});
-        expectOn('pillDim', c.pillDim, body, on: {'chip': c.onAccent});
-        expectOn('text', c.text, body, on: {'chip': c.onAccent});
+      });
+
+      test('the bright fill carries ink: 4.5:1 for text and icons on it', () {
+        expect(c.accentFill, isNot(c.accent), reason: 'the accent is split');
+        expect(contrast(c.onFill, c.accentFill), greaterThanOrEqualTo(body));
+        expect(
+          contrast(over(c.onFillDim, c.accentFill), c.accentFill),
+          greaterThanOrEqualTo(body),
+          reason: 'quiet text on the fill',
+        );
+        // The fill is the mood's bright tone, the deep accent is deeper.
+        expect(
+          c.accentFill.computeLuminance(),
+          greaterThan(c.accent.computeLuminance()),
+        );
+        // The ink chips on the hero card and the calendar's month bar.
+        expectOn('onInk', c.onInk, body, on: {'chip': c.onFill});
+        expectOn('pillDim', c.pillDim, body, on: {'chip': c.onFill});
+        expectOn('accentFill', c.accentFill, muted, on: {'chip': c.onFill});
+      });
+
+      test('the inverse toast reads: text 4.5:1, Undo 4.5:1', () {
+        expectOn('toastText', c.toastText, body, on: {'toast': c.raised});
+        expectOn('toastAction', c.toastAction, body, on: {'toast': c.raised});
+        expect(c.toastAction, c.accentFill);
       });
 
       test('good, bad and "more" are readable text; onBad is on bad', () {
         expectOn('good', c.good, body);
         expectOn('bad', c.bad, body);
         expectOn('more', c.more, body);
+        expect(c.more, c.bad, reason: 'one red for "spent more"');
         expect(contrast(c.onBad, c.bad), greaterThanOrEqualTo(body));
       });
 
-      test('the calendar: ink on the pale heat steps, white on the deep', () {
+      test('the calendar: ink on the three light steps, white on the deep', () {
         expect(c.heat, hasLength(4));
+        expect(c.heatStrongFrom, 4);
         expectOn(
           'text',
           c.text,
           body,
-          on: {'heat1': c.heat[0], 'heat2': c.heat[1]},
+          on: {'heat1': c.heat[0], 'heat2': c.heat[1], 'heat3': c.heat[2]},
         );
-        expectOn(
-          'onAccent',
-          c.onAccent,
-          body,
-          on: {'heat3': c.heat[2], 'heat4': c.heat[3]},
-        );
-        // White amounts on the dim strip, over every kind of cell.
-        final cells = <String, Color>{
-          'plain': c.surface,
-          'heat1': c.heat[0],
-          'heat2': c.heat[1],
-          'heat3': c.heat[2],
-          'heat4': c.heat[3],
-        };
-        cells.forEach((name, cell) {
-          final strip = over(c.strip, cell);
+        expectOn('onAccent', c.onAccent, body, on: {'heat4': c.heat[3]});
+        // Each step is visibly deeper than the one before it.
+        final steps = [c.surface, ...c.heat];
+        for (var i = 1; i < steps.length; i++) {
           expect(
-            contrast(const Color(0xFFFFFFFF), strip),
-            greaterThanOrEqualTo(body),
-            reason: 'white amount on the strip over $name',
+            contrast(steps[i], steps[i - 1]),
+            greaterThanOrEqualTo(1.25),
+            reason: 'step $i against step ${i - 1}',
           );
-        });
+        }
+        // White amounts on the tinted strip: 4.5:1 on every step.
+        expect(
+          contrast(const Color(0xFFFFFFFF), c.strip),
+          greaterThanOrEqualTo(body),
+        );
+        expect(
+          contrast(const Color(0xFFFFFFFF), c.stripStrong),
+          greaterThanOrEqualTo(body),
+        );
+        expect(c.strip.a, 1, reason: 'a tinted strip, not a grey veil');
         // The chosen day's badge.
         expect(contrast(c.onInverse, c.inverse), greaterThanOrEqualTo(body));
       });
@@ -162,11 +183,13 @@ void main() {
       test('what carries meaning reaches 3:1: switch, tick boxes, "rest"', () {
         expectOn('switchOff', c.switchOff, muted, on: {'surface': c.surface});
         expectOn('popStub', c.popStub, muted, on: {'surface2': c.surface2});
-        expectOn(
-          'other',
-          c.other,
-          muted,
-          on: {'surface': c.surface, 'surface2': c.surface2},
+        // The "rest" of the donut is meant to be quiet (a light slate), but
+        // it must still show on the card; its list bars show on their track.
+        expectOn('other', c.other, 1.4, on: {'surface': c.surface});
+        expect(
+          contrast(c.otherBar, c.track),
+          greaterThanOrEqualTo(1.5),
+          reason: 'the bars of the rows after the fifth, on their track',
         );
         // The switch knob on its off track.
         expect(contrast(c.thumb, c.switchOff), greaterThanOrEqualTo(muted));
@@ -176,6 +199,39 @@ void main() {
         for (final step in c.ramp) {
           expect(contrast(step, c.surface), greaterThan(1.5));
         }
+      });
+
+      test('cards, pop-ups, keys and tiles are told apart', () {
+        // Pop-ups and sheets are white; the page is the deeper tone.
+        expect(c.pop, c.surface);
+        // Keys and fields are visible on a white sheet, and on a white card.
+        expect(contrast(c.control, c.surface), greaterThanOrEqualTo(1.1));
+        // Tiles inside white cards keep white emoji parts visible.
+        expect(contrast(c.tile, c.surface), greaterThanOrEqualTo(1.1));
+        expect(contrast(c.tile, c.surface), greaterThan(contrast(c.control, c.surface)));
+        // Tiles on the page are white with the card edge.
+        expect(c.pageTile, c.surface);
+        expect(c.edge.a, greaterThan(0));
+        expect(c.lift1.a, greaterThan(0));
+        expect(c.lift2.a, greaterThan(0));
+        // The chosen tile is a tint of the deeper accent.
+        expect(contrast(c.litTile, c.surface), greaterThanOrEqualTo(1.05));
+        expectOn('accent ring', c.accent, muted, on: {'litTile': c.litTile});
+        // No rim along the top of the hero card.
+        expect(c.sheen.a, 0);
+      });
+
+      test('the muted bars are one tone, clearer than before', () {
+        expect(c.barSoft, c.barDim);
+        expect(contrast(c.barSoft, c.surface), greaterThanOrEqualTo(1.6));
+        // And the selected bar (the deep accent) stands out from it.
+        expect(contrast(c.accent, c.barSoft), greaterThanOrEqualTo(2.0));
+      });
+
+      test('one scrim: the mood ink at 32%', () {
+        expect(c.scrim, c.scrimPocket);
+        expect(c.scrim, c.scrimMenu);
+        expect(c.scrim.a, closeTo(0.32, 0.005));
       });
 
       test("shadows and scrims are lighter than the dark theme's", () {
@@ -211,32 +267,38 @@ void main() {
       }
     });
 
-    test('only the ones under 3:1 got a deeper step, same hue', () {
+    test('Green and Yellow (under 3:1) got a deeper step, Amber a nudge', () {
+      final white = const Color(0xFFFFFFFF);
       final changed = <String>[];
       for (final color in CategoryColor.values) {
-        final plain = contrast(color.color, const Color(0xFFFFFFFF));
+        final plain = contrast(color.color, white);
         if (color.lightColor == color.color) {
           expect(plain, greaterThanOrEqualTo(muted), reason: color.label);
-        } else {
-          changed.add(color.label);
-          expect(plain, lessThan(muted), reason: color.label);
+          continue;
+        }
+        changed.add(color.label);
+        expect(
+          contrast(color.lightColor, white),
+          greaterThanOrEqualTo(muted),
+          reason: color.label,
+        );
+        // The same family of hue as the palette colour.
+        final a = HSLColor.fromColor(color.color);
+        final b = HSLColor.fromColor(color.lightColor);
+        final hueGap = (a.hue - b.hue).abs();
+        expect(math.min(hueGap, 360 - hueGap), lessThan(15), reason: color.label);
+        if (plain < muted) {
+          // Under 3:1: a deeper step.
           expect(
-            contrast(color.lightColor, const Color(0xFFFFFFFF)),
-            greaterThanOrEqualTo(muted),
-          );
-          // Deeper, not another colour: the same family of hue.
-          final a = HSLColor.fromColor(color.color);
-          final b = HSLColor.fromColor(color.lightColor);
-          expect(b.lightness, lessThan(a.lightness), reason: color.label);
-          final hueGap = (a.hue - b.hue).abs();
-          expect(
-            math.min(hueGap, 360 - hueGap),
-            lessThan(15),
+            color.lightColor.computeLuminance(),
+            lessThan(color.color.computeLuminance()),
             reason: color.label,
           );
         }
       }
-      expect(changed, ['Green', 'Yellow']);
+      expect(changed, ['Green', 'Amber', 'Yellow']);
+      expect(CategoryColor.yellow.lightColor, const Color(0xFFB08A00));
+      expect(contrast(CategoryColor.yellow.lightColor, white), closeTo(3.24, 0.01));
     });
 
     test("neighbours stay apart: no pair closer than the dark palette's", () {
@@ -337,6 +399,31 @@ void main() {
       expect(aqua.scrimMenu, aqua.scrim.withValues(alpha: 0.68));
       expect(aqua.raised, aqua.tile);
       expect(aqua.heat.first, mix(aqua.accent, aqua.bg, 0.4));
+      // The tokens added with the light theme are the dark ones' own values.
+      for (final mood in Mood.values) {
+        final d = AppColors.of(mood);
+        expect(d.accentFill, d.accent, reason: mood.name);
+        expect(d.onFill, d.onAccent, reason: mood.name);
+        expect(d.onFillDim, d.onAccentDim, reason: mood.name);
+        expect(d.onInk, d.text, reason: mood.name);
+        expect(d.control, d.surface2, reason: mood.name);
+        expect(d.pop, d.surface2, reason: mood.name);
+        expect(d.pageTile, d.tile, reason: mood.name);
+        expect(d.litTile, mix(d.accent, d.tile, 0.15), reason: mood.name);
+        expect(d.stripStrong, d.strip, reason: mood.name);
+        expect(d.heatStrongFrom, 3, reason: mood.name);
+        expect(d.otherBar, d.other, reason: mood.name);
+        expect(d.toastText, d.text, reason: mood.name);
+        expect(d.toastAction, d.accent, reason: mood.name);
+        expect(d.sheen, const Color(0x4DFFFFFF), reason: mood.name);
+        expect(d.edge.a, 0, reason: 'no card stroke on dark');
+        expect(d.lift1.a, 0, reason: 'no card lift on dark');
+        expect(d.lift2.a, 0, reason: 'no card lift on dark');
+        expect(d.accentGlow, d.accent.withAlpha(0x59), reason: mood.name);
+        expect(d.barSoft, mix(d.accent, d.surface, 0.6), reason: mood.name);
+        expect(d.barDim, mix(d.accent, d.surface, 0.36), reason: mood.name);
+        expect(d.other, mix(d.text3, d.surface, 0.5), reason: mood.name);
+      }
       expect(AppColors.of(Mood.coral).accent, const Color(0xFFFF7A5F));
       expect(AppColors.of(Mood.iris).accent, const Color(0xFFA898FF));
     });

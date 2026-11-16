@@ -56,7 +56,7 @@ class HeroCard extends StatelessWidget {
       height: heroCardHeight,
       child: CustomPaint(
         painter: _HeroPainter(
-          fill: c.accent,
+          fill: c.accentFill,
           sheen: c.sheen,
           ring: c.ring,
           ringSoft: c.ringSoft,
@@ -94,7 +94,7 @@ class HeroCard extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                   style: AppText.overline.copyWith(
                                     fontWeight: FontWeight.w700,
-                                    color: c.onAccentDim,
+                                    color: c.onFillDim,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
@@ -108,7 +108,7 @@ class HeroCard extends StatelessWidget {
                                             value,
                                             maxLines: 1,
                                             style: AppText.heroNumber.copyWith(
-                                              color: c.onAccent,
+                                              color: c.onFill,
                                             ),
                                           )
                                         : Text.rich(
@@ -118,13 +118,13 @@ class HeroCard extends StatelessWidget {
                                                   text: value,
                                                   style: AppText.heroNumber
                                                       .copyWith(
-                                                        color: c.onAccent,
+                                                        color: c.onFill,
                                                       ),
                                                 ),
                                                 TextSpan(
                                                   text: ' $unit',
                                                   style: _unitStyle.copyWith(
-                                                    color: c.onAccent,
+                                                    color: c.onFill,
                                                   ),
                                                 ),
                                               ],
@@ -140,14 +140,14 @@ class HeroCard extends StatelessWidget {
                             width: 32,
                             height: 32,
                             decoration: BoxDecoration(
-                              color: c.onAccent,
+                              color: c.onFill,
                               shape: BoxShape.circle,
                             ),
                             alignment: Alignment.center,
                             child: Icon(
                               Symbols.north_east_rounded,
                               size: 18,
-                              color: c.text,
+                              color: c.onInk,
                             ),
                           ),
                         ],
@@ -180,7 +180,7 @@ class _MonthChip extends StatelessWidget {
     final c = context.colors;
     return Pressable(
       onTap: onTap,
-      color: c.onAccent,
+      color: c.onFill,
       borderRadius: BorderRadius.circular(16),
       semanticLabel: 'Choose month, ${monthYear(month.year, month.month)}',
       child: ExcludeSemantics(
@@ -210,7 +210,7 @@ class _MonthChip extends StatelessWidget {
                       style: AppText.pageTitle.copyWith(
                         fontSize: 22,
                         height: 36 / 22,
-                        color: c.text,
+                        color: c.onInk,
                       ),
                     ),
                     // The chevron overlaps the text box by 4 px (margin -4),
@@ -227,7 +227,7 @@ class _MonthChip extends StatelessWidget {
                           child: Icon(
                             Symbols.expand_more_rounded,
                             size: 20,
-                            color: c.accent,
+                            color: c.accentFill,
                           ),
                         ),
                       ),

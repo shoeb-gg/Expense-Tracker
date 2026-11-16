@@ -207,7 +207,9 @@ class _PocketFormScreenState extends ConsumerState<PocketFormScreen> {
             decoration: BoxDecoration(
               color: c.surface,
               borderRadius: BorderRadius.circular(20),
+              boxShadow: liftShadows(c),
             ),
+            foregroundDecoration: edgeDecoration(c, BorderRadius.circular(20)),
             child: Row(
               children: [
                 EmojiTile(emoji: emoji, size: 56, radius: 18, emojiSize: 28),
@@ -343,7 +345,9 @@ class _PocketFormScreenState extends ConsumerState<PocketFormScreen> {
               decoration: BoxDecoration(
                 color: c.surface,
                 borderRadius: BorderRadius.circular(20),
+                boxShadow: liftShadows(c),
               ),
+              foregroundDecoration: edgeDecoration(c, BorderRadius.circular(20)),
               child: Text(
                 keepLastWordsTogether(
                   'A new pocket starts empty. Your categories and settings '

@@ -47,7 +47,7 @@ class BandCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return ClipRRect(
+    return CardClip(
       borderRadius: BorderRadius.circular(20),
       child: ColoredBox(
         color: c.surface,
@@ -323,7 +323,9 @@ class MessageCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: c.surface,
         borderRadius: BorderRadius.circular(20),
+        boxShadow: liftShadows(c),
       ),
+      foregroundDecoration: edgeDecoration(c, BorderRadius.circular(20)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

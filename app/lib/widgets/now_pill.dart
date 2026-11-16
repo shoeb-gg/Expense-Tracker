@@ -144,7 +144,7 @@ class _NowPillState extends State<NowPill> with SingleTickerProviderStateMixin {
                       leading: Icon(
                         Symbols.calendar_month_rounded,
                         size: 16,
-                        color: c.onAccent,
+                        color: c.onFill,
                       ),
                     ),
                   ),

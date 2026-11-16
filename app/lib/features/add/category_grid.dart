@@ -100,9 +100,11 @@ class CategoryTile extends StatelessWidget {
               height: 48,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: selected ? litTileColor(c) : c.tile,
+                color: selected ? litTileColor(c) : c.pageTile,
                 borderRadius: BorderRadius.circular(15),
-                boxShadow: selected ? selectedTileShadows(c) : const [],
+                boxShadow: selected
+                    ? selectedTileShadows(c)
+                    : (liftShadows(c) ?? const []),
               ),
               foregroundDecoration: showOutline
                   ? BoxDecoration(
@@ -112,7 +114,12 @@ class CategoryTile extends StatelessWidget {
                         width: 1.5,
                       ),
                     )
-                  : null,
+                  : (selected ? selectedTileRing(c) : edgeBorder(c)) == null
+                  ? null
+                  : BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      border: selected ? selectedTileRing(c) : edgeBorder(c),
+                    ),
               child: ExcludeSemantics(child: Text(category.emoji, style: emojiText(24))),
             ),
             const SizedBox(height: 6),

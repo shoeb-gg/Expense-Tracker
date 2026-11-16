@@ -44,6 +44,8 @@ class RoundIconButton extends StatelessWidget {
         semanticLabel: semanticLabel,
         color: background ?? c.surface,
         borderRadius: BorderRadius.circular(size / 2),
+        border: background == null ? edgeBorder(c) : null,
+        shadows: background == null ? liftShadows(c) : null,
         child: Center(
           child: Icon(icon, size: iconSize, color: color ?? c.text, fill: fill),
         ),
@@ -113,7 +115,7 @@ class Pill extends StatelessWidget {
     final (Color bg, Color fg, FontWeight fw) = switch (tone) {
       PillTone.neutral => (c.surface, enabled ? c.text : c.text3, FontWeight.w700),
       PillTone.accent => enabled
-          ? (c.accent, c.onAccent, FontWeight.w800)
+          ? (c.accentFill, c.onFill, FontWeight.w800)
           : (c.surface2, c.text3, FontWeight.w800),
       PillTone.soft => (c.accentSoft, c.text, FontWeight.w700),
     };
@@ -131,6 +133,8 @@ class Pill extends StatelessWidget {
         semanticLabel: semanticLabel,
         color: bg,
         borderRadius: BorderRadius.circular(height / 2),
+        border: tone == PillTone.neutral ? edgeBorder(c) : null,
+        shadows: tone == PillTone.neutral ? liftShadows(c) : null,
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: width == null ? 14 : 0),
           child: Row(
@@ -199,7 +203,7 @@ class PrimaryButton extends StatelessWidget {
     final enabled = onPressed != null;
     final (Color bg, Color fg) = switch (tone) {
       ButtonTone.accent =>
-        enabled ? (c.accent, c.onAccent) : (c.surface2, c.text3),
+        enabled ? (c.accentFill, c.onFill) : (c.surface2, c.text3),
       ButtonTone.quiet => (c.surface2, enabled ? c.text : c.text3),
       ButtonTone.danger => (c.surface2, enabled ? c.bad : c.text3),
       ButtonTone.destructive => enabled
@@ -213,6 +217,9 @@ class PrimaryButton extends StatelessWidget {
         semanticLabel: semanticLabel,
         color: bg,
         borderRadius: BorderRadius.circular(radius),
+        border: tone == ButtonTone.quiet || tone == ButtonTone.danger
+            ? edgeBorder(c)
+            : null,
         shadows: glow && enabled && tone == ButtonTone.accent
             ? [accentGlowShadow(c.accentGlow)]
             : null,
@@ -280,7 +287,7 @@ class PopupButtons extends StatelessWidget {
         ? (enabled
             ? (c.bad, c.onBad)
             : (mix(c.bad, c.surface2, 0.14), mix(c.bad, c.surface2, 0.5)))
-        : (enabled ? (c.accent, c.onAccent) : (c.tile, c.text3));
+        : (enabled ? (c.accentFill, c.onFill) : (c.tile, c.text3));
     final cancelStyle = AppText.buttonQuiet.copyWith(color: c.text);
     final actionStyle = AppText.button.copyWith(color: fg);
     final scaler = MediaQuery.textScalerOf(context);

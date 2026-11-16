@@ -111,7 +111,9 @@ class PlainCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(20),
+        boxShadow: liftShadows(context.colors),
       ),
+      foregroundDecoration: edgeDecoration(context.colors, BorderRadius.circular(20)),
       child: child,
     );
   }

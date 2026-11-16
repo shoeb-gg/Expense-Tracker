@@ -111,7 +111,11 @@ class _ToastViewState extends State<_ToastView>
                 decoration: BoxDecoration(
                   color: c.raised,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [popupShadow(context.colors)],
+                  boxShadow: [
+                    c.brightness == Brightness.light
+                        ? cssShadow(y: 6, blur: 20, color: c.shadowToast)
+                        : popupShadow(c),
+                  ],
                 ),
                 child: Row(
                   children: [
@@ -120,7 +124,7 @@ class _ToastViewState extends State<_ToastView>
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         child: Text(
                           widget.message,
-                          style: AppText.label.copyWith(color: c.text),
+                          style: AppText.label.copyWith(color: c.toastText),
                         ),
                       ),
                     ),
@@ -136,7 +140,7 @@ class _ToastViewState extends State<_ToastView>
                               child: Text(
                                 'Undo',
                                 style: AppText.label.copyWith(
-                                  color: c.accent,
+                                  color: c.toastAction,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),

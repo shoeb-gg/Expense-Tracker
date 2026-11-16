@@ -83,6 +83,23 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.thumb,
     required this.more,
     required this.raised,
+    required this.accentFill,
+    required this.onFill,
+    required this.onFillDim,
+    required this.onInk,
+    required this.control,
+    required this.pop,
+    required this.pageTile,
+    required this.litTile,
+    required this.stripStrong,
+    required this.heatStrongFrom,
+    required this.otherBar,
+    required this.toastText,
+    required this.toastAction,
+    required this.shadowToast,
+    required this.edge,
+    required this.lift1,
+    required this.lift2,
   });
 
   /// Tokens of [mood] in [brightness], computed like the mockup (dark) or
@@ -99,7 +116,7 @@ class AppColors extends ThemeExtension<AppColors> {
     // Dark: a tile lighter than the surface (surface x 0.87 + 33). Light:
     // a tile a little deeper than the page, between the page and the lines.
     final tile = light
-        ? mix(base.bg, base.line, 0.55)
+        ? mix(base.bg, base.line, 0.37)
         : Color.fromARGB(
             0xFF,
             ((surface.toARGB32() >> 16 & 0xFF) * 0.87 + 33).round(),
@@ -110,6 +127,8 @@ class AppColors extends ThemeExtension<AppColors> {
     // light (a black shadow is too heavy on a light page).
     final shade = light ? base.ink : const Color(0xFF000000);
     final scrimBase = light ? base.ink : const Color(0xFF040A0B);
+    // Light: one muted bar tone ("soft" and "dim" are the same there).
+    final muted = light ? base.mutedBar : null;
     return AppColors(
       mood: mood,
       brightness: brightness,
@@ -126,11 +145,11 @@ class AppColors extends ThemeExtension<AppColors> {
       ink: base.ink,
       tile: tile,
       accentSoft: accent.withAlpha(0x2E),
-      accentGlow: accent.withAlpha(0x59),
+      accentGlow: base.accentFill.withAlpha(0x59),
       wash: accent.withAlpha(0x29),
-      other: mix(base.text3, surface, light ? 0.8 : 0.5),
-      barSoft: mix(accent, surface, 0.6),
-      barDim: mix(accent, surface, 0.36),
+      other: mix(base.text3, surface, light ? 0.30 : 0.5),
+      barSoft: muted ?? mix(accent, surface, 0.6),
+      barDim: muted ?? mix(accent, surface, 0.36),
       ramp: List.unmodifiable(
         [1.0, 0.86, 0.72, 0.58, 0.44].map((w) => mix(accent, surface, w)),
       ),
@@ -140,43 +159,57 @@ class AppColors extends ThemeExtension<AppColors> {
           ? mix(base.text3, surface, 0.22)
           : mix(base.bg, surface, 0.5),
       onAccentDim: base.onAccent.withAlpha(light ? 0xEB : 0xD9),
-      // Light: two soft tints with ink on them, then the accent and a deeper
-      // step with white on them (the calendar switches text colour at the
-      // third step).
+      // Light: three tints of the accent fill with ink on them, then the
+      // deep accent with white on it (the calendar switches text colour at
+      // [heatStrongFrom]).
       heat: List.unmodifiable(
         light
-            ? [
-                mix(accent, base.bg, 0.22),
-                mix(accent, base.bg, 0.46),
-                accent,
-                mix(accent, base.text, 0.78),
-              ]
+            ? base.heat!
             : [0.4, 0.56, 0.74, 0.94].map((w) => mix(accent, base.bg, w)),
       ),
       dim: mix(base.text3, base.bg, 0.55),
       good: light ? const Color(0xFF127A4B) : const Color(0xFF5BD49B),
       bad: light ? const Color(0xFFC22D4A) : const Color(0xFFFF8C9A),
       onBad: light ? const Color(0xFFFFFFFF) : const Color(0xFF2A0B12),
-      pillDim: light ? base.text3 : const Color(0xB8FFFFFF),
-      sheen: const Color(0x4DFFFFFF),
+      pillDim: const Color(0xB8FFFFFF),
+      // Light: no rim along the hero's top edge.
+      sheen: light ? const Color(0x00FFFFFF) : const Color(0x4DFFFFFF),
       ring: const Color(0x47FFFFFF),
       ringSoft: const Color(0x26FFFFFF),
       switchOff: mix(base.text3, surface, light ? 0.8 : 0.4),
       popDim: mix(base.text3, surface2, 0.5),
       popGrab: mix(base.text3, surface2, light ? 0.5 : 0.4),
       popStub: mix(base.text3, surface2, light ? 0.8 : 0.45),
-      scrim: light ? scrimBase.withValues(alpha: 0.5) : const Color(0xE0040A0B),
-      scrimPocket: scrimBase.withValues(alpha: light ? 0.42 : 0.80),
+      scrim: light ? scrimBase.withValues(alpha: 0.32) : const Color(0xE0040A0B),
+      scrimPocket: scrimBase.withValues(alpha: light ? 0.32 : 0.80),
       scrimMenu: scrimBase.withValues(alpha: light ? 0.32 : 0.68),
       shadowSm: shade.withAlpha(light ? 0x24 : 0x59),
       shadowMd: shade.withAlpha(light ? 0x33 : 0x73),
-      shadowLg: shade.withAlpha(light ? 0x3D : 0x80),
+      shadowLg: shade.withAlpha(light ? 0x29 : 0x80),
       inverse: light ? base.text : const Color(0xFFFFFFFF),
       onInverse: light ? const Color(0xFFFFFFFF) : base.onAccent,
-      strip: light ? base.ink.withAlpha(0xA6) : base.onAccent.withAlpha(0x8C),
+      strip: light ? base.strip! : base.onAccent.withAlpha(0x8C),
       thumb: light ? surface : base.text,
-      more: light ? const Color(0xFFB93A28) : const Color(0xFFFF9A8F),
-      raised: light ? surface : tile,
+      // Light: the same crimson as bad, so "spent more" is one red.
+      more: light ? const Color(0xFFC22D4A) : const Color(0xFFFF9A8F),
+      raised: light ? base.toast! : tile,
+      accentFill: base.accentFill,
+      onFill: base.onFill,
+      onFillDim: base.onFill.withAlpha(0xD9),
+      onInk: light ? const Color(0xFFFFFFFF) : base.text,
+      control: light ? mix(base.bg, base.line, 0.67) : surface2,
+      pop: light ? surface : surface2,
+      pageTile: light ? surface : tile,
+      litTile: light ? mix(accent, surface, 0.135) : mix(accent, tile, 0.15),
+      stripStrong: light ? base.stripStrong! : base.onAccent.withAlpha(0x8C),
+      heatStrongFrom: light ? 4 : 3,
+      otherBar: mix(base.text3, surface, light ? 0.55 : 0.5),
+      toastText: light ? const Color(0xFFFFFFFF) : base.text,
+      toastAction: light ? base.accentFill : accent,
+      shadowToast: shade.withAlpha(light ? 0x38 : 0x80),
+      edge: light ? base.ink.withAlpha(0x0F) : const Color(0x00000000),
+      lift1: light ? base.ink.withAlpha(0x0A) : const Color(0x00000000),
+      lift2: light ? base.ink.withAlpha(0x0D) : const Color(0x00000000),
     );
   }
 
@@ -328,9 +361,66 @@ class AppColors extends ThemeExtension<AppColors> {
   /// Warm colour of "N% more than ..." in Charts.
   final Color more;
 
-  /// Fill of things that float over the page (the toast): [tile] on dark,
-  /// white on light.
+  /// Fill of things that float over the page (the toast): [tile] on dark, a
+  /// dark ink-like tone on light (an inverse toast).
   final Color raised;
+
+  /// Big fills of the accent: the hero card, the add button, primary buttons,
+  /// chosen segments, the Today chip, the calendar's month bar. On light it
+  /// is the mood's bright tone (the dark theme's accent); [accent] is then
+  /// the deeper step for text, icons, switch tracks and chart marks.
+  final Color accentFill;
+
+  /// Text and icons on [accentFill] (dark ink).
+  final Color onFill;
+
+  /// [onFill] at alpha 0xD9 (quiet text on [accentFill]).
+  final Color onFillDim;
+
+  /// Text and icons on ink-coloured chips (the hero's month chip and arrow):
+  /// white in both themes.
+  final Color onInk;
+
+  /// Keys and fields that sit on a sheet or card: [surface2] on dark, a
+  /// slightly deeper tone on light so they stay visible on white.
+  final Color control;
+
+  /// Pop-ups, sheets and menus: [surface2] on dark, white on light.
+  final Color pop;
+
+  /// Emoji tiles that sit directly on the page (the Add grid): [tile] on
+  /// dark, white on light (with the card edge).
+  final Color pageTile;
+
+  /// A chosen emoji tile's fill.
+  final Color litTile;
+
+  /// Strip under the amount of the strongest calendar step.
+  final Color stripStrong;
+
+  /// First calendar step (1-4) that is "strong": its text and badge switch.
+  final int heatStrongFrom;
+
+  /// Fill of the quiet bars of rows after the fifth ("all the rest").
+  final Color otherBar;
+
+  /// Text on [raised] (the toast).
+  final Color toastText;
+
+  /// The action of the toast ("Undo").
+  final Color toastAction;
+
+  /// Shadow colour of the toast on light.
+  final Color shadowToast;
+
+  /// 1 px inside stroke of cards and white buttons on light (clear on dark).
+  final Color edge;
+
+  /// The two soft shadows that lift cards on light (clear on dark).
+  final Color lift1;
+
+  /// See [lift1].
+  final Color lift2;
 
   /// The mockup's `mix` helper.
   Color mixColors(Color a, Color b, double w) => mix(a, b, w);
@@ -401,6 +491,23 @@ class AppColors extends ThemeExtension<AppColors> {
       thumb: l(thumb, other.thumb),
       more: l(more, other.more),
       raised: l(raised, other.raised),
+      accentFill: l(accentFill, other.accentFill),
+      onFill: l(onFill, other.onFill),
+      onFillDim: l(onFillDim, other.onFillDim),
+      onInk: l(onInk, other.onInk),
+      control: l(control, other.control),
+      pop: l(pop, other.pop),
+      pageTile: l(pageTile, other.pageTile),
+      litTile: l(litTile, other.litTile),
+      stripStrong: l(stripStrong, other.stripStrong),
+      heatStrongFrom: t < 0.5 ? heatStrongFrom : other.heatStrongFrom,
+      otherBar: l(otherBar, other.otherBar),
+      toastText: l(toastText, other.toastText),
+      toastAction: l(toastAction, other.toastAction),
+      shadowToast: l(shadowToast, other.shadowToast),
+      edge: l(edge, other.edge),
+      lift1: l(lift1, other.lift1),
+      lift2: l(lift2, other.lift2),
     );
   }
 }
@@ -429,7 +536,14 @@ class _Base {
     required this.text3,
     required this.accent,
     required this.onAccent,
+    required this.accentFill,
+    required this.onFill,
     required this.ink,
+    this.heat,
+    this.strip,
+    this.stripStrong,
+    this.mutedBar,
+    this.toast,
   });
 
   final Color bg;
@@ -442,10 +556,18 @@ class _Base {
   final Color text3;
   final Color accent;
   final Color onAccent;
+  final Color accentFill;
+  final Color onFill;
   final Color ink;
+
+  // Light only.
+  final List<Color>? heat;
+  final Color? strip;
+  final Color? stripStrong;
+  final Color? mutedBar;
+  final Color? toast;
 }
 
-/// The dark bases (the mockup's).
 const Map<Mood, _Base> _darkBases = {
   Mood.aqua: _Base(
     bg: Color(0xFF0B1517),
@@ -458,6 +580,8 @@ const Map<Mood, _Base> _darkBases = {
     text3: Color(0xFF9BB0B3),
     accent: Color(0xFF4FD1C5),
     onAccent: Color(0xFF04231F),
+    accentFill: Color(0xFF4FD1C5),
+    onFill: Color(0xFF04231F),
     ink: Color(0xFF0F1E21),
   ),
   Mood.coral: _Base(
@@ -471,6 +595,8 @@ const Map<Mood, _Base> _darkBases = {
     text3: Color(0xFFA2ABC4),
     accent: Color(0xFFFF7A5F),
     onAccent: Color(0xFF2A0F0A),
+    accentFill: Color(0xFFFF7A5F),
+    onFill: Color(0xFF2A0F0A),
     ink: Color(0xFF171B2B),
   ),
   Mood.iris: _Base(
@@ -484,13 +610,17 @@ const Map<Mood, _Base> _darkBases = {
     text3: Color(0xFFA9A6CA),
     accent: Color(0xFFA898FF),
     onAccent: Color(0xFF150F33),
+    accentFill: Color(0xFFA898FF),
+    onFill: Color(0xFF150F33),
     ink: Color(0xFF17132B),
   ),
 };
 
 /// The light bases: pale neutral surfaces with a faint tint of the mood, white
-/// cards, ink text, and an accent one deeper step than the dark one so it
-/// reads on light (white on the accent is at least 5:1 in every mood).
+/// cards, ink text. The accent is split in two: [_Base.accentFill] is the
+/// mood's bright tone (the dark theme's accent) for big fills with ink on them,
+/// and [_Base.accent] a deeper step for text, icons, switch tracks and chart
+/// marks (white on it is at least 5:1 in every mood).
 const Map<Mood, _Base> _lightBases = {
   Mood.aqua: _Base(
     bg: Color(0xFFEDF4F4),
@@ -503,7 +633,19 @@ const Map<Mood, _Base> _lightBases = {
     text3: Color(0xFF587276),
     accent: Color(0xFF0A7A71),
     onAccent: Color(0xFFFFFFFF),
+    accentFill: Color(0xFF4FD1C5),
+    onFill: Color(0xFF0D2125),
     ink: Color(0xFF0F1E21),
+    heat: [
+      Color(0xFFCDEBE7),
+      Color(0xFF93D6CD),
+      Color(0xFF4FBFB3),
+      Color(0xFF0A7A71),
+    ],
+    strip: Color(0xFF2F6F69),
+    stripStrong: Color(0xFF07524C),
+    mutedBar: Color(0xFF7CCBC2),
+    toast: Color(0xFF1E3236),
   ),
   Mood.coral: _Base(
     bg: Color(0xFFF0F2F8),
@@ -514,9 +656,21 @@ const Map<Mood, _Base> _lightBases = {
     text: Color(0xFF161B2E),
     text2: Color(0xFF434A66),
     text3: Color(0xFF606886),
-    accent: Color(0xFFC23B21),
+    accent: Color(0xFFB5481F),
     onAccent: Color(0xFFFFFFFF),
+    accentFill: Color(0xFFFF7A5F),
+    onFill: Color(0xFF1A1F33),
     ink: Color(0xFF171B2B),
+    heat: [
+      Color(0xFFFFD9D0),
+      Color(0xFFFFAF9D),
+      Color(0xFFFA826A),
+      Color(0xFFB5481F),
+    ],
+    strip: Color(0xFF97492E),
+    stripStrong: Color(0xFF772B0E),
+    mutedBar: Color(0xFFFB9E89),
+    toast: Color(0xFF272C40),
   ),
   Mood.iris: _Base(
     bg: Color(0xFFF1F0FA),
@@ -529,15 +683,28 @@ const Map<Mood, _Base> _lightBases = {
     text3: Color(0xFF645F88),
     accent: Color(0xFF6A55E0),
     onAccent: Color(0xFFFFFFFF),
+    accentFill: Color(0xFFA898FF),
+    onFill: Color(0xFF16142E),
     ink: Color(0xFF17132B),
+    heat: [
+      Color(0xFFE2E0FE),
+      Color(0xFFC5BEFD),
+      Color(0xFFA89BF7),
+      Color(0xFF6A55E0),
+    ],
+    strip: Color(0xFF5C52B3),
+    stripStrong: Color(0xFF423293),
+    mutedBar: Color(0xFFB8AFF7),
+    toast: Color(0xFF2A263E),
   ),
 };
 
 /// The 18 chart colours a category can have, the one source of truth for
 /// every category colour (the defaults, the form's swatches, imports).
-/// Category colours never change with the mood. On a light theme two of them
-/// (Green and Yellow, the ones under 3:1 against a white card) are drawn one
-/// deeper step; see [CategoryColor.lightColor].
+/// Category colours never change with the mood. On a light theme three of them
+/// are drawn differently (see [CategoryColor.lightColor]): Green and Yellow,
+/// the two under 3:1 against a white card, one deeper step; and Amber a little
+/// toward orange, so the deeper Yellow keeps 7 apart from it (OKLab x100).
 ///
 /// The first eight are the original palette: their values, names and order
 /// never change, so stored colours and earlier picks still match. The other
@@ -552,13 +719,13 @@ enum CategoryColor {
   blue('Blue', Color(0xFF3987E5)),
   green('Green', Color(0xFF41AE61), light: Color(0xFF38A55A)),
   violet('Violet', Color(0xFF9085E9)),
-  amber('Amber', Color(0xFFC98500)),
+  amber('Amber', Color(0xFFC98500), light: Color(0xFFD77C00)),
   cyan('Cyan', Color(0xFF0096AF)),
   pink('Pink', Color(0xFFD55181)),
   orange('Orange', Color(0xFFD95926)),
   coral('Coral', Color(0xFFE66767)),
   red('Red', Color(0xFFB94542)),
-  yellow('Yellow', Color(0xFFCCB501), light: Color(0xFF9D9500)),
+  yellow('Yellow', Color(0xFFCCB501), light: Color(0xFFB08A00)),
   lime('Lime', Color(0xFF4A8F08)),
   teal('Teal', Color(0xFF017C5F)),
   sky('Sky', Color(0xFF6C96CA)),
@@ -579,7 +746,8 @@ enum CategoryColor {
   final Color? _light;
 
   /// The colour drawn on light surfaces: [color] where it already reaches
-  /// 3:1 against the light card, otherwise a deeper step of the same hue.
+  /// 3:1 against the light card and keeps clear of its neighbours, otherwise
+  /// a deeper step of the same hue (Amber: a step toward orange).
   /// Only what is drawn changes; the stored [argb] never does.
   Color get lightColor => _light ?? color;
 

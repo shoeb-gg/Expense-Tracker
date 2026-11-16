@@ -276,7 +276,7 @@ class _MonthBar extends StatelessWidget {
       height: 56,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: c.accent,
+        color: c.accentFill,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -305,13 +305,13 @@ class _MonthBar extends StatelessWidget {
                         fontSize: 16,
                         height: 20 / 16,
                         letterSpacing: -0.2,
-                        color: c.onAccent,
+                        color: c.onFill,
                       ),
                     ),
                     Text(
                       total,
                       maxLines: 1,
-                      style: AppText.overline.copyWith(color: c.onAccentDim),
+                      style: AppText.overline.copyWith(color: c.onFillDim),
                     ),
                   ],
                 ),
@@ -341,13 +341,13 @@ class _Arrow extends StatelessWidget {
     final c = context.colors;
     return Pressable(
       onTap: onTap,
-      color: c.onAccent,
+      color: c.onFill,
       borderRadius: BorderRadius.circular(20),
       semanticLabel: label,
       child: SizedBox(
         width: 40,
         height: 40,
-        child: Icon(icon, size: 24, color: c.accent),
+        child: Icon(icon, size: 24, color: c.accentFill),
       ),
     );
   }
@@ -483,7 +483,7 @@ class _DayCell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
     final fmt = ref.watch(amountFormatProvider);
-    final dark = level >= 3;
+    final dark = level >= c.heatStrongFrom;
     final bg = future
         ? mix(c.surface, c.bg, 0.45)
         : level == 0
@@ -566,7 +566,7 @@ class _DayCell extends ConsumerWidget {
                   Container(
                     height: 22,
                     width: double.infinity,
-                    color: c.strip,
+                    color: dark ? c.stripStrong : c.strip,
                     alignment: Alignment.topCenter,
                     child: SizedBox(
                       height: 20,
@@ -700,7 +700,7 @@ class _DayCard extends ConsumerWidget {
     return Semantics(
       container: true,
       label: '${weekdayName(day)}, ${longMonthDay(day)}',
-      child: ClipRRect(
+      child: CardClip(
         borderRadius: BorderRadius.circular(20),
         child: ColoredBox(
           color: c.surface,
@@ -718,13 +718,13 @@ class _DayCard extends ConsumerWidget {
                       height: 40,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: isToday ? c.accent : c.accentSoft,
+                        color: isToday ? c.accentFill : c.accentSoft,
                         borderRadius: BorderRadius.circular(13),
                       ),
                       child: Text(
                         '${dayOfMonth(day)}',
                         style: AppText.badgeNumber.copyWith(
-                          color: isToday ? c.onAccent : c.accent,
+                          color: isToday ? c.onFill : c.accent,
                         ),
                       ),
                     ),

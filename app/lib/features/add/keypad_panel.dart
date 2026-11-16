@@ -163,7 +163,7 @@ class _CategoryChip extends StatelessWidget {
       child: Pressable(
         onTap: onTap,
         semanticLabel: 'Category: ${category.name}',
-        color: c.surface2,
+        color: c.control,
         borderRadius: BorderRadius.circular(22),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(4, 0, 8, 0),
@@ -265,7 +265,7 @@ class _TitleField extends StatelessWidget {
     return Container(
       height: 48,
       padding: const EdgeInsets.fromLTRB(14, 0, 4, 0),
-      decoration: BoxDecoration(color: c.surface2, borderRadius: BorderRadius.circular(14)),
+      decoration: BoxDecoration(color: c.control, borderRadius: BorderRadius.circular(14)),
       child: Row(
         children: [
           Expanded(
@@ -469,7 +469,7 @@ class _Key extends StatelessWidget {
         onTap: onTap,
         onLongPress: onLongPress,
         semanticLabel: label,
-        color: color ?? context.colors.surface2,
+        color: color ?? context.colors.control,
         borderRadius: BorderRadius.circular(14),
         child: ExcludeSemantics(child: Center(child: child)),
       ),
@@ -537,10 +537,10 @@ class _CheckKey extends StatelessWidget {
         width: width,
         label: 'Equals',
         onTap: () => onKey(keyEquals),
-        color: c.accent,
+        color: c.accentFill,
         child: Text(
           '=',
-          style: boardText(25, 25, FontWeight.w700, tabular: true, color: c.onAccent),
+          style: boardText(25, 25, FontWeight.w700, tabular: true, color: c.onFill),
         ),
       ),
       CheckKey.equalsDisabled => _Key(
@@ -553,8 +553,8 @@ class _CheckKey extends StatelessWidget {
         width: width,
         label: 'Save',
         onTap: onSave,
-        color: c.accent,
-        child: Text('Save', style: boardText(15, 20, FontWeight.w800, color: c.onAccent)),
+        color: c.accentFill,
+        child: Text('Save', style: boardText(15, 20, FontWeight.w800, color: c.onFill)),
       ),
       CheckKey.saveDisabled => _Key(
         width: width,

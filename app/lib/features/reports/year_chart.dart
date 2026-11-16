@@ -232,6 +232,8 @@ class _YearSwitch extends StatelessWidget {
         semanticLabel: 'Year $year. Tap to change',
         color: c.surface,
         borderRadius: BorderRadius.circular(12),
+        border: edgeBorder(c),
+        shadows: liftShadows(c),
         onTap: () async {
           final picked = await showOptionSheet<int>(
             context,

@@ -393,7 +393,9 @@ class _AllTime extends ConsumerWidget {
       decoration: BoxDecoration(
         color: c.surface,
         borderRadius: BorderRadius.circular(20),
+        boxShadow: liftShadows(c),
       ),
+      foregroundDecoration: edgeDecoration(c, BorderRadius.circular(20)),
       child: Row(
         children: [
           Expanded(

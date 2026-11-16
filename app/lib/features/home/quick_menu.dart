@@ -63,7 +63,7 @@ class _QuickMenuLayer extends StatelessWidget {
             type: MaterialType.transparency,
             child: Container(
               decoration: BoxDecoration(
-                color: c.surface2,
+                color: c.pop,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   cssShadow(y: 10, blur: 28, color: c.shadowMd),
@@ -87,7 +87,7 @@ class _QuickMenuLayer extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 decoration: BoxDecoration(
-                  color: c.surface2,
+                  color: c.pop,
                   borderRadius: BorderRadius.circular(18),
                   boxShadow: [popupShadow(c)],
                 ),

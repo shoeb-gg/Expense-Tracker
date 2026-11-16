@@ -217,11 +217,11 @@ class _ReadyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final dim = c.onAccentDim;
+    final dim = c.onFillDim;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: c.accent,
+        color: c.accentFill,
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
@@ -248,7 +248,7 @@ class _ReadyCard extends StatelessWidget {
                   fontSize: 30,
                   height: 38 / 30,
                   letterSpacing: -0.6,
-                  color: c.onAccent,
+                  color: c.onFill,
                 ),
               ),
               Padding(
@@ -259,7 +259,7 @@ class _ReadyCard extends StatelessWidget {
                   children: [
                     Text(
                       total,
-                      style: AppText.badgeNumber.copyWith(color: c.onAccent),
+                      style: AppText.badgeNumber.copyWith(color: c.onFill),
                     ),
                     Text(
                       'in total',

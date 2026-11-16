@@ -249,7 +249,7 @@ class _MoodTile extends StatelessWidget {
                       width: 24,
                       height: 24,
                       decoration: BoxDecoration(
-                        color: m.accent,
+                        color: m.accentFill,
                         shape: BoxShape.circle,
                       ),
                       alignment: Alignment.center,
@@ -257,7 +257,7 @@ class _MoodTile extends StatelessWidget {
                           ? Icon(
                               Symbols.check_rounded,
                               size: 16,
-                              color: m.onAccent,
+                              color: m.onFill,
                             )
                           : null,
                     ),

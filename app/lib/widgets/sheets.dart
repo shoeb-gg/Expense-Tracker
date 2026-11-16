@@ -64,7 +64,7 @@ class AppSheet extends StatelessWidget {
       type: MaterialType.transparency,
       child: Container(
         decoration: BoxDecoration(
-          color: c.surface2,
+          color: c.pop,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           boxShadow: [sheetShadow(context.colors)],
         ),

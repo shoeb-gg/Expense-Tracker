@@ -143,14 +143,14 @@ class _HeroCard extends StatelessWidget {
     final c = context.colors;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      decoration: BoxDecoration(color: c.accent, borderRadius: BorderRadius.circular(24)),
+      decoration: BoxDecoration(color: c.accentFill, borderRadius: BorderRadius.circular(24)),
       child: Column(
         children: [
           Container(
             width: 64,
             height: 64,
             alignment: Alignment.center,
-            decoration: BoxDecoration(color: c.onAccent, borderRadius: BorderRadius.circular(20)),
+            decoration: BoxDecoration(color: c.onFill, borderRadius: BorderRadius.circular(20)),
             child: ExcludeSemantics(child: Text(emoji, style: emojiText(32))),
           ),
           const SizedBox(height: 10),
@@ -158,7 +158,7 @@ class _HeroCard extends StatelessWidget {
             name,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: boardText(15, 20, FontWeight.w700, color: c.onAccentDim),
+            style: boardText(15, 20, FontWeight.w700, color: c.onFillDim),
           ),
           const SizedBox(height: 2),
           FittedBox(
@@ -166,7 +166,7 @@ class _HeroCard extends StatelessWidget {
             child: Text(
               amount,
               maxLines: 1,
-              style: boardText(40, 48, FontWeight.w800, letterSpacing: -0.8, color: c.onAccent),
+              style: boardText(40, 48, FontWeight.w800, letterSpacing: -0.8, color: c.onFill),
             ),
           ),
         ],
@@ -206,7 +206,8 @@ class _InfoCard extends ConsumerWidget {
     ];
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(color: c.surface, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(color: c.surface, borderRadius: BorderRadius.circular(20), boxShadow: liftShadows(c)),
+      foregroundDecoration: edgeDecoration(c, BorderRadius.circular(20)),
       child: Column(
         children: [
           for (var i = 0; i < rows.length; i++)
@@ -331,6 +332,8 @@ class _MonthLink extends ConsumerWidget {
     return Pressable(
       color: c.surface,
       borderRadius: BorderRadius.circular(20),
+      border: edgeBorder(c),
+      shadows: liftShadows(c),
       semanticLabel: 'See all $categoryName in $month',
       onTap: () => context.push(
         Routes.category(

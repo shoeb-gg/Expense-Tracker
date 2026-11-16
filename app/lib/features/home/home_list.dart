@@ -115,7 +115,7 @@ class DayCard extends StatelessWidget {
     final date = dateOfDay(day);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      child: ClipRRect(
+      child: CardClip(
         borderRadius: BorderRadius.circular(20),
         child: ColoredBox(
           color: c.surface,
@@ -139,13 +139,13 @@ class DayCard extends StatelessWidget {
                           height: 40,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            color: isToday ? c.accent : c.accentSoft,
+                            color: isToday ? c.accentFill : c.accentSoft,
                             borderRadius: BorderRadius.circular(13),
                           ),
                           child: Text(
                             '${date.day}',
                             style: AppText.badgeNumber.copyWith(
-                              color: isToday ? c.onAccent : c.accent,
+                              color: isToday ? c.onFill : c.accent,
                             ),
                           ),
                         ),
@@ -303,6 +303,8 @@ class SeeMonthButton extends StatelessWidget {
             onTap: onTap,
             color: c.surface,
             borderRadius: BorderRadius.circular(20),
+            border: edgeBorder(c),
+            shadows: liftShadows(c),
             child: Padding(
               padding: const EdgeInsets.only(left: 10, right: 18),
               child: Row(
