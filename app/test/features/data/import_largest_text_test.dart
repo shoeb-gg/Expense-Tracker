@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:spill_the_bills/core/text_wrap.dart';
 import 'package:spill_the_bills/data/db.dart';
 import 'package:spill_the_bills/data/pockets_repo.dart';
 import 'package:spill_the_bills/features/data/data_parts.dart' show NewBadge;
@@ -87,7 +88,7 @@ void main() {
       'See what will be added before it is saved',
       'In every row',
       'Blank ones go to Miscellaneous',
-      'A file exported from this app works as it is.',
+      keepLastWordsTogether('A file exported from this app works as it is.'),
     ]) {
       expect(isCut(tester, find.text(text)), isFalse, reason: text);
     }
@@ -215,7 +216,7 @@ void main() {
       'Opens in Excel and Google Sheets',
       'CSV (.csv)',
       'Plain text, opens in almost any app',
-      'One row per expense. Photos are left out.',
+      keepLastWordsTogether('One row per expense. Photos are left out.'),
       'This month',
       'This year',
       'Everything',

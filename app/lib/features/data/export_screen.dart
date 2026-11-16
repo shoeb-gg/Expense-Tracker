@@ -234,9 +234,8 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                 onTap: () => setState(() => _format = ExportFormat.csv),
               ),
               const SizedBox(height: 12),
-              Text(
+              CenteredNote(
                 'One row per expense. Photos are left out.',
-                textAlign: TextAlign.center,
                 style: AppText.body.copyWith(
                   fontSize: 13,
                   height: 20 / 13,

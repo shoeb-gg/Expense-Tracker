@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../core/text_wrap.dart';
 import '../theme/text.dart';
 import '../theme/tokens.dart';
 import 'headers.dart' show titleWidth;
@@ -141,6 +142,23 @@ class BandCard extends StatelessWidget {
       },
     );
   }
+}
+
+/// A short centred note under a card's rows ("One row per expense. Photos are
+/// left out."). Large text wraps it, and its last two words stay together so
+/// no word is left alone on the last line.
+class CenteredNote extends StatelessWidget {
+  const CenteredNote(this.text, {super.key, required this.style});
+
+  final String text;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) => Text(
+        keepLastWordsTogether(text),
+        textAlign: TextAlign.center,
+        style: style,
+      );
 }
 
 /// A 44 px emoji tile (radius 14, `tile`). With [dotColor] it shows the

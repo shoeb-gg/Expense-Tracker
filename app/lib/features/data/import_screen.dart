@@ -139,9 +139,8 @@ class ImportScreen extends ConsumerWidget {
                 child: TopHairline(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(0, 10, 0, 12),
-                    child: Text(
+                    child: CenteredNote(
                       'A file exported from this app works as it is.',
-                      textAlign: TextAlign.center,
                       style: AppText.sub.copyWith(color: c.text3),
                     ),
                   ),
