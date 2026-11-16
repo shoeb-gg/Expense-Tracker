@@ -8,11 +8,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/calculator.dart';
+import '../../core/days.dart';
 import '../../core/format.dart';
 import '../../core/type_to_add.dart';
 import '../../data/db.dart';
 import '../../data/photo_store.dart';
 import '../../router.dart';
+import '../../state/budgets.dart';
 import '../../state/pocket_line.dart';
 import '../../state/providers.dart';
 import '../../theme/symbols.dart';
@@ -240,6 +242,8 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
       if (p.id == targetId) target = p;
     }
     final pill = pocketWhenSeveral(pockets, target);
+    // Rings show the month of the date this expense is for.
+    final budgets = ref.watch(budgetUsesProvider(monthStartOfDay(_day)));
 
     final mq = MediaQuery.of(context);
     final keyboard = mq.viewInsets.bottom;
@@ -265,6 +269,7 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
           categories: categories,
           selectedId: keypadMode ? _picked : quick.categoryId,
           outline: base + (1 - base) * _flashLevel.value,
+          budgets: budgets,
           onTap: (cat) => _onTile(cat, quick),
           onManage: () => unawaited(context.push(Routes.categories)),
         );

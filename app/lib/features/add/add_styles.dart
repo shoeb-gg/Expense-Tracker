@@ -48,6 +48,14 @@ BoxBorder? selectedTileRing(AppColors c) => c.brightness == Brightness.light
     ? Border.all(color: c.accent, width: 2)
     : null;
 
+/// Light theme, a selected tile that has a budget ring: the accent ring sits
+/// outside the tile (CSS `0 0 0 3px bg, 0 0 0 5px accent`), as on dark but
+/// without the glow, so it never covers the budget ring inside the edge.
+List<BoxShadow> selectedOutsideRing(AppColors c) => [
+  BoxShadow(color: c.accent, spreadRadius: 5),
+  BoxShadow(color: c.bg, spreadRadius: 3),
+];
+
 /// Emoji text at a given size ([AppText.emoji], the phone's emoji font).
 TextStyle emojiText(double size) => AppText.emoji.copyWith(fontSize: size);
 

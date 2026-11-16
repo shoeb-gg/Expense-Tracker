@@ -3,9 +3,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../data/db.dart';
+import '../../state/budgets.dart';
 import '../../theme/symbols.dart';
 import '../../theme/text.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/budget_ring.dart';
 import '../../widgets/kit.dart';
 import 'add_styles.dart';
 import 'dashed_box.dart';
@@ -24,6 +26,7 @@ class CategoryGrid extends StatelessWidget {
     required this.outline,
     required this.onTap,
     required this.onManage,
+    this.budgets = const <int, BudgetUse>{},
   });
 
   final List<ExpenseCategory> categories;
@@ -31,6 +34,9 @@ class CategoryGrid extends StatelessWidget {
   final double outline;
   final ValueChanged<ExpenseCategory> onTap;
   final VoidCallback onManage;
+
+  /// Budget use by category id, for the categories that have a budget.
+  final Map<int, BudgetUse> budgets;
 
   static const int columns = 4;
 
@@ -42,6 +48,7 @@ class CategoryGrid extends StatelessWidget {
           category: cat,
           selected: cat.id == selectedId,
           outline: outline,
+          budget: budgets[cat.id],
           onTap: () => onTap(cat),
         ),
       _ManageTile(onTap: onManage),
@@ -73,6 +80,7 @@ class CategoryTile extends StatelessWidget {
     required this.selected,
     required this.outline,
     required this.onTap,
+    this.budget,
   });
 
   final ExpenseCategory category;
@@ -80,8 +88,74 @@ class CategoryTile extends StatelessWidget {
   final double outline;
   final VoidCallback onTap;
 
+  /// This month's use of the category's budget; null when it has none.
+  final BudgetUse? budget;
+
   @override
   Widget build(BuildContext context) {
+    final budget = this.budget;
+    return budget == null ? _plain(context) : _withRing(context, budget);
+  }
+
+  /// A tile with a budget: the ring lines the inside of the edge, so the
+  /// selection ring (and on light the edge stroke) moves out of its way.
+  Widget _withRing(BuildContext context, BudgetUse budget) {
+    final c = context.colors;
+    final waiting = !selected && outline > 0;
+    final light = c.brightness == Brightness.light;
+    return _TileButton(
+      onTap: onTap,
+      selected: selected,
+      label: category.name,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 84),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CustomPaint(
+              foregroundPainter: BudgetRingPainter(
+                progress: budget.progress,
+                color: budgetColor(c, budget.level),
+                // Waiting for a pick: the track takes the accent outline.
+                track: waiting
+                    ? c.accent.withValues(alpha: outline.clamp(0, 1))
+                    : c.budgetTrack,
+                radius: 15,
+              ),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 160),
+                curve: Curves.easeOut,
+                width: 48,
+                height: 48,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: selected ? litTileColor(c) : c.pageTile,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: selected
+                      ? (light ? selectedOutsideRing(c) : selectedTileShadows(c))
+                      : (liftShadows(c) ?? const []),
+                ),
+                child: ExcludeSemantics(child: Text(category.emoji, style: emojiText(24))),
+              ),
+            ),
+            const SizedBox(height: 6),
+            ExcludeSemantics(
+              child: TileLabel(
+                text: category.name,
+                style: AppText.navLabel.copyWith(
+                  color: selected ? c.accent : c.text,
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// A tile without a budget, exactly as before budgets existed.
+  Widget _plain(BuildContext context) {
     final c = context.colors;
     final showOutline = !selected && outline > 0;
     return _TileButton(

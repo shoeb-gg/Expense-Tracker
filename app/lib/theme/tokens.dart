@@ -425,6 +425,23 @@ class AppColors extends ThemeExtension<AppColors> {
   /// The mockup's `mix` helper.
   Color mixColors(Color a, Color b, double w) => mix(a, b, w);
 
+  bool get _isLight => brightness == Brightness.light;
+
+  /// Budget ring, under 90% used. A yellow-leaning green, so it stays apart
+  /// from Aqua's turquoise accent (at least 3:1 on the tile in every mood).
+  Color get budgetOk => _isLight ? const Color(0xFF1E8A4C) : const Color(0xFF6CCB5F);
+
+  /// Budget ring, 90% to 100% used. On light the light step of the Yellow
+  /// category colour (3.2:1 on a white tile; brighter yellows are under 3:1).
+  Color get budgetNear => _isLight ? const Color(0xFFB08A00) : const Color(0xFFF2C230);
+
+  /// Budget ring, over budget. A crimson red, so it stays apart from Coral's
+  /// accent. On light the same crimson as [bad].
+  Color get budgetOver => _isLight ? const Color(0xFFC22D4A) : const Color(0xFFFF4D73);
+
+  /// The faint full track under a budget ring.
+  Color get budgetTrack => _isLight ? ink.withAlpha(0x1A) : const Color(0x24FFFFFF);
+
   @override
   AppColors copyWith({Mood? mood, Brightness? brightness}) =>
       mood == null && brightness == null
