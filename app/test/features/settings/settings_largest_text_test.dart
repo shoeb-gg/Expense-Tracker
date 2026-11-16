@@ -95,11 +95,11 @@ void main() {
       expect(tester.getRect(noteText('Add, edit, delete')).top, 981);
       expect(tester.getRect(find.text('Manage categories')).top, 1087);
       expect(tester.getRect(noteText('Add, edit, delete, reorder')).top, 1109);
-      expect(tester.getRect(find.text('Export')).top, 1443);
-      expect(tester.getRect(find.text('Automatic backup')).top, 1579);
-      expect(tester.getRect(noteText('Phone and Google Drive')).top, 1601);
-      expect(tester.getRect(find.text('Delete all data')).top, 1715);
-      expect(tester.getRect(noteText('This can’t be undone')).top, 1737);
+      expect(tester.getRect(find.text('Export')).top, 1387);
+      expect(tester.getRect(find.text('Automatic backup')).top, 1523);
+      expect(tester.getRect(noteText('Phone and Google Drive')).top, 1545);
+      expect(tester.getRect(find.text('Delete all data')).top, 1659);
+      expect(tester.getRect(noteText('This can’t be undone')).top, 1681);
       expect(cutTexts(tester, find.byType(Scaffold)), isEmpty);
       await closeApp(tester, db);
     });

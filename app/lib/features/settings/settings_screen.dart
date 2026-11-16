@@ -306,7 +306,6 @@ class _NumbersCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(settingsProvider);
-    final n = ref.read(settingsProvider.notifier);
     return BandCard(
       title: 'Numbers',
       icon: Symbols.calculate_rounded,
@@ -319,23 +318,10 @@ class _NumbersCard extends ConsumerWidget {
               divider: false,
               wrap: true,
               trailing: ValueChevron(
-                text: s.numberStyle.sample(separator: s.thousandsSeparator),
+                text: s.numberStyle.sample,
                 tabular: true,
               ),
               onTap: () => pickNumberFormat(context, ref),
-            ),
-          ),
-          BottomHairline(
-            child: ListRow(
-              title: 'Thousands separator',
-              divider: false,
-              wrap: true,
-              onTap: () => n.setThousandsSeparator(!s.thousandsSeparator),
-              trailing: AppSwitch(
-                value: s.thousandsSeparator,
-                onChanged: n.setThousandsSeparator,
-                semanticLabel: 'Thousands separator',
-              ),
             ),
           ),
           ListRow(

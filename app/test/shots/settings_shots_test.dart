@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:spill_the_bills/core/format.dart';
 import 'package:spill_the_bills/router.dart';
 import 'package:spill_the_bills/state/providers.dart';
 import 'package:spill_the_bills/theme/tokens.dart';
@@ -75,7 +76,7 @@ void main() {
     await closeApp(tester, db);
   });
 
-  testWidgets('settings: Coral, Large text, separator off', (tester) async {
+  testWidgets('settings: Coral, Large text, no grouping', (tester) async {
     final db = await sampleDatabase(tester);
     await pumpApp(
       tester,
@@ -84,7 +85,7 @@ void main() {
       settings: const AppSettings(
         mood: Mood.coral,
         textScale: 17 / 15,
-        thousandsSeparator: false,
+        numberStyle: NumberStyle.plain,
       ),
     );
     await boardHeight(tester, 1960);
@@ -110,7 +111,7 @@ void main() {
     });
   }
 
-  testWidgets('settings: number format sheet with the separator off', (
+  testWidgets('settings: number format sheet with no grouping', (
     tester,
   ) async {
     final db = await sampleDatabase(tester);
@@ -118,12 +119,12 @@ void main() {
       tester,
       db: db,
       location: Routes.settings,
-      settings: const AppSettings(thousandsSeparator: false),
+      settings: const AppSettings(numberStyle: NumberStyle.plain),
     );
     await revealRow(tester, find.text('Number format'));
     await tester.tap(find.text('Number format'));
     await settle(tester);
-    expect(find.text('1234567,89'), findsOneWidget);
+    expect(find.text('1234567.89'), findsNWidgets(2), reason: 'row + option');
     await takeShot(tester, 'settings_sheet_number_nosep');
     await closeApp(tester, db);
   });

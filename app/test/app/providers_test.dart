@@ -72,15 +72,13 @@ void main() {
   test('settings write through and reload', () async {
     final n = container.read(settingsProvider.notifier);
     await n.setMood(Mood.coral);
-    await n.setNumberStyle(NumberStyle.lakh);
-    await n.setThousandsSeparator(false);
+    await n.setNumberStyle(NumberStyle.plain);
     await n.setTextSizeIndex(4);
     expect(container.read(settingsProvider).mood, Mood.coral);
     expect(container.read(amountFormatProvider).format(123456789), '1234567.89');
     final loaded = await AppSettings.load(SettingsStore(db));
     expect(loaded.mood, Mood.coral);
-    expect(loaded.numberStyle, NumberStyle.lakh);
-    expect(loaded.thousandsSeparator, isFalse);
+    expect(loaded.numberStyle, NumberStyle.plain);
     expect(loaded.textSizeIndex, 4);
   });
 

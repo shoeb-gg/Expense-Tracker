@@ -6,13 +6,35 @@ const _nb = ' ';
 
 void main() {
   group('amounts', () {
-    test('all five styles', () {
-      const n = 123456789; // 1,234,567.89
-      expect(const AmountFormat().format(n), '1,234,567.89');
-      expect(const AmountFormat(style: NumberStyle.dotComma).format(n), '1.234.567,89');
-      expect(const AmountFormat(style: NumberStyle.spaceDot).format(n), '1${_nb}234${_nb}567.89');
-      expect(const AmountFormat(style: NumberStyle.spaceComma).format(n), '1${_nb}234${_nb}567,89');
-      expect(const AmountFormat(style: NumberStyle.lakh).format(n), '12,34,567.89');
+    test('the four styles, in the order the sheet lists them', () {
+      expect(NumberStyle.values, [
+        NumberStyle.comma,
+        NumberStyle.spaceDot,
+        NumberStyle.lakh,
+        NumberStyle.plain,
+      ]);
+      expect([for (final s in NumberStyle.values) s.sample], [
+        '1,234,567.89',
+        '1${_nb}234${_nb}567.89',
+        '12,34,567.89',
+        '1234567.89',
+      ]);
+      expect(NumberStyle.lakh.note, 'Lakh, crore');
+      expect(NumberStyle.plain.note, isEmpty);
+    });
+
+    test('each style formats 1234567.89 and 840.5', () {
+      const expected = {
+        NumberStyle.comma: ('1,234,567.89', '840.50'),
+        NumberStyle.spaceDot: ('1${_nb}234${_nb}567.89', '840.50'),
+        NumberStyle.lakh: ('12,34,567.89', '840.50'),
+        NumberStyle.plain: ('1234567.89', '840.50'),
+      };
+      for (final MapEntry(key: style, value: (big, small)) in expected.entries) {
+        final f = AmountFormat(style: style);
+        expect(f.format(123456789), big, reason: style.name);
+        expect(f.format(84050), small, reason: style.name);
+      }
     });
 
     test('lakh grouping', () {
@@ -24,15 +46,23 @@ void main() {
       expect(f.format(1234567800), '1,23,45,678');
     });
 
-    test('separator off', () {
+    test('the no-grouping style never groups', () {
+      const f = AmountFormat(style: NumberStyle.plain);
+      expect(f.format(123456789), '1234567.89');
+      expect(f.format(3455500), '34555');
+      expect(f.formatWhole(123456789), '1234568');
+      expect(f.count(1266), '1266');
+      expect(f.typed('1234.5'), '1234.5');
+    });
+
+    test('the decimal mark is always a dot', () {
       for (final s in NumberStyle.values) {
-        final f = AmountFormat(style: s, separator: false);
-        expect(f.format(123456789), '1234567${s.decimal}89');
-        expect(f.format(3455500), '34555');
+        final f = AmountFormat(style: s);
+        expect(f.format(1250), endsWith('.50'), reason: s.name);
+        expect(f.typed('12.5'), '12.5', reason: s.name);
+        expect(f.short(166500), '1.7K', reason: s.name);
+        expect(f.decimalMark, '.');
       }
-      expect(NumberStyle.comma.sample(separator: false), '1234567.89');
-      expect(NumberStyle.dotComma.sample(separator: false), '1234567,89');
-      expect(NumberStyle.comma.sample(), '1,234,567.89');
     });
 
     test('whole amounts have no decimals, others two', () {
@@ -60,7 +90,6 @@ void main() {
       expect(f.short(994900), '9.9K');
       expect(f.short(995000), '10K');
       expect(f.short(1509000), '15K'); // 15,090 -> 15K (mockup example)
-      expect(const AmountFormat(style: NumberStyle.dotComma).short(166500), '1,7K');
     });
 
     test('keypad display', () {
@@ -69,7 +98,7 @@ void main() {
       expect(f.typed('1234'), '1,234');
       expect(f.typed('1234.5'), '1,234.5');
       expect(f.typed('12.'), '12.');
-      expect(const AmountFormat(style: NumberStyle.dotComma).typed('1234.5'), '1.234,5');
+      expect(const AmountFormat(style: NumberStyle.spaceDot).typed('1234.5'), '1${_nb}234.5');
       expect(minorToKeypad(118000), '1180');
       expect(minorToKeypad(1250), '12.5');
       expect(minorToKeypad(1205), '12.05');
@@ -85,9 +114,13 @@ void main() {
       expect(f.parse('abc'), isNull);
       expect(f.parse(''), isNull);
       expect(f.parse('-5'), isNull);
-      const eu = AmountFormat(style: NumberStyle.dotComma);
-      expect(eu.parse('1.200'), 120000);
-      expect(eu.parse('12,5'), 1250);
+      expect(f.parse('1.20'), 120, reason: 'a dot is always a decimal mark');
+      expect(f.parse('1.200'), isNull, reason: 'never a grouping mark');
+      expect(f.parse('  12.5 '), 1250);
+      for (final s in NumberStyle.values) {
+        expect(AmountFormat(style: s).parse('12.5'), 1250, reason: s.name);
+        expect(AmountFormat(style: s).parse('1,200.5'), 120050, reason: s.name);
+      }
       expect(const AmountFormat(style: NumberStyle.spaceDot).parse('1${_nb}200.50'), 120050);
       expect(parseDotDecimal('0.5'), 50);
     });

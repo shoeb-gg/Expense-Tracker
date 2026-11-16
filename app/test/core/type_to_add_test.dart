@@ -90,9 +90,12 @@ void main() {
     expect(parse('lunch 120 tk').title, 'Lunch');
     expect(parse('lunch tk120').amount, 12000);
     expect(parse('lunch \$45').amount, 4500);
-    const eu = AmountFormat(style: NumberStyle.dotComma);
-    expect(parse('rent 15.000', format: eu).amount, 1500000);
-    expect(parse('tea 2,5', format: eu).amount, 250);
+    expect(parse('coffee 12.5').amount, 1250);
+    for (final style in NumberStyle.values) {
+      final f = AmountFormat(style: style);
+      expect(parse('coffee 12.5', format: f).amount, 1250, reason: style.name);
+      expect(parse('rent 15,000', format: f).amount, 1500000, reason: style.name);
+    }
   });
 
   test('first number is the amount, later numbers stay in the title', () {

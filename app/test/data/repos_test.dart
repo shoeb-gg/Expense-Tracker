@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:spill_the_bills/core/days.dart';
+import 'package:spill_the_bills/core/format.dart';
 import 'package:spill_the_bills/data/categories_repo.dart';
 import 'package:spill_the_bills/data/db.dart';
 import 'package:spill_the_bills/data/expenses_repo.dart';
@@ -410,7 +411,7 @@ void main() {
         textScale: 17 / 15,
         privacyMask: true,
         firstDayOfWeek: FirstDayOfWeek.monday,
-        thousandsSeparator: false,
+        numberStyle: NumberStyle.plain,
         calcKeys: CalcKeys.allFour,
         currentPocketId: 7,
         lastCustomRange: (from: 20700, to: 20744),

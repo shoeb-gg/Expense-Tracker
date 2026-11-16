@@ -29,37 +29,22 @@ Future<void> pickFirstDayOfWeek(BuildContext context, WidgetRef ref) async {
   }
 }
 
-/// The styles the Number format sheet lists: all five with the thousands
-/// separator on, only the two decimal styles with it off.
-List<NumberStyle> numberStyleChoices({required bool separator}) => separator
-    ? NumberStyle.values
-    : const [NumberStyle.comma, NumberStyle.dotComma];
-
-/// The ticked row: with the separator off, the style with the same decimal
-/// mark as the saved one.
-NumberStyle numberStyleShown(NumberStyle saved, {required bool separator}) {
-  if (separator) return saved;
-  return saved.decimal == ',' ? NumberStyle.dotComma : NumberStyle.comma;
-}
-
-/// "Number format" sheet.
+/// "Number format" sheet: the four styles with their full samples.
 Future<void> pickNumberFormat(BuildContext context, WidgetRef ref) async {
-  final s = ref.read(settingsProvider);
-  final sep = s.thousandsSeparator;
   final picked = await showOptionSheet<NumberStyle>(
     context,
     title: 'Number format',
     message: 'How amounts are written across the app.',
     options: [
-      for (final style in numberStyleChoices(separator: sep))
+      for (final style in NumberStyle.values)
         SheetOption(
           value: style,
-          label: style.sample(separator: sep),
-          note: sep && style.note.isNotEmpty ? style.note : null,
+          label: style.sample,
+          note: style.note.isNotEmpty ? style.note : null,
           tabular: true,
         ),
     ],
-    current: numberStyleShown(s.numberStyle, separator: sep),
+    current: ref.read(settingsProvider).numberStyle,
   );
   if (picked != null) {
     await ref.read(settingsProvider.notifier).setNumberStyle(picked);

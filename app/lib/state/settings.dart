@@ -63,7 +63,6 @@ class AppSettings {
     this.calendarAmounts = true,
     this.firstDayOfWeek = FirstDayOfWeek.sunday,
     this.numberStyle = NumberStyle.comma,
-    this.thousandsSeparator = true,
     this.calcKeys = CalcKeys.plusMinus,
     this.currentPocketId,
     this.lastCustomRange,
@@ -96,9 +95,6 @@ class AppSettings {
   /// "Number format".
   final NumberStyle numberStyle;
 
-  /// "Thousands separator".
-  final bool thousandsSeparator;
-
   /// "Calculator keys".
   final CalcKeys calcKeys;
 
@@ -122,9 +118,8 @@ class AppSettings {
     return best;
   }
 
-  /// The amount formatter for [numberStyle] and [thousandsSeparator].
-  AmountFormat get amountFormat =>
-      AmountFormat(style: numberStyle, separator: thousandsSeparator);
+  /// The amount formatter for [numberStyle].
+  AmountFormat get amountFormat => AmountFormat(style: numberStyle);
 
   AppSettings copyWith({
     Mood? mood,
@@ -136,7 +131,6 @@ class AppSettings {
     bool? calendarAmounts,
     FirstDayOfWeek? firstDayOfWeek,
     NumberStyle? numberStyle,
-    bool? thousandsSeparator,
     CalcKeys? calcKeys,
     ValueGetter<int?>? currentPocketId,
     ValueGetter<DayRangeValue?>? lastCustomRange,
@@ -151,7 +145,6 @@ class AppSettings {
       calendarAmounts: calendarAmounts ?? this.calendarAmounts,
       firstDayOfWeek: firstDayOfWeek ?? this.firstDayOfWeek,
       numberStyle: numberStyle ?? this.numberStyle,
-      thousandsSeparator: thousandsSeparator ?? this.thousandsSeparator,
       calcKeys: calcKeys ?? this.calcKeys,
       currentPocketId:
           currentPocketId != null ? currentPocketId() : this.currentPocketId,
@@ -170,10 +163,13 @@ class AppSettings {
   static const String kCalendarAmounts = 'calendarAmounts';
   static const String kFirstDayOfWeek = 'firstDayOfWeek';
   static const String kNumberStyle = 'numberStyle';
-  static const String kThousandsSeparator = 'thousandsSeparator';
   static const String kCalcKeys = 'calcKeys';
   static const String kCurrentPocketId = 'currentPocketId';
   static const String kLastCustomRange = 'lastCustomRange';
+
+  /// The removed "Thousands separator" setting. Only read to migrate it:
+  /// "false" became the no-grouping number style.
+  static const String kLegacyThousandsSeparator = 'thousandsSeparator';
 
   /// Every setting as stored text (null values are left out).
   Map<String, String> toEntries() => {
@@ -186,7 +182,6 @@ class AppSettings {
         kCalendarAmounts: calendarAmounts.toString(),
         kFirstDayOfWeek: firstDayOfWeek.name,
         kNumberStyle: numberStyle.name,
-        kThousandsSeparator: thousandsSeparator.toString(),
         kCalcKeys: calcKeys.name,
         if (currentPocketId != null) kCurrentPocketId: '$currentPocketId',
         if (lastCustomRange != null)
@@ -194,7 +189,9 @@ class AppSettings {
       };
 
   /// Settings from stored text. Unknown or broken values fall back to the
-  /// defaults.
+  /// defaults. Settings saved by older versions are migrated: the removed
+  /// "Thousands separator" switch set to off means [NumberStyle.plain], and
+  /// the removed comma-decimal styles become their dot-decimal twins.
   factory AppSettings.fromEntries(Map<String, String> e) {
     const d = AppSettings();
     T pick<T extends Enum>(List<T> values, String key, T fallback) {
@@ -208,6 +205,15 @@ class AppSettings {
     bool flag(String key, bool fallback) {
       final v = e[key];
       return v == null ? fallback : v == 'true';
+    }
+
+    NumberStyle style() {
+      if (e[kLegacyThousandsSeparator] == 'false') return NumberStyle.plain;
+      return switch (e[kNumberStyle]) {
+        'dotComma' => NumberStyle.comma,
+        'spaceComma' => NumberStyle.spaceDot,
+        _ => pick(NumberStyle.values, kNumberStyle, d.numberStyle),
+      };
     }
 
     DayRangeValue? range() {
@@ -228,17 +234,27 @@ class AppSettings {
       calendarAmounts: flag(kCalendarAmounts, d.calendarAmounts),
       firstDayOfWeek:
           pick(FirstDayOfWeek.values, kFirstDayOfWeek, d.firstDayOfWeek),
-      numberStyle: pick(NumberStyle.values, kNumberStyle, d.numberStyle),
-      thousandsSeparator: flag(kThousandsSeparator, d.thousandsSeparator),
+      numberStyle: style(),
       calcKeys: pick(CalcKeys.values, kCalcKeys, d.calcKeys),
       currentPocketId: int.tryParse(e[kCurrentPocketId] ?? ''),
       lastCustomRange: range(),
     );
   }
 
-  /// Loads the stored settings (before runApp).
-  static Future<AppSettings> load(SettingsStore store) async =>
-      AppSettings.fromEntries(await store.load());
+  /// Loads the stored settings (before runApp). Migrated number styles are
+  /// written back and the removed settings' keys are deleted, so a later
+  /// choice in Settings is not overruled by an old key.
+  static Future<AppSettings> load(SettingsStore store) async {
+    final entries = await store.load();
+    final settings = AppSettings.fromEntries(entries);
+    final storedStyle = entries[kNumberStyle];
+    final legacy = entries.containsKey(kLegacyThousandsSeparator);
+    if (legacy || (storedStyle != null && storedStyle != settings.numberStyle.name)) {
+      await store.write(kNumberStyle, settings.numberStyle.name);
+    }
+    if (legacy) await store.remove(kLegacyThousandsSeparator);
+    return settings;
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -309,11 +325,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
 
   Future<void> setNumberStyle(NumberStyle v) =>
       _save(state.copyWith(numberStyle: v), AppSettings.kNumberStyle);
-
-  Future<void> setThousandsSeparator(bool v) => _save(
-        state.copyWith(thousandsSeparator: v),
-        AppSettings.kThousandsSeparator,
-      );
 
   Future<void> setCalcKeys(CalcKeys v) =>
       _save(state.copyWith(calcKeys: v), AppSettings.kCalcKeys);

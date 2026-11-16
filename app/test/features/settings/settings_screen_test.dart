@@ -11,7 +11,6 @@ import 'package:spill_the_bills/features/home/home_screen.dart';
 import 'package:spill_the_bills/features/home/home_state.dart';
 import 'package:spill_the_bills/features/settings/settings_parts.dart';
 import 'package:spill_the_bills/features/settings/settings_screen.dart';
-import 'package:spill_the_bills/features/settings/settings_sheets.dart';
 import 'package:spill_the_bills/router.dart';
 import 'package:spill_the_bills/state/providers.dart';
 import 'package:spill_the_bills/theme/tokens.dart';
@@ -44,53 +43,57 @@ Future<void> tapRow(WidgetTester tester, String text) async {
 }
 
 void main() {
-  test('number format choices follow the thousands separator', () {
-    expect(numberStyleChoices(separator: true), NumberStyle.values);
-    expect(numberStyleChoices(separator: false), [
-      NumberStyle.comma,
-      NumberStyle.dotComma,
-    ]);
-    expect(
-      numberStyleShown(NumberStyle.lakh, separator: false),
-      NumberStyle.comma,
-    );
-    expect(
-      numberStyleShown(NumberStyle.spaceComma, separator: false),
-      NumberStyle.dotComma,
-    );
-    expect(
-      numberStyleShown(NumberStyle.lakh, separator: true),
-      NumberStyle.lakh,
-    );
-  });
+  /// The rows of the open Number format sheet, top to bottom.
+  List<OptionRow> sheetRows(WidgetTester tester) =>
+      tester.widgetList<OptionRow>(find.byType(OptionRow)).toList();
 
-  testWidgets('number format sheet picks a style and saves it', (tester) async {
+  testWidgets('the Number format sheet has four rows, the current one ticked', (
+    tester,
+  ) async {
     final db = await openSettings(tester);
     await tapRow(tester, 'Number format');
+    expect(find.text('Number format'), findsNWidgets(2), reason: 'row + title');
     expect(
       find.text('How amounts are written across the app.'),
       findsOneWidget,
     );
+    final rows = sheetRows(tester);
+    expect([for (final r in rows) r.label], [
+      '1,234,567.89',
+      '1\u00A0234\u00A0567.89',
+      '12,34,567.89',
+      '1234567.89',
+    ]);
+    expect([for (final r in rows) r.note ?? ''], ['', '', 'Lakh, crore', '']);
+    expect([for (final r in rows) r.selected], [true, false, false, false]);
     expect(find.text('Lakh, crore'), findsOneWidget);
-    await tester.tap(find.text('1.234.567,89'));
-    await settle(tester);
-    expect(settingsOf(tester).numberStyle, NumberStyle.dotComma);
-    expect(find.text('1.234.567,89'), findsOneWidget, reason: 'row value');
-    expect((await stored(tester, db))[AppSettings.kNumberStyle], 'dotComma');
     await closeApp(tester, db);
   });
 
-  testWidgets('with the separator off the sheet lists two styles', (
+  testWidgets('the ticked row follows the saved style', (tester) async {
+    for (final style in NumberStyle.values) {
+      final db = await openSettings(
+        tester,
+        settings: AppSettings(numberStyle: style),
+      );
+      await tapRow(tester, 'Number format');
+      expect([for (final r in sheetRows(tester)) r.selected], [
+        for (final s in NumberStyle.values) s == style,
+      ], reason: style.name);
+      await closeApp(tester, db);
+    }
+  });
+
+  testWidgets('the Number format sheet picks a style and saves it', (
     tester,
   ) async {
-    final db = await openSettings(
-      tester,
-      settings: const AppSettings(thousandsSeparator: false),
-    );
+    final db = await openSettings(tester);
     await tapRow(tester, 'Number format');
-    expect(find.text('1234567.89'), findsNWidgets(2), reason: 'row + option');
-    expect(find.text('1234567,89'), findsOneWidget);
-    expect(find.text('Lakh, crore'), findsNothing);
+    await tester.tap(find.text('1234567.89'));
+    await settle(tester);
+    expect(settingsOf(tester).numberStyle, NumberStyle.plain);
+    expect(find.text('1234567.89'), findsOneWidget, reason: 'row value');
+    expect((await stored(tester, db))[AppSettings.kNumberStyle], 'plain');
     await closeApp(tester, db);
   });
 
@@ -112,9 +115,6 @@ void main() {
 
     await tapRow(tester, 'Privacy hide');
     expect(settingsOf(tester).privacyMask, isTrue);
-    await tapRow(tester, 'Thousands separator');
-    expect(settingsOf(tester).thousandsSeparator, isFalse);
-    expect(find.text('1234567.89'), findsOneWidget);
     final saved = await stored(tester, db);
     expect(saved[AppSettings.kFirstDayOfWeek], 'monday');
     expect(saved[AppSettings.kCalcKeys], 'allFour');

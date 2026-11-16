@@ -86,8 +86,8 @@ void main() {
   test('expressionLine groups each number in the number style', () {
     expect(expressionLine('1200+80', fmt), '1,200 + 80');
     expect(
-      expressionLine('1234.5×2', const AmountFormat(style: NumberStyle.dotComma)),
-      '1.234,5 × 2',
+      expressionLine('1234.5×2', const AmountFormat(style: NumberStyle.spaceDot)),
+      '1\u00A0234.5 × 2',
     );
   });
 

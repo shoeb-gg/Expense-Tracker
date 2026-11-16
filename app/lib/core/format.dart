@@ -8,36 +8,30 @@ import 'package:flutter/foundation.dart';
 
 import 'days.dart';
 
-/// The five number styles offered in Settings > Number format.
+/// The four number styles offered in Settings > Number format. The decimal
+/// mark is always ".".
 /// Spaces are no-break spaces (U+00A0) so an amount never wraps.
 enum NumberStyle {
   /// 1,234,567.89 (the default).
-  comma(',', '.'),
-
-  /// 1.234.567,89
-  dotComma('.', ','),
+  comma(','),
 
   /// 1 234 567.89
-  spaceDot(' ', '.'),
-
-  /// 1 234 567,89
-  spaceComma(' ', ','),
+  spaceDot('\u00A0'),
 
   /// 12,34,567.89 (lakh and crore).
-  lakh(',', '.');
+  lakh(','),
 
-  const NumberStyle(this.group, this.decimal);
+  /// 1234567.89 (no grouping).
+  plain('');
 
-  /// Thousands (or lakh) separator.
+  const NumberStyle(this.group);
+
+  /// Thousands (or lakh) separator; empty for [plain].
   final String group;
 
-  /// Decimal mark.
-  final String decimal;
-
   /// The seven-digit sample shown in Settings and the Number format sheet,
-  /// e.g. "1,234,567.89", or "1234567.89" when [separator] is off.
-  String sample({bool separator = true}) =>
-      AmountFormat(style: this, separator: separator).format(123456789);
+  /// e.g. "1,234,567.89". Always shows the cents: it describes the style.
+  String get sample => AmountFormat(style: this).format(123456789);
 
   /// Note shown on the right of an option in the Number format sheet.
   String get note => this == NumberStyle.lakh ? 'Lakh, crore' : '';
@@ -47,15 +41,12 @@ enum NumberStyle {
 /// with `ref.watch(amountFormatProvider)`.
 @immutable
 class AmountFormat {
-  const AmountFormat({this.style = NumberStyle.comma, this.separator = true});
+  const AmountFormat({this.style = NumberStyle.comma});
 
   final NumberStyle style;
 
-  /// Whether thousands separators are shown.
-  final bool separator;
-
-  /// The decimal mark of the style ("." or ",").
-  String get decimalMark => style.decimal;
+  /// The decimal mark: always ".".
+  String get decimalMark => '.';
 
   /// 118000 -> "1,180"; 1250 -> "12.50"; 123456789 -> "1,234,567.89".
   String format(int minor) {
@@ -66,7 +57,7 @@ class AmountFormat {
     final buffer = StringBuffer(negative ? '-' : '')..write(group(whole));
     if (cents != 0) {
       buffer
-        ..write(style.decimal)
+        ..write('.')
         ..write(cents.toString().padLeft(2, '0'));
     }
     return buffer.toString();
@@ -91,7 +82,7 @@ class AmountFormat {
     if (v < 9950) {
       var s = (v / 1000).toStringAsFixed(1);
       if (s.endsWith('.0')) s = s.substring(0, s.length - 2);
-      return '${s.replaceAll('.', style.decimal)}K';
+      return '${s}K';
     }
     return '${group((v / 1000).round())}K';
   }
@@ -104,26 +95,25 @@ class AmountFormat {
     final parts = raw.split('.');
     final whole = int.tryParse(parts.first.isEmpty ? '0' : parts.first) ?? 0;
     final head = group(whole);
-    return parts.length > 1 ? '$head${style.decimal}${parts[1]}' : head;
+    return parts.length > 1 ? '$head.${parts[1]}' : head;
   }
 
   /// Parses a user-typed amount to minor units, or null when it is not a
-  /// plain positive amount with at most two decimals. Grouping marks of the
-  /// style are ignored ("1,200" -> 120000; dotComma: "12,5" -> 1250).
+  /// plain positive amount with at most two decimals. Only "." is a decimal
+  /// mark; commas and spaces are ignored as grouping ("1,200" -> 120000).
   int? parse(String text) {
-    var s = text.trim().replaceAll(' ', '').replaceAll(' ', '');
-    if (style.decimal == ',') {
-      s = s.replaceAll('.', '').replaceAll(',', '.');
-    } else {
-      s = s.replaceAll(',', '');
-    }
+    final s = text
+        .trim()
+        .replaceAll(' ', '')
+        .replaceAll('\u00A0', '')
+        .replaceAll(',', '');
     return parseDotDecimal(s);
   }
 
   /// Digits grouped with this style's separator (no decimals).
   String group(int whole) {
     final digits = whole.toString();
-    if (!separator || digits.length <= 3) return digits;
+    if (style == NumberStyle.plain || digits.length <= 3) return digits;
     final sep = style.group;
     if (style == NumberStyle.lakh) {
       final head = digits.substring(0, digits.length - 3);
@@ -148,12 +138,10 @@ class AmountFormat {
 
   @override
   bool operator ==(Object other) =>
-      other is AmountFormat &&
-      other.style == style &&
-      other.separator == separator;
+      other is AmountFormat && other.style == style;
 
   @override
-  int get hashCode => Object.hash(style, separator);
+  int get hashCode => style.hashCode;
 }
 
 final RegExp _dotDecimal = RegExp(r'^(\d+)(?:\.(\d{1,2}))?$');
