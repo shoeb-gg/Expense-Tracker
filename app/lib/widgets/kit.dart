@@ -10,7 +10,6 @@ export 'docks.dart';
 export 'headers.dart';
 export 'now_pill.dart';
 export 'pickers.dart';
-export 'placeholder.dart';
 export 'pressable.dart';
 export 'sheets.dart';
 export 'swipe.dart';
