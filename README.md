@@ -13,12 +13,8 @@ Write down what you spend. See where your money goes. Everything stays on your o
 <p align="center">
   <img src="docs/screenshots/reports.png" width="200" alt="Reports: all-time total and a table of every month">
   <img src="docs/screenshots/pockets.png" width="200" alt="Pockets: switch between Personal, Business and Family trip">
-  <img src="docs/screenshots/themes.png" width="200" alt="Settings: choose a colour theme and a text size">
-  <!--
-    LIGHT THEME PICTURE (to add later): put the new file at
-    docs/screenshots/light.png, then add this line right here:
-    <img src="docs/screenshots/light.png" width="200" alt="The light theme">
-  -->
+  <img src="docs/screenshots/themes.png" width="200" alt="Settings: choose Dark, Light or System, a colour theme and a text size">
+  <img src="docs/screenshots/light.png" width="200" alt="Light mode: Home in the light theme">
 </p>
 
 ## ✨ What you can do
@@ -32,7 +28,7 @@ Write down what you spend. See where your money goes. Everything stays on your o
 - 👛 **Pockets.** Keep money apart, for example Home, Trip and Work. Each pocket has its own expenses. You can move an expense to another pocket later.
 - 📷 **Receipt photos.** Add a photo to an expense, from the camera or from your gallery.
 - 📤 **Export and import.** Save your expenses as an Excel or CSV file. Bring expenses in from a CSV, Excel or JSON file.
-- 🎭 **Three colour themes,** each in dark and light.
+- 🎭 **Three colour themes,** each in dark and light. In Settings, choose Dark, Light or System (System follows your phone).
 - 🔠 **Text size you can change,** so it is easy to read.
 - 🙈 **Hide the total.** Turn on Privacy hide to cover the big number until you tap the eye.
 - 🔢 **Numbers your way.** Choose how numbers look, like 1,234.50 or 1.234,50.
@@ -49,7 +45,7 @@ Write down what you spend. See where your money goes. Everything stays on your o
 You do not need the Play Store. You download one file and open it.
 
 1. 🌐 On your phone, open the **[Releases page](https://github.com/shoeb-gg/Expense-Tracker/releases/latest)**.
-2. ⬇️ Under **Assets**, tap `Spill-the-Bills-<version>.apk` to download it. It is about 20 MB and works on most phones. (`<version>` is a number like 1.0.0.)
+2. ⬇️ Under **Assets**, tap `Spill-the-Bills-<version>.apk` to download it. It is about 24 MB and works on most phones. (`<version>` is a number like 1.0.0.)
 3. 🔁 If your phone says the app can't be installed, download `Spill-the-Bills-<version>-all-phones.apk` instead. It is about 60 MB and works on every Android phone.
 4. 📂 Open the file you downloaded. Your phone may find it in the notification, in your browser's downloads, or in the Files app.
 5. ✅ When Android asks, allow installs from this source (this is usually your browser or Files app). Then tap **Install**.
@@ -61,7 +57,7 @@ You do not need the Play Store. You download one file and open it.
 
 ## 🔄 Updating
 
-Download the newer file from the [Releases page](https://github.com/shoeb-gg/Expense-Tracker/releases/latest) and install it over the old app. Your expenses stay. Tip: choose the same kind of file as the first time (the smaller one or the `all-phones` one).
+Download the newer file from the [Releases page](https://github.com/shoeb-gg/Expense-Tracker/releases/latest) and install it over the old app. Your expenses stay. Either file works for updating.
 
 ## 💾 Keeping your data safe
 

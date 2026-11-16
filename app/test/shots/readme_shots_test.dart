@@ -12,8 +12,7 @@
 /// flutter test --dart-define=README_SHOTS=true test/shots/readme_shots_test.dart
 /// ```
 ///
-/// To add a screen (for example `light.png` once the light theme is in), add
-/// one more entry to [_scenes] below.
+/// To add a screen, add one more entry to [_scenes] below.
 @Tags(['shots'])
 library;
 
@@ -98,9 +97,8 @@ Future<void> _keys(WidgetTester tester, String typed) async {
 
 /// Every picture of the README, in the order they appear there.
 ///
-/// Add new ones at the end (or where they belong). A light-theme picture
-/// would be `(name: 'light', scene: ...)` with the light setting passed to
-/// [_open].
+/// Add new ones at the end (or where they belong). The light-theme picture
+/// is Home in Aqua light: the `light` setting is passed to [_open].
 final List<Shot> _scenes = <Shot>[
   (
     name: 'home',
@@ -155,7 +153,19 @@ final List<Shot> _scenes = <Shot>[
     name: 'themes',
     scene: (tester, db) async {
       await _open(tester, db, location: Routes.settings);
+      expect(find.text('Theme'), findsOneWidget);
       expect(find.text('Color theme'), findsOneWidget);
+    },
+  ),
+  (
+    name: 'light',
+    scene: (tester, db) async {
+      await _open(
+        tester,
+        db,
+        settings: const AppSettings(themeMode: AppThemeMode.light),
+      );
+      expect(find.text('Doctor visit'), findsOneWidget);
     },
   ),
 ];
