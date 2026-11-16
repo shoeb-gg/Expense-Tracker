@@ -14,3 +14,16 @@ String keepLastWordsTogether(String text) {
   if (gap <= 0) return text;
   return text.replaceRange(gap, gap + 1, noBreakSpace);
 }
+
+/// Zero-width space: invisible, but a line may break after it.
+const String zeroWidthSpace = '\u200B';
+
+final RegExp _afterSeparator = RegExp(r'([_\-.])(?=[^\s\u200B])');
+
+/// [name] (a file name such as "expenses_export_2026.csv") with an invisible
+/// break mark after each "_", "-" and "." that has more name after it. A name
+/// has no spaces, so without the marks a long one is cut anywhere; with them
+/// it breaks only after a separator (or at a space). For showing only: the
+/// file itself keeps its name.
+String breakableFileName(String name) =>
+    name.replaceAllMapped(_afterSeparator, (m) => '${m[1]}$zeroWidthSpace');

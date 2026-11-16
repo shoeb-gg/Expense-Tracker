@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/text_wrap.dart';
 import '../../router.dart';
 import '../../state/providers.dart';
 import '../../theme/symbols.dart';
@@ -41,7 +42,10 @@ class ImportColumnsScreen extends ConsumerWidget {
       children: [
         PlainCard(
           child: ListRow(
-            title: table.fileName,
+            // A file name has no spaces: it breaks after "_", "-" or ".",
+            // takes two lines at most and then ends in "…".
+            title: breakableFileName(table.fileName),
+            titleMaxLines: 2,
             subtitle: table.rows.length == 1
                 ? '1 row'
                 : '${fmt.count(table.rows.length)} rows',

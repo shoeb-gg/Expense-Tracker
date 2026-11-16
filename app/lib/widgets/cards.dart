@@ -400,6 +400,7 @@ class ListRow extends StatelessWidget {
     this.onLongPress,
     this.height,
     this.wrap = false,
+    this.titleMaxLines,
     this.titleStyle,
     this.titleColor,
     this.subtitleColor,
@@ -420,6 +421,10 @@ class ListRow extends StatelessWidget {
   /// instead of cutting them to one line.
   final bool wrap;
 
+  /// With [wrap], the most lines the title may take; a longer title ends in
+  /// "…". Null: it takes as many lines as it needs.
+  final int? titleMaxLines;
+
   /// Defaults to [AppText.rowTitle].
   final TextStyle? titleStyle;
   final Color? titleColor;
@@ -438,8 +443,10 @@ class ListRow extends StatelessWidget {
       children: [
         Text(
           title,
-          maxLines: wrap ? null : 1,
-          overflow: wrap ? TextOverflow.clip : TextOverflow.ellipsis,
+          maxLines: wrap ? titleMaxLines : 1,
+          overflow: wrap && titleMaxLines == null
+              ? TextOverflow.clip
+              : TextOverflow.ellipsis,
           style: (titleStyle ?? AppText.rowTitle)
               .copyWith(color: titleColor ?? c.text),
         ),

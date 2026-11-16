@@ -107,7 +107,7 @@ void main() {
     await tester.tap(find.text('Choose a file').last);
     await settle(tester);
     await boardHeight(tester, 1700);
-    expect(isCut(tester, find.text('expenses-2025.csv')), isFalse);
+    expect(isCut(tester, find.text(breakableFileName('expenses-2025.csv'))), isFalse);
     await closeApp(tester, db);
   });
 

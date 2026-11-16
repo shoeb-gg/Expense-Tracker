@@ -23,4 +23,28 @@ void main() {
       expect(keepLastWordsTogether('Hello world '), 'Hello\u00A0world ');
     });
   });
+
+  group('breakableFileName', () {
+    const z = '\u200B';
+
+    test('adds a break mark after _, - and . only', () {
+      expect(
+        breakableFileName('expenses_export-2026.csv'),
+        'expenses_${z}export-${z}2026.${z}csv',
+      );
+    });
+
+    test('the name itself stays the same', () {
+      const name = 'expenses_export_2026_november_final_version.csv';
+      expect(breakableFileName(name).replaceAll(z, ''), name);
+    });
+
+    test('no mark at the end, before a space or after another mark', () {
+      expect(breakableFileName('notes_'), 'notes_');
+      expect(breakableFileName('my file_ 2.csv'), 'my file_ 2.${z}csv');
+      expect(breakableFileName('a__b'), 'a_${z}_${z}b');
+      expect(breakableFileName('plain'), 'plain');
+      expect(breakableFileName(''), '');
+    });
+  });
 }
