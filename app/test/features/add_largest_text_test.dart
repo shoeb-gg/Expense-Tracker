@@ -15,6 +15,7 @@ import 'package:spill_the_bills/widgets/kit.dart';
 import '../support/add_support.dart';
 import '../support/board.dart';
 import '../support/shots.dart';
+import '../support/text_cut.dart';
 
 /// Add / Edit expense at the default and the largest text size, with the
 /// real font (the boards' widths need it).
@@ -184,10 +185,10 @@ void main() {
       final db = await openAdd(tester);
       expect(tester.getRect(card), const Rect.fromLTRB(16, 630, 344, 698));
       expect(tester.getRect(find.text('Select a category')).top, 645);
-      final sub = tester.getRect(find.text(hint));
+      final sub = tester.getRect(noteText(hint));
       expect(sub.top, 667);
       expect(sub.height, 16);
-      expect(lineCount(paragraph(tester, find.text(hint))), 1);
+      expect(lineCount(paragraph(tester, noteText(hint))), 1);
       expect(tester.getRect(bar), const Rect.fromLTRB(16, 708, 344, 764));
       expect(tester.getSize(find.byKey(const ValueKey('quick'))).height, 162);
       await closeApp(tester, db);
@@ -195,8 +196,8 @@ void main() {
 
     testWidgets('largest text: the hint shows in full, over two lines', (tester) async {
       final db = await openAdd(tester, settings: largest);
-      notCut(tester, find.text(hint));
-      expect(lineCount(paragraph(tester, find.text(hint))), 2);
+      notCut(tester, noteText(hint));
+      expect(lineCount(paragraph(tester, noteText(hint))), 2);
       showsInFull(tester, find.text('Select a category'));
       await closeApp(tester, db);
     });
@@ -204,7 +205,7 @@ void main() {
     testWidgets('largest text: the card grows, nothing overlaps', (tester) async {
       final db = await openAdd(tester, settings: largest);
       final c = tester.getRect(card);
-      final sub = tester.getRect(find.text(hint));
+      final sub = tester.getRect(noteText(hint));
       final title = tester.getRect(find.text('Select a category'));
       // The text stays inside the card, below its top padding.
       expect(title.top, greaterThanOrEqualTo(c.top + 12));

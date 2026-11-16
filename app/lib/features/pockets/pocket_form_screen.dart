@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/text_wrap.dart';
 import '../../data/db.dart';
 import '../../state/providers.dart';
 import '../../theme/symbols.dart';
@@ -344,8 +345,10 @@ class _PocketFormScreenState extends ConsumerState<PocketFormScreen> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                'A new pocket starts empty. Your categories and settings '
-                'are already in it.',
+                keepLastWordsTogether(
+                  'A new pocket starts empty. Your categories and settings '
+                  'are already in it.',
+                ),
                 style: AppText.body.copyWith(
                   fontSize: 13,
                   height: 20 / 13,

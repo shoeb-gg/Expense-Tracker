@@ -331,6 +331,7 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
         icon: Symbols.touch_app_rounded,
         title: 'Select a category',
         subtitle: 'Tap one above, or just type below',
+        joinLastWords: true,
       ),
       QuickStage.wordOnly => GuideCard(
         icon: Symbols.dialpad_rounded,

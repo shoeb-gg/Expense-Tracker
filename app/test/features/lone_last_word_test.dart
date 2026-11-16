@@ -114,4 +114,33 @@ void main() {
     expectWholeEnding(tester, ['Tap a slice or a category below to see its share.']);
     await closeApp(tester, db);
   });
+
+  testWidgets('Add expense: the fixed hint on the empty card', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(tester, db: db, location: Routes.add(), settings: largest);
+    await boardHeight(tester, 1700);
+    expectWholeEnding(tester, ['Tap one above, or just type below']);
+    await closeApp(tester, db);
+  });
+
+  testWidgets('Add expense: the line with the typed word is left as typed', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(tester, db: db, location: Routes.add(), settings: largest);
+    await boardHeight(tester, 1700);
+    await tester.enterText(find.byType(EditableText).last, 'coffee');
+    await settle(tester);
+    // Plain spaces: nothing the user typed is joined.
+    expect(find.text('Like “coffee 120”'), findsOneWidget);
+    await closeApp(tester, db);
+  });
+
+  testWidgets('New pocket: the note under the form', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(tester, db: db, location: Routes.newPocket, settings: largest);
+    await boardHeight(tester, 1700);
+    expectWholeEnding(tester, [
+      'A new pocket starts empty. Your categories and settings are already in it.',
+    ]);
+    await closeApp(tester, db);
+  });
 }

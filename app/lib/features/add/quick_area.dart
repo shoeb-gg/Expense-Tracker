@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../../core/text_wrap.dart';
 import '../../data/db.dart';
 import '../../theme/symbols.dart';
 import '../../theme/text.dart';
@@ -89,11 +90,22 @@ class _RenderHeightReporter extends RenderProxyBox {
 /// "Select a category / Tap one above, or just type below", or, with a word
 /// typed, "Now add the amount / Like “coffee 120”".
 class GuideCard extends StatelessWidget {
-  const GuideCard({super.key, required this.icon, required this.title, required this.subtitle});
+  const GuideCard({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.joinLastWords = false,
+  });
 
   final IconData icon;
   final String title;
   final String subtitle;
+
+  /// Keep the last two words of [subtitle] on one line (it never ends on a
+  /// lone word). Only for fixed wording: a subtitle with words the user typed
+  /// stays as it is.
+  final bool joinLastWords;
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +126,7 @@ class GuideCard extends StatelessWidget {
                 // Wraps onto a second line in large text (the card grows, see
                 // QuickArea); ends in "..." only after two lines.
                 Text(
-                  subtitle,
+                  joinLastWords ? keepLastWordsTogether(subtitle) : subtitle,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppText.sub.copyWith(color: c.text3),

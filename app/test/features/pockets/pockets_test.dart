@@ -289,7 +289,7 @@ void main() {
       await _open(tester, db, Routes.newPocket);
       expect(find.text('Add pocket'), findsOneWidget);
       expect(
-        find.text(
+        noteText(
           'A new pocket starts empty. Your categories and settings are '
           'already in it.',
         ),
