@@ -59,7 +59,7 @@ enum _Screen {
 }
 
 /// The screens the tests below run on.
-const List<_Screen> _screens = <_Screen>[_Screen.calendar];
+const List<_Screen> _screens = _Screen.values;
 
 /// What the app was opened with.
 class _Opened {
@@ -315,6 +315,30 @@ void main() {
         expect(tester.getRect(find.text(_personal)).right, lessThan(pill.left));
         await closeApp(tester, opened.db);
       });
+
+      testWidgets(
+        'Charts at text size ${scale.toStringAsFixed(2)}: the "This month" '
+        'pill covers neither the title nor the line',
+        (tester) async {
+          final opened = await _open(
+            tester,
+            _Screen.charts,
+            extra: _businessPocket,
+            scale: scale,
+          );
+          await _awayFromNow(tester);
+          expect(find.byType(Pill), findsOneWidget);
+          expectNothingUnder(tester, find.byType(Pill));
+          final pill = tester.getRect(find.byType(Pill));
+          expect(pill.top, 16, reason: 'the pill keeps its place');
+          expect(pill.right, 360 - 16);
+          expect(
+            tester.getRect(find.text(_personal)).right,
+            lessThan(pill.left),
+          );
+          await closeApp(tester, opened.db);
+        },
+      );
     }
 
     testWidgets('widthFor is the width the pill really takes', (tester) async {

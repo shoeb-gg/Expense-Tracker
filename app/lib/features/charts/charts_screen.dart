@@ -9,6 +9,7 @@ import '../../core/days.dart';
 import '../../core/format.dart';
 import '../../data/db.dart';
 import '../../router.dart';
+import '../../state/pocket_line.dart';
 import '../../state/providers.dart';
 import '../../theme/symbols.dart';
 import '../../theme/text.dart';
@@ -183,6 +184,8 @@ class _ChartsScreenState extends ConsumerState<ChartsScreen> {
         : ref.watch(spendIndexProvider(pocketId)).value;
     final period = _period(today, settings);
     final nowWord = _nowWord(_kind);
+    // The pocket in use, under the title, once there are two or more pockets.
+    final pocketLine = ref.watch(pocketLineProvider);
 
     final tabs = [
       for (final o in tabOffsets(_kind, _offsets[_kind]!))
@@ -224,7 +227,19 @@ class _ChartsScreenState extends ConsumerState<ChartsScreen> {
                     children: [
                       Stack(
                         children: [
-                          const PageHeader(title: 'Charts'),
+                          PageHeader(
+                            title: 'Charts',
+                            subtitle: pocketLine,
+                            // The line stops short of the pill, whichever of
+                            // "This week", "This month" or "This year" shows.
+                            endRoom: pocketLine == null
+                                ? 0
+                                : 8 +
+                                      [
+                                        for (final word in ['week', 'month', 'year'])
+                                          NowPill.widthFor(context, 'This $word'),
+                                      ].reduce(math.max),
+                          ),
                           // Free room at the right of the title: shown off
                           // the current week, month or year.
                           Positioned(

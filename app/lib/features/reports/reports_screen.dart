@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/days.dart';
 import '../../core/format.dart';
 import '../../data/db.dart';
+import '../../state/pocket_line.dart';
 import '../../state/providers.dart';
 import '../../theme/symbols.dart';
 import '../../theme/text.dart';
@@ -55,13 +56,15 @@ class ReportsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
     final pocketId = ref.watch(currentPocketIdProvider);
+    // The pocket in use, under the title, once there are two or more pockets.
+    final pocketLine = ref.watch(pocketLineProvider);
     return Scaffold(
       backgroundColor: c.bg,
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
-            const PageHeader(title: 'Reports'),
+            PageHeader(title: 'Reports', subtitle: pocketLine),
             Expanded(
               child: pocketId == null
                   ? const SizedBox.shrink()
