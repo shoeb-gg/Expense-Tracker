@@ -30,6 +30,7 @@ class DataMaintenance {
     final pocketId = await _db.transaction(() async {
       await _db.delete(_db.expenses).go();
       await _db.delete(_db.learnedWords).go();
+      await _db.delete(_db.categoryBudgets).go();
       await _db.delete(_db.categories).go();
       await _db.delete(_db.pockets).go();
       return _db.seedDefaults();

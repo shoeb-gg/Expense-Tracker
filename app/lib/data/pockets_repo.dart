@@ -114,6 +114,7 @@ class PocketsRepo {
           .get();
       photoNames.addAll(withPhotos.map((x) => x.photoPath!));
       final n = await (_db.delete(e)..where((x) => x.pocketId.equals(id))).go();
+      await (_db.delete(_db.categoryBudgets)..where((b) => b.pocketId.equals(id))).go();
       await (_db.delete(_t)..where((p) => p.id.equals(id))).go();
       return n;
     });

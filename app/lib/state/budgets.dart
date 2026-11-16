@@ -4,6 +4,10 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/days.dart';
+import '../data/budgets_repo.dart';
+import 'providers.dart';
+
 /// Where a category stands against its budget for a month.
 enum BudgetLevel {
   /// Under 90% used: green.
@@ -33,14 +37,17 @@ class BudgetUse {
   double get progress => spent / budget;
 
   /// Green under 90%, yellow from 90% to 100%, red over 100%.
-  BudgetLevel get level {
+  BudgetLevel get level => levelOf(spent, budget);
+
+  /// How much over the budget (0 when not over).
+  int get overBy => spent > budget ? spent - budget : 0;
+
+  /// The level of [spent] against [budget] (both minor units, budget > 0).
+  static BudgetLevel levelOf(int spent, int budget) {
     if (spent > budget) return BudgetLevel.over;
     if (spent * 10 >= budget * 9) return BudgetLevel.near;
     return BudgetLevel.ok;
   }
-
-  /// How much over the budget (0 when not over).
-  int get overBy => spent > budget ? spent - budget : 0;
 
   @override
   bool operator ==(Object other) =>
@@ -48,11 +55,40 @@ class BudgetUse {
 
   @override
   int get hashCode => Object.hash(spent, budget);
+
+  @override
+  String toString() => 'BudgetUse($spent of $budget)';
 }
 
-/// The budget use of every category that has a budget, in the pocket in use,
-/// for the month starting on [monthStart] (a day number, see `core/days.dart`).
-/// Categories without a budget are not in the map.
-final budgetUsesProvider = Provider.family<Map<int, BudgetUse>, int>(
-  (ref, monthStart) => const <int, BudgetUse>{},
+/// A pocket and the first day of a month (a day number, see core/days.dart).
+typedef PocketMonth = ({int pocketId, int monthStart});
+
+final budgetsRepoProvider = Provider<BudgetsRepo>(
+  (ref) => BudgetsRepo(ref.watch(databaseProvider)),
+);
+
+/// A pocket's budgets: category id -> monthly amount (minor units).
+final pocketBudgetsProvider = StreamProvider.autoDispose.family<Map<int, int>, int>(
+  (ref, pocketId) => ref.watch(budgetsRepoProvider).watch(pocketId),
+);
+
+/// The budget use of every category that has a budget in the pocket, for
+/// the month. Categories without a budget are not in the map.
+final budgetUsesProvider = Provider.autoDispose.family<Map<int, BudgetUse>, PocketMonth>(
+  (ref, k) {
+    final budgets = ref.watch(pocketBudgetsProvider(k.pocketId)).value;
+    if (budgets == null || budgets.isEmpty) return const <int, BudgetUse>{};
+    final first = dateOfDay(k.monthStart);
+    final range = (
+      pocketId: k.pocketId,
+      from: k.monthStart,
+      to: monthEnd(first.year, first.month),
+    );
+    final totals = ref.watch(categoryTotalsProvider(range)).value ?? const <CategoryTotal>[];
+    final spent = {for (final t in totals) t.categoryId: t.total};
+    return {
+      for (final MapEntry(key: id, value: budget) in budgets.entries)
+        id: BudgetUse(spent: spent[id] ?? 0, budget: budget),
+    };
+  },
 );

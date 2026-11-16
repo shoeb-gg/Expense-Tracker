@@ -348,6 +348,16 @@ class ExpensesRepo {
     return q.watchSingle().map((r) => r.read(total) ?? 0);
   }
 
+  /// Total of one category in a pocket and range (the budget toasts read it
+  /// right before and right after a save).
+  Future<int> categoryTotal(int pocketId, int categoryId, int from, int to) {
+    final total = _t.amount.sum();
+    final q = _db.selectOnly(_t)
+      ..addColumns([total])
+      ..where(_inRange(pocketId, from, to) & _t.categoryId.equals(categoryId));
+    return q.getSingle().then((r) => r.read(total) ?? 0);
+  }
+
   /// All-time total of a pocket.
   Stream<int> watchAllTimeTotal(int pocketId) {
     final total = _t.amount.sum();

@@ -242,8 +242,12 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
       if (p.id == targetId) target = p;
     }
     final pill = pocketWhenSeveral(pockets, target);
-    // Rings show the month of the date this expense is for.
-    final budgets = ref.watch(budgetUsesProvider(monthStartOfDay(_day)));
+    // Rings show the pocket this expense goes into, in the month of its date.
+    final budgets = targetId == null
+        ? const <int, BudgetUse>{}
+        : ref.watch(
+            budgetUsesProvider((pocketId: targetId, monthStart: monthStartOfDay(_day))),
+          );
 
     final mq = MediaQuery.of(context);
     final keyboard = mq.viewInsets.bottom;

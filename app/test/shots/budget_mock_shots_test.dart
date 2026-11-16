@@ -63,7 +63,7 @@ Future<Override> _fakeBudgets(WidgetTester tester, AppDatabase db) async {
       if (_uses[cat.name] case final share?)
         cat.id: BudgetUse(spent: (share * 500000).round(), budget: 500000),
   };
-  return budgetUsesProvider.overrideWith((ref, monthStart) => uses);
+  return budgetUsesProvider.overrideWith((ref, key) => uses);
 }
 
 void main() {

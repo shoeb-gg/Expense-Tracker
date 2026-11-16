@@ -1860,6 +1860,278 @@ class SettingsEntriesCompanion extends UpdateCompanion<SettingsEntry> {
   }
 }
 
+class $CategoryBudgetsTable extends CategoryBudgets
+    with TableInfo<$CategoryBudgetsTable, CategoryBudget> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CategoryBudgetsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _pocketIdMeta = const VerificationMeta(
+    'pocketId',
+  );
+  @override
+  late final GeneratedColumn<int> pocketId = GeneratedColumn<int>(
+    'pocket_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES pockets (id)',
+    ),
+  );
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  @override
+  late final GeneratedColumn<int> categoryId = GeneratedColumn<int>(
+    'category_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES categories (id)',
+    ),
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<int> amount = GeneratedColumn<int>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [pocketId, categoryId, amount];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'category_budgets';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CategoryBudget> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('pocket_id')) {
+      context.handle(
+        _pocketIdMeta,
+        pocketId.isAcceptableOrUnknown(data['pocket_id']!, _pocketIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pocketIdMeta);
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryIdMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {pocketId, categoryId};
+  @override
+  CategoryBudget map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CategoryBudget(
+      pocketId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}pocket_id'],
+      )!,
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}category_id'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount'],
+      )!,
+    );
+  }
+
+  @override
+  $CategoryBudgetsTable createAlias(String alias) {
+    return $CategoryBudgetsTable(attachedDatabase, alias);
+  }
+}
+
+class CategoryBudget extends DataClass implements Insertable<CategoryBudget> {
+  final int pocketId;
+  final int categoryId;
+  final int amount;
+  const CategoryBudget({
+    required this.pocketId,
+    required this.categoryId,
+    required this.amount,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['pocket_id'] = Variable<int>(pocketId);
+    map['category_id'] = Variable<int>(categoryId);
+    map['amount'] = Variable<int>(amount);
+    return map;
+  }
+
+  CategoryBudgetsCompanion toCompanion(bool nullToAbsent) {
+    return CategoryBudgetsCompanion(
+      pocketId: Value(pocketId),
+      categoryId: Value(categoryId),
+      amount: Value(amount),
+    );
+  }
+
+  factory CategoryBudget.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CategoryBudget(
+      pocketId: serializer.fromJson<int>(json['pocketId']),
+      categoryId: serializer.fromJson<int>(json['categoryId']),
+      amount: serializer.fromJson<int>(json['amount']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'pocketId': serializer.toJson<int>(pocketId),
+      'categoryId': serializer.toJson<int>(categoryId),
+      'amount': serializer.toJson<int>(amount),
+    };
+  }
+
+  CategoryBudget copyWith({int? pocketId, int? categoryId, int? amount}) =>
+      CategoryBudget(
+        pocketId: pocketId ?? this.pocketId,
+        categoryId: categoryId ?? this.categoryId,
+        amount: amount ?? this.amount,
+      );
+  CategoryBudget copyWithCompanion(CategoryBudgetsCompanion data) {
+    return CategoryBudget(
+      pocketId: data.pocketId.present ? data.pocketId.value : this.pocketId,
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      amount: data.amount.present ? data.amount.value : this.amount,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CategoryBudget(')
+          ..write('pocketId: $pocketId, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('amount: $amount')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(pocketId, categoryId, amount);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CategoryBudget &&
+          other.pocketId == this.pocketId &&
+          other.categoryId == this.categoryId &&
+          other.amount == this.amount);
+}
+
+class CategoryBudgetsCompanion extends UpdateCompanion<CategoryBudget> {
+  final Value<int> pocketId;
+  final Value<int> categoryId;
+  final Value<int> amount;
+  final Value<int> rowid;
+  const CategoryBudgetsCompanion({
+    this.pocketId = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CategoryBudgetsCompanion.insert({
+    required int pocketId,
+    required int categoryId,
+    required int amount,
+    this.rowid = const Value.absent(),
+  }) : pocketId = Value(pocketId),
+       categoryId = Value(categoryId),
+       amount = Value(amount);
+  static Insertable<CategoryBudget> custom({
+    Expression<int>? pocketId,
+    Expression<int>? categoryId,
+    Expression<int>? amount,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (pocketId != null) 'pocket_id': pocketId,
+      if (categoryId != null) 'category_id': categoryId,
+      if (amount != null) 'amount': amount,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CategoryBudgetsCompanion copyWith({
+    Value<int>? pocketId,
+    Value<int>? categoryId,
+    Value<int>? amount,
+    Value<int>? rowid,
+  }) {
+    return CategoryBudgetsCompanion(
+      pocketId: pocketId ?? this.pocketId,
+      categoryId: categoryId ?? this.categoryId,
+      amount: amount ?? this.amount,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (pocketId.present) {
+      map['pocket_id'] = Variable<int>(pocketId.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<int>(categoryId.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<int>(amount.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CategoryBudgetsCompanion(')
+          ..write('pocketId: $pocketId, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('amount: $amount, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1868,6 +2140,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ExpensesTable expenses = $ExpensesTable(this);
   late final $LearnedWordsTable learnedWords = $LearnedWordsTable(this);
   late final $SettingsEntriesTable settingsEntries = $SettingsEntriesTable(
+    this,
+  );
+  late final $CategoryBudgetsTable categoryBudgets = $CategoryBudgetsTable(
     this,
   );
   late final Index expensesPocketDay = Index(
@@ -1884,6 +2159,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     expenses,
     learnedWords,
     settingsEntries,
+    categoryBudgets,
     expensesPocketDay,
   ];
 }
@@ -1925,6 +2201,26 @@ final class $$PocketsTableReferences
     ).filter((f) => f.pocketId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_expensesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$CategoryBudgetsTable, List<CategoryBudget>>
+  _categoryBudgetsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.categoryBudgets,
+    aliasName: $_aliasNameGenerator(db.pockets.id, db.categoryBudgets.pocketId),
+  );
+
+  $$CategoryBudgetsTableProcessedTableManager get categoryBudgetsRefs {
+    final manager = $$CategoryBudgetsTableTableManager(
+      $_db,
+      $_db.categoryBudgets,
+    ).filter((f) => f.pocketId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _categoryBudgetsRefsTable($_db),
+    );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -1986,6 +2282,31 @@ class $$PocketsTableFilterComposer
           }) => $$ExpensesTableFilterComposer(
             $db: $db,
             $table: $db.expenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> categoryBudgetsRefs(
+    Expression<bool> Function($$CategoryBudgetsTableFilterComposer f) f,
+  ) {
+    final $$CategoryBudgetsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.categoryBudgets,
+      getReferencedColumn: (t) => t.pocketId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoryBudgetsTableFilterComposer(
+            $db: $db,
+            $table: $db.categoryBudgets,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2087,6 +2408,31 @@ class $$PocketsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> categoryBudgetsRefs<T extends Object>(
+    Expression<T> Function($$CategoryBudgetsTableAnnotationComposer a) f,
+  ) {
+    final $$CategoryBudgetsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.categoryBudgets,
+      getReferencedColumn: (t) => t.pocketId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoryBudgetsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.categoryBudgets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$PocketsTableTableManager
@@ -2102,7 +2448,7 @@ class $$PocketsTableTableManager
           $$PocketsTableUpdateCompanionBuilder,
           (Pocket, $$PocketsTableReferences),
           Pocket,
-          PrefetchHooks Function({bool expensesRefs})
+          PrefetchHooks Function({bool expensesRefs, bool categoryBudgetsRefs})
         > {
   $$PocketsTableTableManager(_$AppDatabase db, $PocketsTable table)
     : super(
@@ -2155,28 +2501,63 @@ class $$PocketsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({expensesRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (expensesRefs) db.expenses],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (expensesRefs)
-                    await $_getPrefetchedData<Pocket, $PocketsTable, Expense>(
-                      currentTable: table,
-                      referencedTable: $$PocketsTableReferences
-                          ._expensesRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$PocketsTableReferences(db, table, p0).expensesRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.pocketId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({expensesRefs = false, categoryBudgetsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (expensesRefs) db.expenses,
+                    if (categoryBudgetsRefs) db.categoryBudgets,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (expensesRefs)
+                        await $_getPrefetchedData<
+                          Pocket,
+                          $PocketsTable,
+                          Expense
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PocketsTableReferences
+                              ._expensesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PocketsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).expensesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.pocketId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (categoryBudgetsRefs)
+                        await $_getPrefetchedData<
+                          Pocket,
+                          $PocketsTable,
+                          CategoryBudget
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PocketsTableReferences
+                              ._categoryBudgetsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PocketsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).categoryBudgetsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.pocketId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -2193,7 +2574,7 @@ typedef $$PocketsTableProcessedTableManager =
       $$PocketsTableUpdateCompanionBuilder,
       (Pocket, $$PocketsTableReferences),
       Pocket,
-      PrefetchHooks Function({bool expensesRefs})
+      PrefetchHooks Function({bool expensesRefs, bool categoryBudgetsRefs})
     >;
 typedef $$CategoriesTableCreateCompanionBuilder =
     CategoriesCompanion Function({
@@ -2255,6 +2636,29 @@ final class $$CategoriesTableReferences
     ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_learnedWordsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$CategoryBudgetsTable, List<CategoryBudget>>
+  _categoryBudgetsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.categoryBudgets,
+    aliasName: $_aliasNameGenerator(
+      db.categories.id,
+      db.categoryBudgets.categoryId,
+    ),
+  );
+
+  $$CategoryBudgetsTableProcessedTableManager get categoryBudgetsRefs {
+    final manager = $$CategoryBudgetsTableTableManager(
+      $_db,
+      $_db.categoryBudgets,
+    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _categoryBudgetsRefsTable($_db),
+    );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -2346,6 +2750,31 @@ class $$CategoriesTableFilterComposer
           }) => $$LearnedWordsTableFilterComposer(
             $db: $db,
             $table: $db.learnedWords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> categoryBudgetsRefs(
+    Expression<bool> Function($$CategoryBudgetsTableFilterComposer f) f,
+  ) {
+    final $$CategoryBudgetsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.categoryBudgets,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoryBudgetsTableFilterComposer(
+            $db: $db,
+            $table: $db.categoryBudgets,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2480,6 +2909,31 @@ class $$CategoriesTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> categoryBudgetsRefs<T extends Object>(
+    Expression<T> Function($$CategoryBudgetsTableAnnotationComposer a) f,
+  ) {
+    final $$CategoryBudgetsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.categoryBudgets,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoryBudgetsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.categoryBudgets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CategoriesTableTableManager
@@ -2495,7 +2949,11 @@ class $$CategoriesTableTableManager
           $$CategoriesTableUpdateCompanionBuilder,
           (ExpenseCategory, $$CategoriesTableReferences),
           ExpenseCategory,
-          PrefetchHooks Function({bool expensesRefs, bool learnedWordsRefs})
+          PrefetchHooks Function({
+            bool expensesRefs,
+            bool learnedWordsRefs,
+            bool categoryBudgetsRefs,
+          })
         > {
   $$CategoriesTableTableManager(_$AppDatabase db, $CategoriesTable table)
     : super(
@@ -2553,12 +3011,17 @@ class $$CategoriesTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({expensesRefs = false, learnedWordsRefs = false}) {
+              ({
+                expensesRefs = false,
+                learnedWordsRefs = false,
+                categoryBudgetsRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (expensesRefs) db.expenses,
                     if (learnedWordsRefs) db.learnedWords,
+                    if (categoryBudgetsRefs) db.categoryBudgets,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -2605,6 +3068,27 @@ class $$CategoriesTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (categoryBudgetsRefs)
+                        await $_getPrefetchedData<
+                          ExpenseCategory,
+                          $CategoriesTable,
+                          CategoryBudget
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CategoriesTableReferences
+                              ._categoryBudgetsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CategoriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).categoryBudgetsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.categoryId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -2625,7 +3109,11 @@ typedef $$CategoriesTableProcessedTableManager =
       $$CategoriesTableUpdateCompanionBuilder,
       (ExpenseCategory, $$CategoriesTableReferences),
       ExpenseCategory,
-      PrefetchHooks Function({bool expensesRefs, bool learnedWordsRefs})
+      PrefetchHooks Function({
+        bool expensesRefs,
+        bool learnedWordsRefs,
+        bool categoryBudgetsRefs,
+      })
     >;
 typedef $$ExpensesTableCreateCompanionBuilder =
     ExpensesCompanion Function({
@@ -3528,6 +4016,386 @@ typedef $$SettingsEntriesTableProcessedTableManager =
       SettingsEntry,
       PrefetchHooks Function()
     >;
+typedef $$CategoryBudgetsTableCreateCompanionBuilder =
+    CategoryBudgetsCompanion Function({
+      required int pocketId,
+      required int categoryId,
+      required int amount,
+      Value<int> rowid,
+    });
+typedef $$CategoryBudgetsTableUpdateCompanionBuilder =
+    CategoryBudgetsCompanion Function({
+      Value<int> pocketId,
+      Value<int> categoryId,
+      Value<int> amount,
+      Value<int> rowid,
+    });
+
+final class $$CategoryBudgetsTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $CategoryBudgetsTable, CategoryBudget> {
+  $$CategoryBudgetsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $PocketsTable _pocketIdTable(_$AppDatabase db) =>
+      db.pockets.createAlias(
+        $_aliasNameGenerator(db.categoryBudgets.pocketId, db.pockets.id),
+      );
+
+  $$PocketsTableProcessedTableManager get pocketId {
+    final $_column = $_itemColumn<int>('pocket_id')!;
+
+    final manager = $$PocketsTableTableManager(
+      $_db,
+      $_db.pockets,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_pocketIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
+      db.categories.createAlias(
+        $_aliasNameGenerator(db.categoryBudgets.categoryId, db.categories.id),
+      );
+
+  $$CategoriesTableProcessedTableManager get categoryId {
+    final $_column = $_itemColumn<int>('category_id')!;
+
+    final manager = $$CategoriesTableTableManager(
+      $_db,
+      $_db.categories,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$CategoryBudgetsTableFilterComposer
+    extends Composer<_$AppDatabase, $CategoryBudgetsTable> {
+  $$CategoryBudgetsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PocketsTableFilterComposer get pocketId {
+    final $$PocketsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pocketId,
+      referencedTable: $db.pockets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PocketsTableFilterComposer(
+            $db: $db,
+            $table: $db.pockets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CategoriesTableFilterComposer get categoryId {
+    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableFilterComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CategoryBudgetsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CategoryBudgetsTable> {
+  $$CategoryBudgetsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PocketsTableOrderingComposer get pocketId {
+    final $$PocketsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pocketId,
+      referencedTable: $db.pockets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PocketsTableOrderingComposer(
+            $db: $db,
+            $table: $db.pockets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CategoriesTableOrderingComposer get categoryId {
+    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CategoryBudgetsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CategoryBudgetsTable> {
+  $$CategoryBudgetsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  $$PocketsTableAnnotationComposer get pocketId {
+    final $$PocketsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pocketId,
+      referencedTable: $db.pockets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PocketsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pockets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CategoriesTableAnnotationComposer get categoryId {
+    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CategoryBudgetsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CategoryBudgetsTable,
+          CategoryBudget,
+          $$CategoryBudgetsTableFilterComposer,
+          $$CategoryBudgetsTableOrderingComposer,
+          $$CategoryBudgetsTableAnnotationComposer,
+          $$CategoryBudgetsTableCreateCompanionBuilder,
+          $$CategoryBudgetsTableUpdateCompanionBuilder,
+          (CategoryBudget, $$CategoryBudgetsTableReferences),
+          CategoryBudget,
+          PrefetchHooks Function({bool pocketId, bool categoryId})
+        > {
+  $$CategoryBudgetsTableTableManager(
+    _$AppDatabase db,
+    $CategoryBudgetsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CategoryBudgetsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CategoryBudgetsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CategoryBudgetsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> pocketId = const Value.absent(),
+                Value<int> categoryId = const Value.absent(),
+                Value<int> amount = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CategoryBudgetsCompanion(
+                pocketId: pocketId,
+                categoryId: categoryId,
+                amount: amount,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int pocketId,
+                required int categoryId,
+                required int amount,
+                Value<int> rowid = const Value.absent(),
+              }) => CategoryBudgetsCompanion.insert(
+                pocketId: pocketId,
+                categoryId: categoryId,
+                amount: amount,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CategoryBudgetsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({pocketId = false, categoryId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (pocketId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.pocketId,
+                                referencedTable:
+                                    $$CategoryBudgetsTableReferences
+                                        ._pocketIdTable(db),
+                                referencedColumn:
+                                    $$CategoryBudgetsTableReferences
+                                        ._pocketIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+                    if (categoryId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.categoryId,
+                                referencedTable:
+                                    $$CategoryBudgetsTableReferences
+                                        ._categoryIdTable(db),
+                                referencedColumn:
+                                    $$CategoryBudgetsTableReferences
+                                        ._categoryIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CategoryBudgetsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CategoryBudgetsTable,
+      CategoryBudget,
+      $$CategoryBudgetsTableFilterComposer,
+      $$CategoryBudgetsTableOrderingComposer,
+      $$CategoryBudgetsTableAnnotationComposer,
+      $$CategoryBudgetsTableCreateCompanionBuilder,
+      $$CategoryBudgetsTableUpdateCompanionBuilder,
+      (CategoryBudget, $$CategoryBudgetsTableReferences),
+      CategoryBudget,
+      PrefetchHooks Function({bool pocketId, bool categoryId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3542,4 +4410,6 @@ class $AppDatabaseManager {
       $$LearnedWordsTableTableManager(_db, _db.learnedWords);
   $$SettingsEntriesTableTableManager get settingsEntries =>
       $$SettingsEntriesTableTableManager(_db, _db.settingsEntries);
+  $$CategoryBudgetsTableTableManager get categoryBudgets =>
+      $$CategoryBudgetsTableTableManager(_db, _db.categoryBudgets);
 }

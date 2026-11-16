@@ -72,6 +72,19 @@ class LearnedWords extends Table {
   Set<Column<Object>> get primaryKey => {word};
 }
 
+/// A category's monthly budget in one pocket, in minor units (amount x 100).
+/// Each pocket has its own budgets; a category with no row in a pocket has
+/// no budget there. The same amount applies to every month.
+@DataClassName('CategoryBudget')
+class CategoryBudgets extends Table {
+  IntColumn get pocketId => integer().references(Pockets, #id)();
+  IntColumn get categoryId => integer().references(Categories, #id)();
+  IntColumn get amount => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {pocketId, categoryId};
+}
+
 /// App settings as key/value text (see state/settings.dart).
 @DataClassName('SettingsEntry')
 class SettingsEntries extends Table {
@@ -141,7 +154,14 @@ const ({String name, String emoji}) defaultPocket =
     (name: 'Personal', emoji: '\u{1F45B}');
 
 @DriftDatabase(
-  tables: [Pockets, Categories, Expenses, LearnedWords, SettingsEntries],
+  tables: [
+    Pockets,
+    Categories,
+    Expenses,
+    LearnedWords,
+    SettingsEntries,
+    CategoryBudgets,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   /// The app's database file `spill_the_bills.sqlite` in the documents folder.
@@ -151,8 +171,9 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   /// 1: first release. 2: every default category has its own colour.
+  /// 3: category budgets.
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -162,6 +183,7 @@ class AppDatabase extends _$AppDatabase {
         },
         onUpgrade: (m, from, to) async {
           if (from < 2) await recolourDefaultCategories();
+          if (from < 3) await m.createTable(categoryBudgets);
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');

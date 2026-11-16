@@ -123,7 +123,7 @@ class CategoriesRepo {
   /// Deletes a category. Its expenses in EVERY pocket move to
   /// Miscellaneous; returns how many moved. The words type to add learned
   /// for it are forgotten (so the next time the app asks again instead of
-  /// quietly filing them under Miscellaneous).
+  /// quietly filing them under Miscellaneous), and so are its budgets.
   /// Throws a [StateError] for Miscellaneous.
   Future<int> delete(int id) {
     return _db.transaction(() async {
@@ -144,6 +144,7 @@ class CategoriesRepo {
       await (_db.delete(_db.learnedWords)
             ..where((w) => w.categoryId.equals(id)))
           .go();
+      await (_db.delete(_db.categoryBudgets)..where((b) => b.categoryId.equals(id))).go();
       await (_db.delete(_t)..where((c) => c.id.equals(id))).go();
       return moved;
     });
