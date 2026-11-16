@@ -69,7 +69,7 @@ KeypadView keypadView(String expr, AmountFormat format) {
       );
     }
     return KeypadView(
-      amountText: format.format(result),
+      amountText: format.formatExact(result),
       isPlaceholder: false,
       expressionText: line,
       checkKey: CheckKey.equals,

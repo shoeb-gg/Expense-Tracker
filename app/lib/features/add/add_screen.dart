@@ -342,7 +342,7 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
       QuickStage.matched || QuickStage.unknown => PreviewCard(
         category: quickCategory,
         subtitle: parsed.title.isEmpty ? dateLabel : '${parsed.title} · $dateLabel',
-        amount: fmt.format(parsed.amount ?? 0),
+        amount: fmt.formatExact(parsed.amount ?? 0),
         onCategoryTap: _pointAtGrid,
         word: parsed.title.toLowerCase(),
         hint: hint,

@@ -306,6 +306,7 @@ class _NumbersCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(settingsProvider);
+    final n = ref.read(settingsProvider.notifier);
     return BandCard(
       title: 'Numbers',
       icon: Symbols.calculate_rounded,
@@ -322,6 +323,19 @@ class _NumbersCard extends ConsumerWidget {
                 tabular: true,
               ),
               onTap: () => pickNumberFormat(context, ref),
+            ),
+          ),
+          BottomHairline(
+            child: ListRow(
+              title: 'Show decimals',
+              divider: false,
+              wrap: true,
+              onTap: () => n.setShowDecimals(!s.showDecimals),
+              trailing: AppSwitch(
+                value: s.showDecimals,
+                onChanged: n.setShowDecimals,
+                semanticLabel: 'Show decimals',
+              ),
             ),
           ),
           ListRow(

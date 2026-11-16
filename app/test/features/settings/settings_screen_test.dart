@@ -97,6 +97,58 @@ void main() {
     await closeApp(tester, db);
   });
 
+  testWidgets('the Numbers card has Show decimals, not Thousands separator', (
+    tester,
+  ) async {
+    final db = openTestDatabase();
+    await pumpApp(tester, db: db, location: Routes.settings);
+    await boardHeight(tester, 3000);
+    expect(find.text('Show decimals'), findsOneWidget);
+    expect(find.text('Thousands separator'), findsNothing);
+    expect(find.bySemanticsLabel('Show decimals'), findsWidgets);
+    expect(find.bySemanticsLabel('Thousands separator'), findsNothing);
+    final decimals = find.widgetWithText(ListRow, 'Show decimals');
+    // No subtitle: just the title and the switch, which is on.
+    expect(
+      find.descendant(of: decimals, matching: find.byType(Text)),
+      findsOneWidget,
+    );
+    final switchFinder = find.descendant(
+      of: decimals,
+      matching: find.byType(AppSwitch),
+    );
+    expect(tester.widget<AppSwitch>(switchFinder).value, isTrue);
+    expect(tester.widgetList<ListRow>(find.byType(ListRow)), hasLength(16));
+    await closeApp(tester, db);
+  });
+
+  testWidgets('Show decimals switches, is saved, and the sample keeps .89', (
+    tester,
+  ) async {
+    final db = await openSettings(tester);
+    expect(settingsOf(tester).showDecimals, isTrue);
+    await tapRow(tester, 'Show decimals');
+    expect(settingsOf(tester).showDecimals, isFalse);
+    expect((await stored(tester, db))[AppSettings.kShowDecimals], 'false');
+    expect(find.text('1,234,567.89'), findsOneWidget, reason: 'row sample');
+    await tapRow(tester, 'Number format');
+    expect(find.text('1,234,567.89'), findsNWidgets(2), reason: 'row + option');
+    expect([for (final r in sheetRows(tester)) r.label], [
+      '1,234,567.89',
+      '1\u00A0234\u00A0567.89',
+      '12,34,567.89',
+      '1234567.89',
+    ], reason: 'the sheet samples keep the cents');
+    await tester.tap(find.text('12,34,567.89'));
+    await settle(tester);
+    expect(settingsOf(tester).numberStyle, NumberStyle.lakh);
+    expect(settingsOf(tester).showDecimals, isFalse);
+    await tapRow(tester, 'Show decimals');
+    expect(settingsOf(tester).showDecimals, isTrue);
+    expect((await stored(tester, db))[AppSettings.kShowDecimals], 'true');
+    await closeApp(tester, db);
+  });
+
   testWidgets('first day of the week, calculator keys and switches', (
     tester,
   ) async {

@@ -31,7 +31,7 @@ enum NumberStyle {
 
   /// The seven-digit sample shown in Settings and the Number format sheet,
   /// e.g. "1,234,567.89". Always shows the cents: it describes the style.
-  String get sample => AmountFormat(style: this).format(123456789);
+  String get sample => AmountFormat(style: this).formatExact(123456789);
 
   /// Note shown on the right of an option in the Number format sheet.
   String get note => this == NumberStyle.lakh ? 'Lakh, crore' : '';
@@ -41,15 +41,36 @@ enum NumberStyle {
 /// with `ref.watch(amountFormatProvider)`.
 @immutable
 class AmountFormat {
-  const AmountFormat({this.style = NumberStyle.comma});
+  const AmountFormat({
+    this.style = NumberStyle.comma,
+    this.showDecimals = true,
+  });
 
   final NumberStyle style;
+
+  /// Whether [format] shows the cents. Off: saved amounts are shown rounded
+  /// to whole units, half up. What the user types and the stored data are
+  /// never rounded.
+  final bool showDecimals;
 
   /// The decimal mark: always ".".
   String get decimalMark => '.';
 
-  /// 118000 -> "1,180"; 1250 -> "12.50"; 123456789 -> "1,234,567.89".
+  /// An amount as the app shows it: 118000 -> "1,180"; 1250 -> "12.50";
+  /// 123456789 -> "1,234,567.89". With [showDecimals] off it is rounded to
+  /// whole units, half up: 84050 -> "841", 84025 -> "840", 123456789 ->
+  /// "1,234,568". Pass sums of exact amounts, never of rounded ones.
   String format(int minor) {
+    if (showDecimals) return formatExact(minor);
+    final negative = minor < 0;
+    final units = (minor.abs() + 50) ~/ 100;
+    final text = group(units);
+    return negative && units != 0 ? '-$text' : text;
+  }
+
+  /// Always exact, whatever [showDecimals] says: whole amounts show no
+  /// decimals, others two. Used for what the user is typing.
+  String formatExact(int minor) {
     final negative = minor < 0;
     final abs = minor.abs();
     final whole = abs ~/ 100;
@@ -138,10 +159,12 @@ class AmountFormat {
 
   @override
   bool operator ==(Object other) =>
-      other is AmountFormat && other.style == style;
+      other is AmountFormat &&
+      other.style == style &&
+      other.showDecimals == showDecimals;
 
   @override
-  int get hashCode => style.hashCode;
+  int get hashCode => Object.hash(style, showDecimals);
 }
 
 final RegExp _dotDecimal = RegExp(r'^(\d+)(?:\.(\d{1,2}))?$');

@@ -79,6 +79,28 @@ void main() {
       ]);
     });
 
+    test('files keep exact cents, whatever the display settings', () {
+      // The files are written from the stored minor units, never from the
+      // formatted text, so "Show decimals" and the number style do not
+      // reach them.
+      final day = dayOf(2026, 10, 18);
+      final rows = [
+        for (final amount in [84050, 84025, 50, 84000, 123456789])
+          ExportRow(day: day, category: 'Groceries', title: 'x', amount: amount),
+      ];
+      expect(encodeCsv(rows).substring(1).split('\r\n').skip(1).take(5).toList(), [
+        '2026-10-18,Groceries,x,840.50',
+        '2026-10-18,Groceries,x,840.25',
+        '2026-10-18,Groceries,x,0.50',
+        '2026-10-18,Groceries,x,840',
+        '2026-10-18,Groceries,x,1234567.89',
+      ]);
+      final book = readImportTable('x.xlsx', encodeXlsx(rows));
+      expect([
+        for (final r in book.rows) parseAmountCell(r.cell(3), decimalMark: '.'),
+      ], [84050, 84025, 50, 84000, 123456789]);
+    });
+
     test('file name names the pocket and the range', () {
       expect(
         exportFileName(
@@ -311,6 +333,30 @@ void main() {
       expect(parseAmountText('0', decimalMark: '.'), isNull);
       expect(parseAmountText('', decimalMark: '.'), isNull);
       expect(parseAmountText('n/a', decimalMark: '.'), isNull);
+    });
+
+    test('a comma-decimal file still imports exactly', () async {
+      // The decimal mark comes from the file, not from the number style.
+      const file =
+          'Date,Amount,Category,Title\n'
+          '2025-03-02,"12,50",Groceries,Bazaar\n'
+          '2025-03-03,"1.200,75",Groceries,Rent\n'
+          '2025-03-04,"840,5",Groceries,Half\n';
+      final s = ImportSession.start(readImportTable('c.csv', csvBytes(file)));
+      expect(s.settings.decimalMark, ',');
+      final p = await plan(s, personal);
+      expect([for (final e in p.toAdd) e.amount], [1250, 120075, 84050]);
+      expect(p.total, 1250 + 120075 + 84050);
+      expect(p.bad, isEmpty);
+
+      const dotFile =
+          'Date,Amount,Category,Title\n'
+          '2025-03-02,"1,250.50",Groceries,Bazaar\n'
+          '2025-03-03,12.5,Groceries,Rent\n';
+      final d = ImportSession.start(readImportTable('d.csv', csvBytes(dotFile)));
+      expect(d.settings.decimalMark, '.');
+      final q = await plan(d, personal);
+      expect([for (final e in q.toAdd) e.amount], [125050, 1250]);
     });
 
     test('the decimal mark is read from the column', () {

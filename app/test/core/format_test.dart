@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/core/days.dart';
 import 'package:spill_the_bills/core/format.dart';
 
-const _nb = ' ';
+const _nb = '\u00A0';
 
 void main() {
   group('amounts', () {
@@ -77,6 +77,103 @@ void main() {
       expect(f.format(-1250), '-12.50');
       expect(f.formatWhole(123456), '1,235');
       expect(f.count(1266), '1,266');
+    });
+
+    group('show decimals off', () {
+      const off = {
+        NumberStyle.comma: ('1,234,568', '841'),
+        NumberStyle.spaceDot: ('1\u00A0234\u00A0568', '841'),
+        NumberStyle.lakh: ('12,34,568', '841'),
+        NumberStyle.plain: ('1234568', '841'),
+      };
+      const on = {
+        NumberStyle.comma: ('1,234,567.89', '840.50'),
+        NumberStyle.spaceDot: ('1\u00A0234\u00A0567.89', '840.50'),
+        NumberStyle.lakh: ('12,34,567.89', '840.50'),
+        NumberStyle.plain: ('1234567.89', '840.50'),
+      };
+
+      test('each style formats 1234567.89 and 840.5 with decimals on', () {
+        for (final MapEntry(key: style, value: (big, small)) in on.entries) {
+          const decimals = true;
+          final f = AmountFormat(style: style, showDecimals: decimals);
+          expect(f.format(123456789), big, reason: style.name);
+          expect(f.format(84050), small, reason: style.name);
+          expect(f.format(84025), '840.25', reason: style.name);
+          expect(f.format(84000), '840', reason: style.name);
+        }
+      });
+
+      test('each style formats 1234567.89 and 840.5 rounded when off', () {
+        for (final MapEntry(key: style, value: (big, small)) in off.entries) {
+          final f = AmountFormat(style: style, showDecimals: false);
+          expect(f.format(123456789), big, reason: style.name);
+          expect(f.format(84050), small, reason: style.name);
+        }
+      });
+
+      test('rounds half up', () {
+        const f = AmountFormat(showDecimals: false);
+        expect(f.format(84050), '841');
+        expect(f.format(84025), '840');
+        expect(f.format(84049), '840');
+        expect(f.format(84099), '841');
+        expect(f.format(50), '1');
+        expect(f.format(49), '0');
+        expect(f.format(0), '0');
+        expect(f.format(99950), '1,000');
+        expect(f.format(99949), '999');
+        expect(f.format(84000), '840');
+        expect(f.format(123456750), '1,234,568');
+      });
+
+      test('a total is rounded once, not row by row', () {
+        const f = AmountFormat(showDecimals: false);
+        const rows = [84040, 84040]; // 840.40 twice
+        expect(f.format(rows.fold<int>(0, (a, b) => a + b)), '1,681');
+        expect([for (final r in rows) f.format(r)], ['840', '840']);
+      });
+
+      test('negative amounts round away from zero and never show -0', () {
+        const f = AmountFormat(showDecimals: false);
+        expect(f.format(-84050), '-841');
+        expect(f.format(-84025), '-840');
+        expect(f.format(-20), '0');
+      });
+
+      test('formatExact, typed text, samples and whole figures are not affected', () {
+        const f = AmountFormat(showDecimals: false);
+        expect(f.formatExact(84050), '840.50');
+        expect(f.formatExact(84025), '840.25');
+        expect(f.formatExact(84000), '840');
+        expect(f.typed('840.5'), '840.5');
+        expect(f.parse('840.5'), 84050);
+        expect(f.formatWhole(84050), '841');
+        expect(f.short(166500), '1.7K');
+        expect(f.short(83500), '835');
+        expect(f.count(1266), '1,266');
+        for (final s in NumberStyle.values) {
+          expect(AmountFormat(style: s, showDecimals: false).format(123456789),
+              isNot(contains('.')));
+          expect(s.sample, endsWith('.89'), reason: 'samples describe the style');
+        }
+      });
+
+      test('equality and hashCode follow both fields', () {
+        expect(const AmountFormat(), const AmountFormat(showDecimals: true));
+        expect(const AmountFormat().hashCode, const AmountFormat().hashCode);
+        expect(const AmountFormat(showDecimals: false),
+            const AmountFormat(showDecimals: false));
+        expect(const AmountFormat(showDecimals: false).hashCode,
+            const AmountFormat(showDecimals: false).hashCode);
+        expect(const AmountFormat(), isNot(const AmountFormat(showDecimals: false)));
+        expect(const AmountFormat(style: NumberStyle.lakh),
+            isNot(const AmountFormat()));
+        expect(
+          const AmountFormat(style: NumberStyle.lakh, showDecimals: false),
+          isNot(const AmountFormat(style: NumberStyle.lakh)),
+        );
+      });
     });
 
     test('calendar short form', () {

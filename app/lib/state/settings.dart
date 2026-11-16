@@ -63,6 +63,7 @@ class AppSettings {
     this.calendarAmounts = true,
     this.firstDayOfWeek = FirstDayOfWeek.sunday,
     this.numberStyle = NumberStyle.comma,
+    this.showDecimals = true,
     this.calcKeys = CalcKeys.plusMinus,
     this.currentPocketId,
     this.lastCustomRange,
@@ -95,6 +96,9 @@ class AppSettings {
   /// "Number format".
   final NumberStyle numberStyle;
 
+  /// "Show decimals": off shows saved amounts rounded to whole units.
+  final bool showDecimals;
+
   /// "Calculator keys".
   final CalcKeys calcKeys;
 
@@ -118,8 +122,9 @@ class AppSettings {
     return best;
   }
 
-  /// The amount formatter for [numberStyle].
-  AmountFormat get amountFormat => AmountFormat(style: numberStyle);
+  /// The amount formatter for [numberStyle] and [showDecimals].
+  AmountFormat get amountFormat =>
+      AmountFormat(style: numberStyle, showDecimals: showDecimals);
 
   AppSettings copyWith({
     Mood? mood,
@@ -131,6 +136,7 @@ class AppSettings {
     bool? calendarAmounts,
     FirstDayOfWeek? firstDayOfWeek,
     NumberStyle? numberStyle,
+    bool? showDecimals,
     CalcKeys? calcKeys,
     ValueGetter<int?>? currentPocketId,
     ValueGetter<DayRangeValue?>? lastCustomRange,
@@ -145,6 +151,7 @@ class AppSettings {
       calendarAmounts: calendarAmounts ?? this.calendarAmounts,
       firstDayOfWeek: firstDayOfWeek ?? this.firstDayOfWeek,
       numberStyle: numberStyle ?? this.numberStyle,
+      showDecimals: showDecimals ?? this.showDecimals,
       calcKeys: calcKeys ?? this.calcKeys,
       currentPocketId:
           currentPocketId != null ? currentPocketId() : this.currentPocketId,
@@ -163,6 +170,7 @@ class AppSettings {
   static const String kCalendarAmounts = 'calendarAmounts';
   static const String kFirstDayOfWeek = 'firstDayOfWeek';
   static const String kNumberStyle = 'numberStyle';
+  static const String kShowDecimals = 'showDecimals';
   static const String kCalcKeys = 'calcKeys';
   static const String kCurrentPocketId = 'currentPocketId';
   static const String kLastCustomRange = 'lastCustomRange';
@@ -182,6 +190,7 @@ class AppSettings {
         kCalendarAmounts: calendarAmounts.toString(),
         kFirstDayOfWeek: firstDayOfWeek.name,
         kNumberStyle: numberStyle.name,
+        kShowDecimals: showDecimals.toString(),
         kCalcKeys: calcKeys.name,
         if (currentPocketId != null) kCurrentPocketId: '$currentPocketId',
         if (lastCustomRange != null)
@@ -235,6 +244,7 @@ class AppSettings {
       firstDayOfWeek:
           pick(FirstDayOfWeek.values, kFirstDayOfWeek, d.firstDayOfWeek),
       numberStyle: style(),
+      showDecimals: flag(kShowDecimals, d.showDecimals),
       calcKeys: pick(CalcKeys.values, kCalcKeys, d.calcKeys),
       currentPocketId: int.tryParse(e[kCurrentPocketId] ?? ''),
       lastCustomRange: range(),
@@ -325,6 +335,9 @@ class SettingsNotifier extends Notifier<AppSettings> {
 
   Future<void> setNumberStyle(NumberStyle v) =>
       _save(state.copyWith(numberStyle: v), AppSettings.kNumberStyle);
+
+  Future<void> setShowDecimals(bool v) =>
+      _save(state.copyWith(showDecimals: v), AppSettings.kShowDecimals);
 
   Future<void> setCalcKeys(CalcKeys v) =>
       _save(state.copyWith(calcKeys: v), AppSettings.kCalcKeys);

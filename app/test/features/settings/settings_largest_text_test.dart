@@ -89,17 +89,32 @@ void main() {
       await closeApp(tester, db);
     });
 
+    testWidgets('Show decimals sits where Thousands separator did', (tester) async {
+      final db = await openSettings(tester);
+      // Measured before the change: the same 56 px row, and the Calculator
+      // keys row below it did not move.
+      Rect row(String title) => tester.getRect(find.widgetWithText(ListRow, title));
+      expect(row('Number format'), const Rect.fromLTRB(16, 1200, 344, 1256));
+      expect(row('Show decimals'), const Rect.fromLTRB(16, 1256, 344, 1312));
+      expect(row('Calculator keys').top, 1312);
+      expect(tester.getRect(find.text('Show decimals')).top, 1274);
+      expect(tester.getRect(find.text('Calculator keys')).top, 1330);
+      expect(tester.widgetList<ListRow>(find.byType(ListRow)), hasLength(16));
+      expect(find.text('Thousands separator'), findsNothing);
+      await closeApp(tester, db);
+    });
+
     testWidgets('the other rows keep their places', (tester) async {
       final db = await openSettings(tester);
       expect(tester.getRect(find.text('Manage pockets')).top, 959);
       expect(tester.getRect(noteText('Add, edit, delete')).top, 981);
       expect(tester.getRect(find.text('Manage categories')).top, 1087);
       expect(tester.getRect(noteText('Add, edit, delete, reorder')).top, 1109);
-      expect(tester.getRect(find.text('Export')).top, 1387);
-      expect(tester.getRect(find.text('Automatic backup')).top, 1523);
-      expect(tester.getRect(noteText('Phone and Google Drive')).top, 1545);
-      expect(tester.getRect(find.text('Delete all data')).top, 1659);
-      expect(tester.getRect(noteText('This can’t be undone')).top, 1681);
+      expect(tester.getRect(find.text('Export')).top, 1443);
+      expect(tester.getRect(find.text('Automatic backup')).top, 1579);
+      expect(tester.getRect(noteText('Phone and Google Drive')).top, 1601);
+      expect(tester.getRect(find.text('Delete all data')).top, 1715);
+      expect(tester.getRect(noteText('This can’t be undone')).top, 1737);
       expect(cutTexts(tester, find.byType(Scaffold)), isEmpty);
       await closeApp(tester, db);
     });

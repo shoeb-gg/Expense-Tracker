@@ -10,6 +10,49 @@ void main() {
   AppSettings from(Map<String, String> entries) =>
       AppSettings.fromEntries(entries);
 
+  group('show decimals', () {
+    test('on by default, as before', () {
+      expect(const AppSettings().showDecimals, isTrue);
+      expect(from(const {}).showDecimals, isTrue);
+      expect(const AppSettings().amountFormat, const AmountFormat());
+    });
+
+    test('stored as text and read back', () {
+      const off = AppSettings(showDecimals: false);
+      expect(off.toEntries()[AppSettings.kShowDecimals], 'false');
+      expect(from(off.toEntries()).showDecimals, isFalse);
+      expect(from({AppSettings.kShowDecimals: 'true'}).showDecimals, isTrue);
+      expect(from(const {AppSettings.kShowDecimals: 'false'}), off);
+    });
+
+    test('the amount format carries style and switch', () {
+      const s = AppSettings(numberStyle: NumberStyle.lakh, showDecimals: false);
+      expect(
+        s.amountFormat,
+        const AmountFormat(style: NumberStyle.lakh, showDecimals: false),
+      );
+      expect(s.amountFormat.format(123456789), '12,34,568');
+      expect(s.copyWith(showDecimals: true).amountFormat.format(123456789),
+          '12,34,567.89');
+    });
+
+    test('the switch and the style are independent settings', () {
+      // An old "separator off" file does not turn the decimals off.
+      expect(
+        from({AppSettings.kLegacyThousandsSeparator: 'false'}).showDecimals,
+        isTrue,
+      );
+    });
+
+    test('write through to the table and reload', () async {
+      final db = openTestDatabase();
+      addTearDown(db.close);
+      final store = SettingsStore(db);
+      await store.write(AppSettings.kShowDecimals, 'false');
+      expect((await AppSettings.load(store)).showDecimals, isFalse);
+    });
+  });
+
   group('number style migration', () {
     test('missing keys give the defaults', () {
       expect(from(const {}).numberStyle, NumberStyle.comma);
