@@ -344,8 +344,8 @@ Text(total.value == null ? '' : fmt.format(total.value!));
 | `showCalendarButton` (true) | `setShowCalendarButton` | Calendar button |
 | `calendarAmounts` (true) | `setCalendarAmounts` | Amounts in calendar days |
 | `firstDayOfWeek` (sunday) | `setFirstDayOfWeek` | First day of the week (sheet order Monday, Saturday, Sunday) |
-| `numberStyle` (comma) | `setNumberStyle` | Number format (5 styles; separator off lists only 1234567.89 / 1234567,89) |
-| `thousandsSeparator` (true) | `setThousandsSeparator` | Thousands separator |
+| `numberStyle` (comma) | `setNumberStyle` | Number format (4 styles: 1,234,567.89 / 1 234 567.89 / 12,34,567.89 / 1234567.89; the decimal mark is always "."; old `thousandsSeparator` and comma-decimal values are migrated on load) |
+| `showDecimals` (true) | `setShowDecimals` | Show decimals (off: saved amounts shown in whole units, half up; typing, stored data and exports stay exact) |
 | `calcKeys` (plusMinus) | `setCalcKeys(CalcKeys)` | Calculator keys: "Plus and minus" / "All four keys" (`.label`) |
 | `currentPocketId` (null) | `setCurrentPocketId(int?)` | pocket in use |
 | `lastCustomRange` (null) | `setLastCustomRange(({int from, int to})?)` | Charts custom range (null: last 30 days) |
