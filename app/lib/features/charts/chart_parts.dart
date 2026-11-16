@@ -1,9 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../theme/symbols.dart';
 import '../../theme/text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/kit.dart';
+import 'ring_chart.dart';
 
 /// Text styles shared by the Charts and Category screens (mockup sizes).
 abstract final class ChartText {
@@ -184,6 +187,14 @@ class DetailsPill extends StatelessWidget {
 
 /// The ring centre: a title, the amount and a line under it, plus an
 /// optional Details pill.
+///
+/// It sits in the box in the middle of the ring ([RingChart] centres it).
+/// Each of the three lines is as wide as the hole of the ring is at that
+/// height (the chord of the inner circle at the line's far edge, and no wider
+/// than the box). A line that needs more, a long name, a big amount or large
+/// text, is drawn in a smaller font until it fits, never cut. A line that fits
+/// is a plain text where it always was; the lines keep their places whatever
+/// their size.
 class RingCenter extends StatelessWidget {
   const RingCenter({
     super.key,
@@ -198,55 +209,112 @@ class RingCenter extends StatelessWidget {
   final String sub;
   final VoidCallback? onDetails;
 
+  /// Space between the three lines.
+  static const double _gap = 2;
+
+  /// Space between the lines and the Details pill, and the pill's height.
+  static const double _pillGap = 6;
+  static const double _pillHeight = 24;
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        IgnorePointer(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 100),
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: AppText.overline.copyWith(color: c.text2),
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                maxLines: 1,
-                softWrap: false,
-                style: AppText.heroNumber.copyWith(
-                  fontSize: 24,
-                  height: 30 / 24,
-                  letterSpacing: -0.4,
-                  fontFeatures: const <FontFeature>[],
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                sub,
-                maxLines: 1,
-                softWrap: false,
-                style: AppText.caption.copyWith(color: c.text3),
-              ),
-            ],
-          ),
-        ),
-        if (onDetails != null) ...[
-          const SizedBox(height: 6),
-          DetailsPill(onTap: onDetails!),
-        ],
-      ],
+    final titleStyle = AppText.overline.copyWith(color: c.text2);
+    final valueStyle = AppText.heroNumber.copyWith(
+      fontSize: 24,
+      height: 30 / 24,
+      letterSpacing: -0.4,
+      fontFeatures: const <FontFeature>[],
     );
+    final subStyle = AppText.caption.copyWith(color: c.text3);
+    final heights = [
+      for (final style in [titleStyle, valueStyle, subStyle])
+        _lineHeight(context, style),
+    ];
+    final hasPill = onDetails != null;
+
+    return LayoutBuilder(
+      builder: (context, box) {
+        // Where the lines sit: the column is centred in the box, and the
+        // middle of the box is the middle of the ring.
+        final total = heights.fold<double>(0, (a, h) => a + h) +
+            2 * _gap +
+            (hasPill ? _pillGap + _pillHeight : 0);
+        final middle = box.maxHeight / 2;
+        var top = (box.maxHeight - total) / 2;
+        final rooms = <double>[];
+        for (final h in heights) {
+          rooms.add(math.min(_holeWidth(top - middle, top + h - middle), box.maxWidth));
+          top += h + _gap;
+        }
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IgnorePointer(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _line(title, titleStyle, heights[0], rooms[0], TextAlign.center),
+                  const SizedBox(height: _gap),
+                  _line(value, valueStyle, heights[1], rooms[1], TextAlign.start),
+                  const SizedBox(height: _gap),
+                  _line(sub, subStyle, heights[2], rooms[2], TextAlign.start),
+                ],
+              ),
+            ),
+            if (hasPill) ...[
+              const SizedBox(height: _pillGap),
+              DetailsPill(onTap: onDetails!),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  /// One line in a slot of its own height, [room] wide at most. The slot
+  /// keeps the line where it is when the text inside it is drawn smaller.
+  /// [align] is how each line was aligned before it fitted itself: it makes
+  /// no difference to where a plain text is, but keeps its pixels the same.
+  static Widget _line(
+    String text,
+    TextStyle style,
+    double height,
+    double room,
+    TextAlign align,
+  ) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: room),
+      child: SizedBox(
+        height: height,
+        child: Center(
+          child: FitTitle(text, style: style, resizeFont: true, textAlign: align),
+        ),
+      ),
+    );
+  }
+
+  /// The height of one line of [style] at the current text size.
+  static double _lineHeight(BuildContext context, TextStyle style) {
+    final painter = TextPainter(
+      text: TextSpan(text: 'Ag', style: style),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    final height = painter.height;
+    painter.dispose();
+    return height;
+  }
+
+  /// The widest a line between [from] and [to] (px below the middle of the
+  /// ring, negative above) can be and still have its corners in the hole: the
+  /// chord of the inner circle at the edge that is further from the middle.
+  static double _holeWidth(double from, double to) {
+    final far = math.max(from.abs(), to.abs());
+    const radius = RingChart.inner;
+    if (far >= radius) return 0;
+    return 2 * math.sqrt(radius * radius - far * far);
   }
 }
 

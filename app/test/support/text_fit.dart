@@ -2,9 +2,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/core/days.dart';
+import 'package:spill_the_bills/data/categories_repo.dart';
 import 'package:spill_the_bills/data/db.dart';
 import 'package:spill_the_bills/data/expenses_repo.dart';
 
+import 'shots.dart';
 import 'test_db.dart';
 
 /// A paragraph that is cut, in words: ended with "..." or by the line limit
@@ -94,6 +96,45 @@ Future<AppDatabase> bigSpendDatabase(
       draft(2026, 10, spent, spentCents),
     ];
     await ExpensesRepo(db).addAll(drafts);
+  });
+  return db;
+}
+
+/// A category name at the 40 letter limit of the category form.
+const String longestCategoryName = 'Online Subscriptions & Streaming Service';
+
+/// The mockup data plus one more expense in the first category, so that
+/// October (to the 18th) adds up to 1,234,567.89, still in 11 categories.
+Future<AppDatabase> sampleWithBigTotal(WidgetTester tester) async {
+  final db = await sampleDatabase(tester);
+  await tester.runAsync(
+    () => ExpensesRepo(db).add(
+      pocketId: 1,
+      categoryId: 1,
+      amount: 123456789 - 3455500,
+      day: dayOf(2026, 10, 1),
+    ),
+  );
+  return db;
+}
+
+/// The mockup data plus a category named [longestCategoryName] whose one
+/// expense in October is 1,234,567.89: the biggest slice (97.3% of the
+/// total), and a 12th category.
+Future<AppDatabase> sampleWithBigCategory(WidgetTester tester) async {
+  final db = await sampleDatabase(tester);
+  await tester.runAsync(() async {
+    final id = await CategoriesRepo(db).add(
+      name: longestCategoryName,
+      emoji: '\u{1F3D6}',
+      color: 0xFF336699,
+    );
+    await ExpensesRepo(db).add(
+      pocketId: 1,
+      categoryId: id,
+      amount: 123456789,
+      day: dayOf(2026, 10, 2),
+    );
   });
   return db;
 }

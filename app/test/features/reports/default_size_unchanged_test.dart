@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:spill_the_bills/features/charts/chart_parts.dart';
+import 'package:spill_the_bills/features/charts/ring_chart.dart';
 import 'package:spill_the_bills/router.dart';
 
 import '../../support/board.dart';
@@ -23,6 +25,14 @@ void main() {
     ]) {
       expect(a, closeTo(b, 0.01), reason: '$what, $side: $r instead of $rect');
     }
+  }
+
+  /// [finder] under the ring centre, its box measured from the ring's
+  /// top left corner (the ring scrolls with the page).
+  void expectInRing(WidgetTester tester, String text, Rect rect) {
+    final finder = find.descendant(of: find.byType(RingCenter), matching: find.text(text));
+    final ring = tester.getTopLeft(find.byType(RingChart));
+    expectAt(tester, finder, rect.shift(ring), '"$text" in the ring');
   }
 
   testWidgets('Reports: the stats, the axis, the month rows and the all-time '
@@ -72,6 +82,58 @@ void main() {
       const Rect.fromLTRB(64, 260, 295.1, 276),
       'the long chip',
     );
+    await closeApp(tester, db);
+  });
+
+  testWidgets('Charts: the ring centre does not move (the total, and a tapped '
+      'slice with its Details pill)', (tester) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(tester, db: db, location: Routes.charts);
+    await boardHeight(tester, 791);
+    // Measured before the ring centre fitted itself to the hole of the ring.
+    expectInRing(tester, 'Total', const Rect.fromLTRB(121.45, 103, 150.55, 119));
+    expectInRing(tester, '34,555', const Rect.fromLTRB(95.18, 121, 176.82, 151));
+    expectInRing(tester, '11 categories', const Rect.fromLTRB(99.29, 153, 172.71, 169));
+
+    // A tapped slice: name, amount, share, "Details" and the pill round it.
+    final tapped = <(String, Rect, String, Rect, String, Rect)>[
+      (
+        'Groceries',
+        const Rect.fromLTRB(106.13, 88, 165.87, 104),
+        '6,540',
+        const Rect.fromLTRB(101.41, 106, 170.59, 136),
+        '18.9% of total',
+        const Rect.fromLTRB(96.81, 138, 175.19, 154),
+      ),
+      (
+        'Health',
+        const Rect.fromLTRB(116.27, 88, 155.73, 104),
+        '1,180',
+        const Rect.fromLTRB(106.94, 106, 165.06, 136),
+        '3.4% of total',
+        const Rect.fromLTRB(98.99, 138, 173.01, 154),
+      ),
+    ];
+    for (final (name, nameBox, amount, amountBox, share, shareBox) in tapped) {
+      final row = find.text(name);
+      await Scrollable.ensureVisible(tester.element(row), alignment: 0.5);
+      await tester.pump();
+      await tester.tap(row);
+      await settle(tester);
+      expectInRing(tester, name, nameBox);
+      expectInRing(tester, amount, amountBox);
+      expectInRing(tester, share, shareBox);
+      expectInRing(tester, 'Details', const Rect.fromLTRB(109.83, 164, 150.17, 180));
+      expectAt(
+        tester,
+        find.descendant(of: find.byType(RingCenter), matching: find.byType(DetailsPill)),
+        const Rect.fromLTRB(99.83, 160, 172.17, 184).shift(tester.getTopLeft(find.byType(RingChart))),
+        'the Details pill',
+      );
+      // Tap it again: back to the total.
+      await tester.tap(find.text(name).last);
+      await settle(tester);
+    }
     await closeApp(tester, db);
   });
 }
