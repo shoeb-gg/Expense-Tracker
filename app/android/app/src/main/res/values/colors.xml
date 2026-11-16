@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- The Aqua page background (theme token bg), shown while the app starts. -->
-    <color name="app_background">#FF0B1517</color>
+    <!-- The Aqua light page background (theme token bg), shown while the app
+         starts when the phone is in light mode. values-night has the dark one. -->
+    <color name="app_background">#FFEDF4F4</color>
 </resources>

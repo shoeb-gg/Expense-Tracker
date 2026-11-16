@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Start-up screen: the app's dark page background. -->
+<!-- Start-up screen: the app's page background, light or dark with the phone. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/app_background" />
 </layer-list>

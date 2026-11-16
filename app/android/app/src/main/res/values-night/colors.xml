@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The Aqua dark page background (theme token bg), shown while the app
+         starts when the phone is in dark mode. -->
+    <color name="app_background">#FF0B1517</color>
+</resources>
