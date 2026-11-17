@@ -100,11 +100,13 @@ class _ToastViewState extends State<_ToastView>
   Widget build(BuildContext context) {
     final c = context.colors;
     final inset = MediaQuery.viewPaddingOf(context).bottom;
+    // With the keyboard up the toast sits 16 px above it, never behind it.
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
     final curved = CurvedAnimation(parent: _in, curve: Curves.easeOutCubic);
     return Positioned(
       left: 16,
       right: 16,
-      bottom: inset + widget.bottom,
+      bottom: keyboard > 0 ? keyboard + 16 : inset + widget.bottom,
       child: FadeTransition(
         opacity: curved,
         child: SlideTransition(

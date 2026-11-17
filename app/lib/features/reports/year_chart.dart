@@ -312,10 +312,7 @@ class YearChart extends ConsumerWidget {
     final compact = scale.top >= 10000;
     String tick(double v) {
       if (v == 0) return '0';
-      if (compact) {
-        final k = v / 1000;
-        return k == k.roundToDouble() ? '${k.round()}K' : '${k}K';
-      }
+      if (compact) return compactAxisLabel(v, fmt);
       return fmt.group(v.round());
     }
 

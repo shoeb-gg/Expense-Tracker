@@ -195,18 +195,7 @@ Dropped at first. Brought back on 2026-11-14 as "Pockets". The user chose the na
   - **Ring colours:** dark green #6CCB5F, yellow #F2C230, red #FF4D73. Light green #2FB45A, yellow #FFDD66, red #EF4565. The user asked twice for a lighter yellow on light; the deeper steps read as brown.
   - **Toasts after saving (Add or Edit, keypad or type to add):** when the save takes the category over its budget, and every time it stays over, "Snacks is 600 over budget" with "5,600 of 5,000 spent this month" under it and a red "!" mark. Once, when it first passes 90%: "Snacks has used 92% of its budget" with "4,600 of 5,000 spent this month · 400 left" and a yellow rising-line mark. Another month reads "in September" ("in December 2025" for another year). Saving into another pocket adds "in Business". Moving an expense to another pocket keeps the "Moved to Business" toast with Undo and puts the budget news on its second line.
   - Deleting a category, a pocket or all data removes their budgets. Export and Import do not include budgets.
-- **Phone test, first pass (2026-11-17), found and not yet fixed:**
-  1. A message shown while the keyboard is open sits behind the keyboard (e.g. "You already have a pocket called personal", "There is already a category called snacks"), so Save seems to do nothing.
-  2. Back with the keyboard up on Add expense goes straight to "Discard this expense?"; the first Back should only lower the keyboard (the user asked for this).
-  3. Home: a 9-digit monthly total runs under the arrow button on the hero card.
-  4. Reports year chart: the side labels read "1000000K" in tiny text; Charts "Over time" reads "1250M". Both should shorten to M and B.
-  5. Type to add: a full category name with short words ("qa cat 900") does not pick that category when another name starts with one of its words; an exact word should beat a prefix. Then the picked category's name also stays as the title.
-  6. Type to add: "snacks 12.345" (3 decimals) says "Now add the amount"; it should say amounts take at most 2 decimals.
-  7. The monthly budget field takes up to 15 digits; expenses stop at 9.
-  8. Budget note: "Only for 💰 QA Test Pocket …." (ellipsis then a full stop).
-  9. Largest text with the pocket pill: the "Add expense" title shrinks to tiny text.
-  10. "Pocket added" pop-up: a long name makes its switch button two lines.
-  - Import turns "-75" into a +75 expense. The user wants to keep negatives for recording earnings; open question whether a negative should lower the totals.
+- **Phone test, first pass (2026-11-17).** Fixed the same day: messages now sit above the keyboard; Back with the keyboard up only lowers it, the next Back asks to discard; a 9-digit total on Home keeps clear of the arrow; chart side labels go K, M, B ("1B", "1.25B"); "snacks 12.345" says "Use at most 2 decimals"; a budget has at most 9 digits; the budget note has no full stop after "…"; the "Pocket added" buttons cut long names with "…". Left as they are, by the user's choice: a typed full category name with short words ("qa cat") may not pick that category; Import saves "-75" as a 75 expense. Open: at the largest text the Add expense title is about 90% of its normal size beside Cancel and the pocket button.
 - **After that:** a very thorough test of the whole app on the phone. Type every kind of text and number in every field (expenses, categories, pockets and the rest), and follow every path, both the ones that should work and the ones that should fail, to find anything that breaks in the screens or the flow.
 - **Then:** automatic backup.
 - **Postponed:** the combined view of all pockets (postponed again on 2026-11-16), AI assistant, PDF and photo import, the monthly PDF report.

@@ -12,11 +12,13 @@ import 'providers.dart';
 /// subtitle stays on one line.
 String pocketLabel(Pocket? pocket) {
   if (pocket == null) return '';
-  final name = pocket.name.characters.length > 16
-      ? '${pocket.name.characters.take(15)}…'
-      : pocket.name;
-  return '${pocket.emoji} $name';
+  return '${pocket.emoji} ${shortPocketName(pocket.name)}';
 }
+
+/// A pocket name short enough for one line in a header or a button: over 16
+/// characters it keeps the first 15 and ends in "…".
+String shortPocketName(String name) =>
+    name.characters.length > 16 ? '${name.characters.take(15)}…' : name;
 
 /// [pocket] when the user has two or more [pockets], else null. This is the
 /// one rule for naming a pocket on screen (the pocket pill of Add and Edit

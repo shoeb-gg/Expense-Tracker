@@ -257,3 +257,10 @@ bool hasUnsavedInput({
       day != initialDay ||
       (pocketId != null && pocketId != currentPocketId);
 }
+
+/// Whether [text] has a number with more than two decimals ("12.345",
+/// "1,234.567"): type to add then asks for at most two instead of reading
+/// it as a word. A dotted version such as "1.2.3" does not count.
+bool tooManyDecimals(String text) => text
+    .split(RegExp(r'\s+'))
+    .any((t) => RegExp(r'^\d[\d,]*\.\d{3,}$').hasMatch(t));

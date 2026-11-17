@@ -62,28 +62,13 @@ class ChartScale {
         for (var i = 0; i * step <= top + 0.001; i++) i * step,
       ];
 
-  /// Axis label of [v]: "1,000"; "5K" once the top reaches 10,000; "1M" and
-  /// "1.5M" from a million up (so a label stays four or five characters).
+  /// Axis label of [v]: "1,000"; once the top reaches 10,000 the short form
+  /// of [compactAxisLabel] ("5K", "1.5M", "1.25B").
   String label(double v, AmountFormat fmt) {
     if (v == 0) return '0';
-    if (top >= 10000) {
-      if (v >= 1000000) return '${_trim(v / 1000000, 2, fmt)}M';
-      return '${_trim(v / 1000, 1, fmt)}K';
-    }
+    if (top >= 10000) return compactAxisLabel(v, fmt);
     if (v == v.roundToDouble()) return fmt.formatWhole((v * 100).round());
     return fmt.format((v * 100).round());
-  }
-
-  /// [x] with at most [decimals] decimals, none when it is whole: "5", "2.5",
-  /// "1.25".
-  static String _trim(double x, int decimals, AmountFormat fmt) {
-    if (x == x.roundToDouble()) return '${x.round()}';
-    var text = x.toStringAsFixed(decimals);
-    while (text.endsWith('0')) {
-      text = text.substring(0, text.length - 1);
-    }
-    if (text.endsWith('.')) text = text.substring(0, text.length - 1);
-    return text.replaceAll('.', fmt.decimalMark);
   }
 }
 

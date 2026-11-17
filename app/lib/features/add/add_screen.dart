@@ -246,9 +246,7 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
     // Rings show the pocket this expense goes into, in the month of its date.
     final budgets = targetId == null
         ? const <int, BudgetUse>{}
-        : ref.watch(
-            budgetUsesProvider((pocketId: targetId, monthStart: monthStartOfDay(_day))),
-          );
+        : ref.watch(budgetUsesProvider((pocketId: targetId, monthStart: monthStartOfDay(_day))));
 
     final mq = MediaQuery.of(context);
     final keyboard = mq.viewInsets.bottom;
@@ -344,6 +342,11 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
         subtitle: 'Tap one above, or just type below',
         joinLastWords: true,
       ),
+      QuickStage.wordOnly when tooManyDecimals(_typed.text) => const GuideCard(
+        icon: Symbols.dialpad_rounded,
+        title: 'Use at most 2 decimals',
+        subtitle: 'Like 12.35',
+      ),
       QuickStage.wordOnly => GuideCard(
         icon: Symbols.dialpad_rounded,
         title: 'Now add the amount',
@@ -388,9 +391,15 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
     final dirty = _dirty;
     _wasDirty = dirty;
     return PopScope(
-      canPop: _saved || !dirty,
+      // With the keyboard up, Back first only lowers the keyboard.
+      canPop: keyboard == 0 && (_saved || !dirty),
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) unawaited(_close());
+        if (didPop) return;
+        if (keyboard > 0) {
+          _dropFocus();
+          return;
+        }
+        unawaited(_close());
       },
       child: Scaffold(
         backgroundColor: c.bg,

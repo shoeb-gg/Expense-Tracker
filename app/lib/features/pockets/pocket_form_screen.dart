@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/text_wrap.dart';
 import '../../data/db.dart';
+import '../../state/pocket_line.dart';
 import '../../state/providers.dart';
 import '../../theme/symbols.dart';
 import '../../theme/text.dart';
@@ -133,8 +134,9 @@ class _PocketFormScreenState extends ConsumerState<PocketFormScreen> {
       context,
       title: 'Pocket added',
       boldLine: 'Switch to $emoji $name now?',
-      cancelLabel: current == null ? 'Stay' : 'Stay in $current',
-      actionLabel: 'Switch to $name',
+      // The buttons keep one line: long names end in "…" there.
+      cancelLabel: current == null ? 'Stay' : 'Stay in ${shortPocketName(current)}',
+      actionLabel: 'Switch to ${shortPocketName(name)}',
     );
     return switchNow && mounted;
   }

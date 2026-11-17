@@ -136,6 +136,9 @@ class HeroCard extends StatelessWidget {
                               ],
                             ),
                           ),
+                          // A big total shrinks to fit, so keep air between
+                          // it and the arrow.
+                          const SizedBox(width: 10),
                           Container(
                             width: 32,
                             height: 32,

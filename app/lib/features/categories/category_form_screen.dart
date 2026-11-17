@@ -103,10 +103,14 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
     final text = _budget.text.trim();
     if (text.isEmpty) return null;
     final amount = ref.read(amountFormatProvider).parse(text);
-    return amount == null || amount <= 0 ? _invalidBudget : amount;
+    if (amount == null || amount <= 0) return _invalidBudget;
+    // Like an expense on the keypad: at most 9 digits before the point.
+    return amount > _maxBudget ? _tooBigBudget : amount;
   }
 
   static const int _invalidBudget = -1;
+  static const int _tooBigBudget = -2;
+  static const int _maxBudget = 99999999999;
 
   /// The color shown and saved.
   int _colorFor(List<ExpenseCategory>? all) {
@@ -131,7 +135,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   Future<void> _save() async {
     final name = _name.text.trim().replaceAll(RegExp(r'\s+'), ' ');
     final budget = _parsedBudget();
-    if (name.isEmpty || _saving || budget == _invalidBudget) return;
+    if (name.isEmpty || _saving || (budget != null && budget < 0)) return;
     final repo = ref.read(categoriesRepoProvider);
     setState(() => _saving = true);
     try {
@@ -178,8 +182,12 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
       }
     }
     _seedBudget();
-    final budgetInvalid = _parsedBudget() == _invalidBudget;
-    final canSave = _name.text.trim().isNotEmpty && !_saving && !budgetInvalid;
+    final budgetError = switch (_parsedBudget()) {
+      _invalidBudget => 'Type an amount, like 5000 or 2500.50.',
+      _tooBigBudget => 'A budget has at most 9 digits.',
+      _ => null,
+    };
+    final canSave = _name.text.trim().isNotEmpty && !_saving && budgetError == null;
     final all = ref.watch(categoriesProvider).value;
     final pockets = ref.watch(pocketsProvider).value ?? const <Pocket>[];
     final budgetPocket = pocketWhenSeveral(pockets, ref.watch(currentPocketProvider));
@@ -220,7 +228,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                       controller: _budget,
                       focusNode: _budgetFocus,
                       pocket: budgetPocket,
-                      invalid: budgetInvalid,
+                      error: budgetError,
                       onSubmit: _save,
                     ),
                     const SizedBox(height: 12),
@@ -347,6 +355,15 @@ String budgetText(int minor, AmountFormat fmt) {
   return cents == 0 ? whole : '$whole.${cents.toString().padLeft(2, '0')}';
 }
 
+/// The note under the budget field: which pocket the budget is for when there
+/// are two or more ([pocket]), else how a budget works. A long pocket name
+/// ends in "…" and gets no full stop after it.
+String budgetNote(Pocket? pocket) {
+  if (pocket == null) return 'The same amount every month. Leave it empty for no budget.';
+  final label = pocketLabel(pocket);
+  return 'Only for $label${label.endsWith('…') ? '' : '.'} Each pocket has its own budgets.';
+}
+
 /// "Monthly budget": an optional amount for the category in the pocket in
 /// use. [pocket] is that pocket when there are two or more (the band then
 /// names it), else null.
@@ -355,7 +372,7 @@ class _BudgetCard extends StatelessWidget {
     required this.controller,
     required this.focusNode,
     required this.pocket,
-    required this.invalid,
+    required this.error,
     required this.onSubmit,
   });
 
@@ -363,8 +380,8 @@ class _BudgetCard extends StatelessWidget {
   final FocusNode focusNode;
   final Pocket? pocket;
 
-  /// The typed text is not an amount: the note says so in red.
-  final bool invalid;
+  /// What is wrong with the typed text, shown in red in place of the note.
+  final String? error;
   final VoidCallback onSubmit;
 
   @override
@@ -376,12 +393,9 @@ class _BudgetCard extends StatelessWidget {
       fontWeight: FontWeight.w700,
       color: c.text,
     );
-    final pocket = this.pocket;
-    final note = invalid
-        ? 'Type an amount, like 5000 or 2500.50.'
-        : pocket == null
-        ? 'The same amount every month. Leave it empty for no budget.'
-        : 'Only for ${pocketLabel(pocket)}. Each pocket has its own budgets.';
+    final error = this.error;
+    final note = error ?? budgetNote(pocket);
+    final invalid = error != null;
     return BandCard(
       title: 'Monthly budget',
       trailingText: 'Optional',

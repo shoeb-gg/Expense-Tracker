@@ -312,3 +312,24 @@ String addedLabel(DateTime createdAt) {
 /// "1 expense" / "1,266 expenses".
 String expenseCount(int n, AmountFormat format) =>
     n == 1 ? '1 expense' : '${format.count(n)} expenses';
+
+/// A chart's side label in short form, for charts whose scale reaches ten
+/// thousand: "2.5K", "500K", "1.5M", "250M", "1B", "1.25B" (at most two
+/// decimals, none when whole), so a label stays four or five characters
+/// however big the amounts get. Zero is "0".
+String compactAxisLabel(double v, AmountFormat fmt) {
+  if (v == 0) return '0';
+  String trim(double x) {
+    if (x == x.roundToDouble()) return '${x.round()}';
+    var text = x.toStringAsFixed(2);
+    while (text.endsWith('0')) {
+      text = text.substring(0, text.length - 1);
+    }
+    if (text.endsWith('.')) text = text.substring(0, text.length - 1);
+    return text.replaceAll('.', fmt.decimalMark);
+  }
+
+  if (v >= 1e9) return '${trim(v / 1e9)}B';
+  if (v >= 1e6) return '${trim(v / 1e6)}M';
+  return '${trim(v / 1e3)}K';
+}
