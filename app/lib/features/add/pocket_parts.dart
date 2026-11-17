@@ -33,11 +33,19 @@ class PocketPill extends StatelessWidget {
   static double maxWidthFor(TextScaler scaler) =>
       (baseMaxWidth * scaler.scale(12) / 12).clamp(baseMaxWidth, largestMaxWidth);
 
+  /// Whether the pill shows only the emoji: at the two text sizes above the
+  /// default, so the screen title keeps its size (the user's choice,
+  /// 2026-11-17). Each pocket starts with its own emoji, and the spoken
+  /// label and the pocket sheet still name it.
+  static bool emojiOnly(TextScaler scaler) => scaler.scale(12) > 12.01;
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final scaler = MediaQuery.textScalerOf(context);
+    final compact = emojiOnly(scaler);
     return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: maxWidthFor(MediaQuery.textScalerOf(context))),
+      constraints: BoxConstraints(maxWidth: maxWidthFor(scaler)),
       child: SizedBox(
         height: 36,
         child: Pressable(
@@ -46,14 +54,16 @@ class PocketPill extends StatelessWidget {
           color: c.accentSoft,
           borderRadius: BorderRadius.circular(18),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 10, 0),
+            padding: compact
+                ? const EdgeInsets.symmetric(horizontal: 9)
+                : const EdgeInsets.fromLTRB(8, 0, 10, 0),
             child: ExcludeSemantics(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(pocket.emoji, style: emojiText(15)),
-                  const SizedBox(width: 5),
-                  Flexible(
+                  if (!compact) const SizedBox(width: 5),
+                  if (!compact) Flexible(
                     child: Text(
                       pocket.name,
                       maxLines: 1,

@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/data/db.dart';
 import 'package:spill_the_bills/data/pockets_repo.dart';
 import 'package:spill_the_bills/features/add/category_grid.dart';
+import 'package:spill_the_bills/features/add/pocket_parts.dart';
 import 'package:spill_the_bills/features/add/quick_area.dart';
 import 'package:spill_the_bills/router.dart';
 import 'package:spill_the_bills/state/providers.dart';
@@ -106,7 +107,35 @@ void main() {
       await closeApp(tester, db);
     });
 
-    testWidgets('largest text: Edit expense shows in full, with a pocket pill', (tester) async {
+    // The two largest text sizes: the pocket pill shows only its emoji, so
+    // the title keeps its size (the user's choice, 2026-11-17). Each pocket
+    // starts with its own emoji; tapping the pill lists the names.
+    final pill = find.byType(PocketPill);
+
+    for (final scale in textScaleSteps.where((s) => s > 1)) {
+      testWidgets('text x${scale.toStringAsFixed(2)}: the pill is only the emoji, the title keeps its size', (
+        tester,
+      ) async {
+        final defaultTitle = await () async {
+          final db = await openAdd(tester, pockets: true);
+          final h = tester.getRect(find.text('Add expense')).height;
+          await closeApp(tester, db);
+          return h;
+        }();
+        final db = await openAdd(tester, settings: AppSettings(textScale: scale), pockets: true);
+        expect(find.descendant(of: pill, matching: find.text('Personal')), findsNothing);
+        expect(find.descendant(of: pill, matching: find.text('\u{1F45B}')), findsOneWidget);
+        final rect = tester.getRect(pill);
+        expect(rect.right, 344);
+        expect(rect.width, lessThanOrEqualTo(48));
+        showsInFull(tester, find.text('Add expense'));
+        showsInFull(tester, find.text('Cancel'));
+        expect(tester.getRect(find.text('Add expense')).height, greaterThanOrEqualTo(defaultTitle - 0.5));
+        await closeApp(tester, db);
+      });
+    }
+
+    testWidgets('largest text: Edit expense shows in full, with the emoji pill', (tester) async {
       final db = await openAdd(
         tester,
         settings: largest,
@@ -115,52 +144,24 @@ void main() {
       );
       showsInFull(tester, find.text('Edit expense'));
       showsInFull(tester, find.text('Cancel'));
-      showsInFull(tester, find.text('Personal'));
       final title = tester.getRect(find.text('Edit expense'));
       expect(title.left, greaterThanOrEqualTo(tester.getRect(cancel).right));
-      expect(title.right, lessThanOrEqualTo(tester.getRect(pocketPill('Personal')).left));
+      expect(title.right, lessThanOrEqualTo(tester.getRect(pill).left));
       await closeApp(tester, db);
     });
 
-    testWidgets('largest text: short pocket names show in full', (tester) async {
+    testWidgets('largest text: switching pockets swaps the emoji', (tester) async {
       final db = await sampleDatabase(tester);
       await addSamplePockets(tester, db);
-      await tester.runAsync(() => PocketsRepo(db).add(name: 'Test trip', emoji: '\u{1F9F3}'));
-      await pumpApp(tester, db: db, location: Routes.add(), settings: largest);
-
-      showsInFull(tester, find.text('Personal'));
-      var current = 'Personal';
-      for (final name in ['Test trip', 'Business', 'Personal']) {
-        await tap(tester, pocketPill(current));
-        await tap(tester, find.text(name).last);
-        current = name;
-        showsInFull(tester, find.text(name));
-        final pill = tester.getRect(pocketPill(name));
-        expect(pill.right, 344, reason: name);
-        expect(pill.left, greaterThanOrEqualTo(180), reason: name);
-        expect(
-          tester.getRect(find.text('Add expense')).right,
-          lessThanOrEqualTo(pill.left),
-          reason: name,
-        );
-        showsInFull(tester, find.text('Add expense'));
-        showsInFull(tester, find.text('Cancel'));
-      }
-      await closeApp(tester, db);
-    });
-
-    testWidgets('largest text: a long pocket name ellipsizes and breaks nothing', (tester) async {
-      final db = await sampleDatabase(tester);
       await tester.runAsync(
-        () => PocketsRepo(db).add(name: 'The Smiths family holiday', emoji: '\u{1F3D6}'),
+        () => PocketsRepo(db).add(name: 'The Smiths family holiday', emoji: '\u{1F9F3}'),
       );
       await pumpApp(tester, db: db, location: Routes.add(), settings: largest);
-      await tap(tester, pocketPill('Personal'));
+      await tap(tester, pill);
       await tap(tester, find.text('The Smiths family holiday').last);
-      final pill = tester.getRect(pocketPill('The Smiths family holiday'));
-      expect(pill.right, 344);
-      expect(pill.width, lessThanOrEqualTo(140));
-      expect(paragraph(tester, find.text('The Smiths family holiday')).didExceedMaxLines, isTrue);
+      expect(find.descendant(of: pill, matching: find.text('\u{1F9F3}')), findsOneWidget);
+      expect(find.descendant(of: pill, matching: find.textContaining('Smiths')), findsNothing);
+      expect(tester.getRect(pill).width, lessThanOrEqualTo(48));
       showsInFull(tester, find.text('Add expense'));
       await closeApp(tester, db);
     });

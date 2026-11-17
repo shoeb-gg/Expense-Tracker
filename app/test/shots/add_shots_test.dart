@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/data/learned_words_repo.dart';
 import 'package:spill_the_bills/data/pockets_repo.dart';
 import 'package:spill_the_bills/features/add/photo_picker.dart';
+import 'package:spill_the_bills/features/add/pocket_parts.dart';
 import 'package:spill_the_bills/router.dart';
 import 'package:spill_the_bills/state/providers.dart';
 import 'package:spill_the_bills/state/settings.dart';
@@ -175,7 +176,9 @@ void main() {
     await pumpApp(tester, db: db, location: Routes.add(), settings: largest);
     await takeShot(tester, 'add_open_pockets_large');
 
-    await tapText(tester, 'Personal');
+    // At this size the pill is only the emoji.
+    await tester.tap(find.byType(PocketPill));
+    await settle(tester);
     await tester.tap(find.text('Test trip').last);
     await settle(tester);
     await takeShot(tester, 'add_pocket_test_trip_large');
