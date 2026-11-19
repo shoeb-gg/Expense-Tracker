@@ -11,6 +11,7 @@ import 'data/db.dart';
 import 'data/maintenance.dart';
 import 'data/photo_store.dart';
 import 'data/settings_store.dart';
+import 'state/backup.dart';
 import 'state/providers.dart';
 import 'theme/app_theme.dart';
 
@@ -21,6 +22,7 @@ Future<void> main() async {
 
   final db = AppDatabase();
   final settings = await AppSettings.load(SettingsStore(db));
+  final backup = BackupState.fromEntries(await SettingsStore(db).load());
   SystemChrome.setSystemUIOverlayStyle(
     systemBarsStyle(
       settings.mood,
@@ -38,6 +40,7 @@ Future<void> main() async {
       overrides: [
         databaseProvider.overrideWithValue(db),
         initialSettingsProvider.overrideWithValue(settings),
+        initialBackupStateProvider.overrideWithValue(backup),
       ],
       child: const SpillTheBillsApp(),
     ),

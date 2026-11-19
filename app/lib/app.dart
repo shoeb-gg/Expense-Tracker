@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'router.dart';
+import 'state/backup.dart';
 import 'state/providers.dart';
 import 'theme/app_theme.dart';
 
@@ -36,6 +37,11 @@ class SpillTheBillsApp extends ConsumerStatefulWidget {
 }
 
 class _SpillTheBillsAppState extends ConsumerState<SpillTheBillsApp> {
+  /// Runs the daily backup when the app comes back to the screen.
+  late final AppLifecycleListener _lifecycle = AppLifecycleListener(
+    onResume: () => unawaited(ref.read(backupProvider.notifier).maybeAutoBackup()),
+  );
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +50,18 @@ class _SpillTheBillsAppState extends ConsumerState<SpillTheBillsApp> {
     unawaited(
       ref.read(nightModeProvider).apply(ref.read(settingsProvider).themeMode),
     );
+    // The daily backup, once the first screen is up (it does nothing unless
+    // the user signed in to Google Drive backup).
+    _lifecycle;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => unawaited(ref.read(backupProvider.notifier).maybeAutoBackup()),
+    );
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
   }
 
   @override

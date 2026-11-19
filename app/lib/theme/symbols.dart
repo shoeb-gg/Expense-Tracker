@@ -25,6 +25,9 @@ abstract final class Symbols {
   static const IconData chevron_left_rounded = IconData(0xe5cb, fontFamily: 'MaterialSymbolsRounded', matchTextDirection: true);
   static const IconData chevron_right_rounded = IconData(0xe5cc, fontFamily: 'MaterialSymbolsRounded', matchTextDirection: true);
   static const IconData close_rounded = IconData(0xe5cd, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData cloud_done_rounded = IconData(0xe2bf, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData cloud_off_rounded = IconData(0xe2c1, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData cloud_upload_rounded = IconData(0xe2c3, fontFamily: 'MaterialSymbolsRounded');
   static const IconData content_copy_rounded = IconData(0xe14d, fontFamily: 'MaterialSymbolsRounded');
   static const IconData delete_rounded = IconData(0xe92e, fontFamily: 'MaterialSymbolsRounded');
   static const IconData description_rounded = IconData(0xe873, fontFamily: 'MaterialSymbolsRounded');
@@ -37,11 +40,13 @@ abstract final class Symbols {
   static const IconData expand_more_rounded = IconData(0xe5cf, fontFamily: 'MaterialSymbolsRounded');
   static const IconData folder_rounded = IconData(0xe2c7, fontFamily: 'MaterialSymbolsRounded');
   static const IconData hide_image_rounded = IconData(0xf022, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData history_rounded = IconData(0xe8b3, fontFamily: 'MaterialSymbolsRounded');
   static const IconData home_rounded = IconData(0xe9b2, fontFamily: 'MaterialSymbolsRounded');
   static const IconData image_rounded = IconData(0xe3f4, fontFamily: 'MaterialSymbolsRounded');
   static const IconData info_rounded = IconData(0xe88e, fontFamily: 'MaterialSymbolsRounded');
   static const IconData keyboard_rounded = IconData(0xe312, fontFamily: 'MaterialSymbolsRounded');
   static const IconData lock_rounded = IconData(0xe899, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData logout_rounded = IconData(0xe9ba, fontFamily: 'MaterialSymbolsRounded', matchTextDirection: true);
   static const IconData north_east_rounded = IconData(0xf1e1, fontFamily: 'MaterialSymbolsRounded');
   static const IconData notes_rounded = IconData(0xe26c, fontFamily: 'MaterialSymbolsRounded', matchTextDirection: true);
   static const IconData palette_rounded = IconData(0xe40a, fontFamily: 'MaterialSymbolsRounded');

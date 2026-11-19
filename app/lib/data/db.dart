@@ -170,6 +170,10 @@ class AppDatabase extends _$AppDatabase {
   /// For tests: `AppDatabase.forTesting(NativeDatabase.memory())`.
   AppDatabase.forTesting(super.executor);
 
+  /// A database on [executor] other than the app's own file: a backup being
+  /// brought up to date before a restore.
+  AppDatabase.withExecutor(super.executor);
+
   /// 1: first release. 2: every default category has its own colour.
   /// 3: category budgets.
   @override

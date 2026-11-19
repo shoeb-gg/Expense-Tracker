@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Google Drive backup is the only thing that goes online. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="Spill the Bills"
         android:name="${applicationName}"

@@ -291,6 +291,11 @@ class SettingsNotifier extends Notifier<AppSettings> {
 
   SettingsStore get _store => ref.read(settingsStoreProvider);
 
+  /// Reads every setting from the database again (after a restore).
+  Future<void> reload() async {
+    state = await AppSettings.load(_store);
+  }
+
   Future<void> _save(AppSettings next, String key) async {
     state = next;
     final value = next.toEntries()[key];
