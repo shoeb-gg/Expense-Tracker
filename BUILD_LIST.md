@@ -104,7 +104,7 @@ Dropped at first. Brought back on 2026-11-14 as "Pockets". The user chose the na
 - [ ] ~~Passcode lock~~ - Dropped.
 - [x] Export - Expenses for a chosen date range to a file.
 - [x] Import - CSV, Excel, JSON. (PDF and image import moved to the AI phase.)
-- [x] Auto backup - Phone + Google Drive, with last-backup time. (Not built yet. Postponed on 2026-11-16 until after the current round.)
+- [x] Auto backup - Google Drive only (the user dropped the phone copy: a phone backup is lost with the phone). Built 2026-11-19.
 - [x] Delete all data - Wipe everything.
 - [ ] ~~Import from Money Tracker (dedicated)~~ - Not selected.
 
@@ -197,6 +197,13 @@ Dropped at first. Brought back on 2026-11-14 as "Pockets". The user chose the na
   - Deleting a category, a pocket or all data removes their budgets. Export and Import do not include budgets.
 - **Phone test, first pass (2026-11-17).** Fixed the same day: messages now sit above the keyboard; Back with the keyboard up only lowers it, the next Back asks to discard; a 9-digit total on Home keeps clear of the arrow; chart side labels go K, M, B ("1B", "1.25B"); "snacks 12.345" says "Use at most 2 decimals"; a budget has at most 9 digits; the budget note has no full stop after "…"; the "Pocket added" buttons cut long names with "…". Left as they are, by the user's choice: a typed full category name with short words ("qa cat") may not pick that category; Import saves "-75" as a 75 expense. At the two text sizes above the default, the Add and Edit expense pocket pill shows only its emoji, so the title keeps its size (the user chose this; each pocket starts with its own emoji, and tapping the pill lists the names).
 - **After that:** a very thorough test of the whole app on the phone. Type every kind of text and number in every field (expenses, categories, pockets and the rest), and follow every path, both the ones that should work and the ones that should fail, to find anything that breaks in the screens or the flow.
-- **Then:** automatic backup.
+- **Google Drive backup** (built 2026-11-19).
+  - Settings, Your data, "Google Drive backup": sign in with any Google account; the app asks only for drive.file (its own files).
+  - A backup is one zip in "Spill the Bills backups" in that Drive: the whole database (expenses, pockets, categories, budgets, learned words, settings) and the receipt photos.
+  - It backs up once a day by itself when the app opens or comes back, only when there are expenses and never with Google's screens; "Back up now" too. The newest 10 are kept.
+  - Restore: pick a backup, confirm; everything is replaced, all or nothing. Signing in on an empty phone offers the backups found.
+  - Sign out stops the daily backup; backups stay in Drive.
+  - Google Cloud project spill-the-bills; sign-in works only in builds signed with the permanent key.
+  - Verified on the user's phone: sign-in, first backup, the restore list.
 - **Postponed:** the combined view of all pockets (postponed again on 2026-11-16), AI assistant, PDF and photo import, the monthly PDF report.
 - **Only if ever needed:** an iPhone version and Play Store testing. The user doesn't use an iPhone.
