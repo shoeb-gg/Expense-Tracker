@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spill_the_bills/core/days.dart';
 import 'package:spill_the_bills/features/add/add_screen.dart';
+import 'package:spill_the_bills/features/home/home_state.dart';
 import 'package:spill_the_bills/router.dart';
 import 'package:spill_the_bills/state/providers.dart';
 import 'package:spill_the_bills/state/settings.dart';
@@ -31,6 +33,26 @@ void main() {
     expect(find.text('15K'), findsOneWidget);
     expect(find.text('1.7K'), findsOneWidget);
     expect(find.text('835'), findsOneWidget);
+    await closeApp(tester, db);
+  });
+
+  testWidgets('Privacy hide masks the month total, as on Home; the eye shows it on both', (
+    tester,
+  ) async {
+    final db = await sampleDatabase(tester);
+    await pumpApp(
+      tester,
+      db: db,
+      location: Routes.calendar(),
+      settings: const AppSettings(privacyMask: true),
+    );
+    expect(find.text('34,555 spent'), findsNothing);
+    expect(find.text('•••••• spent'), findsOneWidget);
+    // Shown on Home with the eye: shown here too.
+    final container = ProviderScope.containerOf(tester.element(find.byType(Scaffold).first));
+    container.read(homeTotalHiddenProvider.notifier).toggle();
+    await settle(tester);
+    expect(find.text('34,555 spent'), findsOneWidget);
     await closeApp(tester, db);
   });
 

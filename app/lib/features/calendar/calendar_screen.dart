@@ -16,6 +16,7 @@ import '../../theme/text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/kit.dart';
 import '../charts/chart_data.dart';
+import '../home/home_state.dart';
 import 'calendar_data.dart';
 
 /// The tallest a week of the month grid is (it is this high unless the
@@ -122,6 +123,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final bottom = MediaQuery.paddingOf(context).bottom;
     // The pocket in use, under the title, once there are two or more pockets.
     final pocketLine = ref.watch(pocketLineProvider);
+    // "Privacy hide" masks the month total here as on Home (and the eye on
+    // Home shows it on both).
+    final totalHidden = ref.watch(homeTotalHiddenProvider);
 
     return Scaffold(
       backgroundColor: c.bg,
@@ -165,7 +169,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: _MonthBar(
                 label: monthYear(_ym.year, _ym.month),
-                total: '${fmt.format(monthTotal)} spent',
+                total: '${totalHidden ? maskedAmount : fmt.format(monthTotal)} spent',
                 onPrev: () => _step(false, Axis.horizontal),
                 onNext: () => _step(true, Axis.horizontal),
                 onLabel: () => unawaited(_pickMonth()),
