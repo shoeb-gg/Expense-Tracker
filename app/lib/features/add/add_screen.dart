@@ -60,9 +60,6 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
 
   late int _day;
 
-  /// The day the screen opened on, to tell whether the user changed it.
-  late final int _initialDay;
-
   /// Category of the keypad (null: the opening state with type to add).
   int? _picked;
 
@@ -113,7 +110,6 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
     _noteFocus.addListener(_onNoteFocus);
     _note.addListener(_onNoteChanged);
     _day = widget.day ?? ref.read(todayProvider);
-    _initialDay = _day;
     if (_isEdit) {
       _loading = true;
       unawaited(_load());
@@ -184,9 +180,7 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
       categoryId: _picked,
       photo: _photo,
       day: _day,
-      initialDay: _initialDay,
       pocketId: _pocketId,
-      currentPocketId: ref.read(currentPocketIdProvider),
       typed: _typed.text,
     );
   }

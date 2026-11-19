@@ -219,9 +219,7 @@ void main() {
       categoryId: categoryId,
       photo: photo,
       day: day,
-      initialDay: 20744,
       pocketId: pocketId,
-      currentPocketId: 1,
       typed: typed,
     );
 
@@ -239,9 +237,7 @@ void main() {
       categoryId: categoryId,
       photo: photo,
       day: day,
-      initialDay: 20744,
       pocketId: pocketId,
-      currentPocketId: 1,
       typed: '',
     );
 
@@ -255,14 +251,20 @@ void main() {
       expect(fresh(title: 'Coffee'), isTrue);
       expect(fresh(categoryId: 2), isTrue);
       expect(fresh(photo: 'r1.jpg'), isTrue);
-      expect(fresh(day: 20740), isTrue);
-      expect(fresh(pocketId: 3), isTrue);
       expect(fresh(typed: 'coffee 5'), isTrue);
+      // With something entered, a new day or pocket changes nothing.
+      expect(fresh(expr: '5', day: 20740, pocketId: 3), isTrue);
     });
 
     test('a new expense: the day it opened on, or the pocket it is in, is not a change', () {
       expect(fresh(day: 20744), isFalse);
       expect(fresh(pocketId: 1), isFalse);
+    });
+
+    test('a new expense: only another day or pocket chosen is nothing to lose', () {
+      expect(fresh(day: 20740), isFalse);
+      expect(fresh(pocketId: 3), isFalse);
+      expect(fresh(day: 20740, pocketId: 3), isFalse);
     });
 
     test('an edit with nothing changed is clean', () {

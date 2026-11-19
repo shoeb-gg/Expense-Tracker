@@ -223,12 +223,11 @@ List<String> learnableWords(List<String> titleWords) {
 /// entered or changed (then Cancel and Back ask first).
 ///
 /// A new expense counts as changed once there is an amount or calculation
-/// ([expr]), a [title], a [categoryId], a [photo], words in the typing bar
-/// ([typed]), a [day] other than [initialDay], or a [pocketId] other than
-/// [currentPocketId] (the pocket the user is in). Editing an [original]
-/// counts any difference from it: the amount (what [expr] works out to), the
-/// title, the category, the photo, the day or the pocket ([pocketId] null:
-/// not touched).
+/// ([expr]), a [title], a [categoryId], a [photo] or words in the typing bar
+/// ([typed]). Choosing only another [day] or pocket is nothing to lose, so it
+/// does not count. Editing an [original] counts any difference from it: the
+/// amount (what [expr] works out to), the title, the category, the photo, the
+/// day or the pocket ([pocketId] null: not touched).
 bool hasUnsavedInput({
   Expense? original,
   required String expr,
@@ -236,9 +235,7 @@ bool hasUnsavedInput({
   required int? categoryId,
   required String? photo,
   required int day,
-  required int initialDay,
   required int? pocketId,
-  required int? currentPocketId,
   required String typed,
 }) {
   if (original != null) {
@@ -253,9 +250,7 @@ bool hasUnsavedInput({
       title.trim().isNotEmpty ||
       categoryId != null ||
       photo != null ||
-      typed.trim().isNotEmpty ||
-      day != initialDay ||
-      (pocketId != null && pocketId != currentPocketId);
+      typed.trim().isNotEmpty;
 }
 
 /// Whether [text] has a number with more than two decimals ("12.345",

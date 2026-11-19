@@ -879,6 +879,32 @@ void main() {
       await closeApp(tester, db);
     });
 
+    testWidgets('a new expense: another pocket or day alone closes at once', (tester) async {
+      final db = await emptyDb(tester);
+      await addSamplePockets(tester, db);
+      await pumpApp(tester, db: db);
+      await openAdd(tester);
+      await tap(tester, find.text('Personal'));
+      await tap(tester, find.text('Business'));
+      expect(find.text('Business'), findsOneWidget);
+      await tap(tester, find.text('Cancel'));
+      expect(dialog, findsNothing);
+      expect(find.byType(AddScreen), findsNothing);
+
+      // Another day picked, then the category let go again.
+      await openAdd(tester);
+      await tap(tester, find.text('Snacks'));
+      await tap(tester, find.text('Today'));
+      await tap(tester, find.text('17'));
+      await tap(tester, find.text('Confirm'));
+      expect(find.text('Yesterday'), findsOneWidget);
+      await tap(tester, find.text('Snacks').first);
+      await tap(tester, find.text('Cancel'));
+      expect(dialog, findsNothing);
+      expect(find.byType(AddScreen), findsNothing);
+      await closeApp(tester, db);
+    });
+
     testWidgets('Edit: a new pocket counts', (tester) async {
       final db = await sampleDatabase(tester);
       await addSamplePockets(tester, db);
