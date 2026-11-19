@@ -136,7 +136,8 @@ void main() {
       expect(find.text('840.5'), findsOneWidget);
       expect(find.text('841'), findsNothing);
       await keys(tester, '+ 0 . 2 5');
-      expect(find.text('840.5 + 0.25'), findsOneWidget, reason: 'the line');
+      expect(find.text('840.5'), findsOneWidget, reason: 'the first pill');
+      expect(find.text('+ 0.25'), findsOneWidget, reason: 'the second pill');
       expect(find.text('840.75'), findsOneWidget, reason: 'the result');
       expect(find.text('841'), findsNothing);
       await closeApp(tester, db);

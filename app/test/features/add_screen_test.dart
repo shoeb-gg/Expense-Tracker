@@ -72,7 +72,9 @@ void main() {
     await tap(tester, find.text('Snacks'));
     expect(find.text('Save'), findsOneWidget);
     await keys(tester, '1 2 0 + 3 0');
-    expect(find.text('120 + 30'), findsOneWidget);
+    // Each number in its own pill, the result above them.
+    expect(find.text('120'), findsOneWidget);
+    expect(find.text('+ 30'), findsOneWidget);
     expect(find.text('150'), findsOneWidget);
     expect(find.text('='), findsOneWidget);
     expect(find.text('Save'), findsNothing);

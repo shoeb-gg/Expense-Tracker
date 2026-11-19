@@ -28,7 +28,7 @@ class KeypadView {
     required this.amountText,
     required this.isPlaceholder,
     required this.checkKey,
-    this.expressionText,
+    this.parts,
     this.amount,
     this.noResult = false,
   });
@@ -39,8 +39,9 @@ class KeypadView {
   /// True when the big number is the grey "0" (nothing typed or no result).
   final bool isPlaceholder;
 
-  /// The small line above the big number, only while an operator is typed.
-  final String? expressionText;
+  /// The numbers of the calculation, each in its own pill under the big
+  /// number; null unless an operator is typed.
+  final List<ExpressionPart>? parts;
 
   /// The amount to save in minor units, null when Save is not possible.
   final int? amount;
@@ -58,12 +59,12 @@ KeypadView keypadView(String expr, AmountFormat format) {
   }
   if (hasOperator(expr)) {
     final result = evaluateExpression(expr);
-    final line = expressionLine(expr, format);
+    final parts = expressionParts(expr, format);
     if (result == null) {
       return KeypadView(
         amountText: '0',
         isPlaceholder: true,
-        expressionText: line,
+        parts: parts,
         checkKey: CheckKey.equalsDisabled,
         noResult: true,
       );
@@ -71,7 +72,7 @@ KeypadView keypadView(String expr, AmountFormat format) {
     return KeypadView(
       amountText: format.formatExact(result),
       isPlaceholder: false,
-      expressionText: line,
+      parts: parts,
       checkKey: CheckKey.equals,
     );
   }
@@ -85,13 +86,18 @@ KeypadView keypadView(String expr, AmountFormat format) {
   );
 }
 
-/// The expression with each number in the user's number style and a space
-/// on each side of every operator: "1200+80" -> "1,200 + 80".
-String expressionLine(String expr, AmountFormat format) {
-  final out = StringBuffer();
+/// One number of a calculation and the operator typed before it ([op] is
+/// null for the first number; [number] is '' after a trailing operator).
+typedef ExpressionPart = ({String? op, String number});
+
+/// The numbers of [expr], each in the user's number style with the operator
+/// before it: "1200+80" -> 1,200 and + 80.
+List<ExpressionPart> expressionParts(String expr, AmountFormat format) {
+  final parts = <ExpressionPart>[];
+  String? op;
   final number = StringBuffer();
   void flush() {
-    if (number.isNotEmpty) out.write(format.typed(number.toString()));
+    parts.add((op: op, number: number.isEmpty ? '' : format.typed(number.toString())));
     number.clear();
   }
 
@@ -99,13 +105,13 @@ String expressionLine(String expr, AmountFormat format) {
     final ch = String.fromCharCode(rune);
     if (isOperatorKey(ch)) {
       flush();
-      out.write(' $ch ');
+      op = ch;
     } else {
       number.write(ch);
     }
   }
   flush();
-  return out.toString().trim();
+  return parts;
 }
 
 /// Short date for the date key and the preview card:

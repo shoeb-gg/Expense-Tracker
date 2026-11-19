@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -47,6 +48,14 @@ class KeypadPanel extends StatelessWidget {
 
   /// Height of the keys and the gap above them: what [collapse] folds away.
   static const double keysHeight = 228;
+
+  /// Height of one number pill of a calculation (34 px at the default text
+  /// size; larger text makes it taller).
+  static double tapeHeight(TextScaler scaler) => scaler.scale(20) + 14;
+
+  /// What the row of number pills adds to the panel while calculating: the
+  /// pills and the gap above them.
+  static double tapeRoom(TextScaler scaler) => 8 + tapeHeight(scaler);
 
   final ExpenseCategory category;
   final KeypadView view;
@@ -110,6 +119,19 @@ class KeypadPanel extends StatelessWidget {
                       ),
                     ],
                   ),
+                ),
+                // While calculating: each number in its own pill, under the
+                // category and the total.
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 160),
+                  curve: Curves.easeOut,
+                  alignment: Alignment.topCenter,
+                  child: view.parts == null
+                      ? const SizedBox(width: double.infinity)
+                      : Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: CalcTape(parts: view.parts!, noResult: view.noResult),
+                        ),
                 ),
                 const SizedBox(height: 10),
                 _TitleField(controller: note, focusNode: noteFocus, buttons: photoButtons),
@@ -207,45 +229,133 @@ class _AmountBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final expression = view.expressionText;
-    final small = boardText(12.5, 16, FontWeight.w600, tabular: true, color: c.text3);
+    // The numbers of a calculation are in the pills under this row.
     return Semantics(
       liveRegion: true,
       label: view.noResult ? 'No result' : 'Amount ${view.amountText}',
       child: ExcludeSemantics(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerRight,
+          child: Text(
+            view.amountText,
+            maxLines: 1,
+            style: AppText.keypadNumber.copyWith(color: view.isPlaceholder ? c.text3 : c.text),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The numbers of a calculation, each in its own pill with the operator
+/// before it in the accent ("120", "+ 45", "+ 300"), the newest at the right
+/// end under the total. A long one can be swiped to see the first numbers;
+/// typing brings the newest back, and the left edge fades while there is
+/// more to that side. "no result" ends the row in red.
+class CalcTape extends StatefulWidget {
+  const CalcTape({super.key, required this.parts, this.noResult = false});
+
+  final List<ExpressionPart> parts;
+  final bool noResult;
+
+  @override
+  State<CalcTape> createState() => _CalcTapeState();
+}
+
+class _CalcTapeState extends State<CalcTape> {
+  final ScrollController _scroll = ScrollController();
+
+  /// Some pills are hidden past the left edge.
+  bool _moreLeft = false;
+
+  @override
+  void didUpdateWidget(CalcTape old) {
+    super.didUpdateWidget(old);
+    // A new key: show the newest number again.
+    if (!listEquals(old.parts, widget.parts) && _scroll.hasClients && _scroll.offset != 0) {
+      _scroll.jumpTo(0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  bool _onMetrics(ScrollMetrics m) {
+    // Reversed: 0 is the right end; the first numbers lie towards the max.
+    final more = m.pixels < m.maxScrollExtent - 0.5;
+    if (more != _moreLeft) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _moreLeft = more);
+      });
+    }
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final height = KeypadPanel.tapeHeight(MediaQuery.textScalerOf(context));
+    final style = boardText(16, 20, FontWeight.w700, tabular: true, color: c.text);
+    Widget pill(ExpressionPart part) => Container(
+      height: height,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(color: c.control, borderRadius: BorderRadius.circular(height / 2)),
+      child: Text.rich(
+        TextSpan(
           children: [
-            if (expression != null)
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerRight,
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(text: expression),
-                      if (view.noResult)
-                        TextSpan(
-                          text: '  ·  no result',
-                          style: TextStyle(color: c.bad),
-                        ),
-                    ],
-                  ),
-                  maxLines: 1,
-                  style: small,
-                ),
+            if (part.op != null)
+              TextSpan(
+                text: part.number.isEmpty ? part.op : '${part.op} ',
+                style: TextStyle(color: c.accent),
               ),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: Text(
-                view.amountText,
-                maxLines: 1,
-                style: AppText.keypadNumber.copyWith(color: view.isPlaceholder ? c.text3 : c.text),
-              ),
-            ),
+            TextSpan(text: part.number),
           ],
+        ),
+        maxLines: 1,
+        style: style,
+      ),
+    );
+
+    final list = NotificationListener<ScrollMetricsNotification>(
+      onNotification: (n) => _onMetrics(n.metrics),
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (n) => _onMetrics(n.metrics),
+        child: ListView(
+          controller: _scroll,
+          scrollDirection: Axis.horizontal,
+          reverse: true,
+          children: [
+            if (widget.noResult)
+              Padding(
+                padding: const EdgeInsets.only(left: 10, right: 2),
+                child: Center(child: Text('no result', style: style.copyWith(color: c.bad))),
+              ),
+            for (var i = widget.parts.length - 1; i >= 0; i--)
+              Padding(
+                padding: EdgeInsets.only(left: i == 0 ? 0 : 6),
+                child: pill(widget.parts[i]),
+              ),
+          ],
+        ),
+      ),
+    );
+    // Always wrapped (only the fade changes), so the list keeps its place
+    // when the fade comes and goes.
+    return ExcludeSemantics(
+      child: SizedBox(
+        height: height,
+        child: ShaderMask(
+          shaderCallback: (r) => LinearGradient(
+            colors: [Color(_moreLeft ? 0x00000000 : 0xFF000000), const Color(0xFF000000)],
+            stops: [0, 28 / r.width],
+          ).createShader(r),
+          blendMode: BlendMode.dstIn,
+          child: list,
         ),
       ),
     );

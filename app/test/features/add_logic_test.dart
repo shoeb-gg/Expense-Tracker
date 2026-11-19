@@ -31,7 +31,7 @@ void main() {
       expect(v.amountText, '1,180');
       expect(v.amount, 118000);
       expect(v.checkKey, CheckKey.save);
-      expect(v.expressionText, isNull);
+      expect(v.parts, isNull);
     });
 
     test('decimals show as typed', () {
@@ -47,7 +47,7 @@ void main() {
 
     test('an operator shows the expression, the running result and =', () {
       final v = keypadView(typeKeys('1 2 0 + 3 0'), fmt);
-      expect(v.expressionText, '120 + 30');
+      expect(v.parts, [(op: null, number: '120'), (op: '+', number: '30')]);
       expect(v.amountText, '150');
       expect(v.checkKey, CheckKey.equals);
       expect(v.amount, isNull);
@@ -78,17 +78,39 @@ void main() {
 
     test('a trailing operator is ignored in the result', () {
       final v = keypadView(typeKeys('1 2 0 +'), fmt);
-      expect(v.expressionText, '120 +');
+      expect(v.parts, [(op: null, number: '120'), (op: '+', number: '')]);
       expect(v.amountText, '120');
     });
   });
 
-  test('expressionLine groups each number in the number style', () {
-    expect(expressionLine('1200+80', fmt), '1,200 + 80');
-    expect(
-      expressionLine('1234.5×2', const AmountFormat(style: NumberStyle.spaceDot)),
-      '1\u00A0234.5 × 2',
-    );
+  group('expressionParts: each number with the operator before it', () {
+    test('the first number has no operator', () {
+      expect(expressionParts('1200+80−5', fmt), [
+        (op: null, number: '1,200'),
+        (op: '+', number: '80'),
+        (op: '−', number: '5'),
+      ]);
+    });
+
+    test('a trailing operator waits for its number', () {
+      expect(expressionParts('120+', fmt), [(op: null, number: '120'), (op: '+', number: '')]);
+    });
+
+    test('numbers keep the number style, spaces and all', () {
+      expect(expressionParts('1234.5×2', const AmountFormat(style: NumberStyle.spaceDot)), [
+        (op: null, number: '1 234.5'),
+        (op: '×', number: '2'),
+      ]);
+    });
+
+    test('the keypad view has them only while calculating', () {
+      expect(keypadView(typeKeys('1 2 0'), fmt).parts, isNull);
+      expect(keypadView(typeKeys('1 2 0 + 3 0'), fmt).parts, [
+        (op: null, number: '120'),
+        (op: '+', number: '30'),
+      ]);
+      expect(keypadView(typeKeys('5 ÷ 0'), fmt).parts, hasLength(2), reason: 'no result still shows them');
+    });
   });
 
   test('shortDayLabel', () {

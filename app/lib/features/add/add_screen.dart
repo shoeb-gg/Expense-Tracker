@@ -250,7 +250,10 @@ class _AddScreenState extends ConsumerState<AddScreen> with SingleTickerProvider
     final typingTitle = keypadMode && keyboard > 0 && _noteFocus.hasFocus;
     double reserveFor(double collapse) =>
         (keypadMode
-            ? KeypadPanel.height - KeypadPanel.keysHeight * collapse
+            ? KeypadPanel.height -
+                  KeypadPanel.keysHeight * collapse +
+                  // The row of number pills while calculating.
+                  (hasOperator(_expr) ? KeypadPanel.tapeRoom(mq.textScaler) : 0)
             // The card grows by its "Next time" line, or by the prompt of
             // a typed word that has no category yet; and, in large text,
             // by a hint that wraps (the measured height, when it is more).
