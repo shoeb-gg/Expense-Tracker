@@ -9,6 +9,7 @@ import '../../core/days.dart';
 import '../../core/format.dart';
 import '../../data/db.dart';
 import '../../router.dart';
+import '../../state/pocket_line.dart';
 import '../../state/providers.dart';
 import '../../theme/symbols.dart';
 import '../../theme/text.dart';
@@ -110,6 +111,12 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
       return Scaffold(backgroundColor: c.bg);
     }
 
+    // The pocket shown (an expense's own one may not be the pocket in use),
+    // under the name once there are two or more pockets.
+    final pockets = ref.watch(pocketsProvider).value ?? const <Pocket>[];
+    final shown = pockets.where((p) => p.id == pocketId).firstOrNull;
+    final pocketLine = pocketLabel(pocketWhenSeveral(pockets, shown));
+
     final range = _range(today);
     final y = yearOfDay(range.from);
     final _RangeKind kind;
@@ -156,6 +163,7 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
           children: [
             _Header(
               category: category,
+              pocketLine: pocketLine,
               pill: pill,
               onPill: () => unawaited(_pickMonth(range.from)),
             ),
@@ -194,11 +202,15 @@ const double _minTitleScale = 0.65;
 class _Header extends StatelessWidget {
   const _Header({
     required this.category,
+    required this.pocketLine,
     required this.pill,
     required this.onPill,
   });
 
   final ExpenseCategory category;
+
+  /// "👛 Personal" under the name, or '' for none (a single pocket).
+  final String pocketLine;
   final String pill;
   final VoidCallback onPill;
 
@@ -225,7 +237,7 @@ class _Header extends StatelessWidget {
                   if (tile && (box.maxWidth - tileRoom) / natural < _minTitleScale) {
                     tile = false;
                   }
-                  return Row(
+                  final name = Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       if (tile) ...[
@@ -245,6 +257,19 @@ class _Header extends StatelessWidget {
                           // As it was: the text is its own width here.
                           textAlign: TextAlign.start,
                         ),
+                      ),
+                    ],
+                  );
+                  if (pocketLine.isEmpty) return name;
+                  // Like the pocket line of Calendar, Charts and Reports: one
+                  // line that scales down rather than wrapping.
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      name,
+                      FitTitle(
+                        pocketLine,
+                        style: AppText.overline.copyWith(color: c.text3),
                       ),
                     ],
                   );
