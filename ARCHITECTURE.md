@@ -29,10 +29,14 @@ Decisions for the Expense Tracker app. The app is called "Spill the Bills". Scop
 - Process: chart design mockups go to the user for approval before building.
 - Alternatives considered: Syncfusion Flutter Charts (closed source, corporate look), fully hand-drawn (most effort).
 
-## Backup (later phase, not in first build)
-- **Both:** daily automatic backup to the phone, plus a copy in the hidden Google Drive app-data folder.
-- Restore from either. Google Drive also works on iPhone later.
-- Needs a one-time Google account pick (not an app account).
+## Backup (built 2026-11-19)
+- **Google Drive only.** A copy on the phone was dropped: it is lost with the phone.
+- **What:** one zip per backup, a `VACUUM INTO` snapshot of the whole database (expenses, pockets, categories, budgets, learned words, settings) plus the receipt photos expenses use, and a manifest (format, schema, counts).
+- **Where:** a "Spill the Bills backups" folder in the user's own Drive. The app asks only for `drive.file`, so it sees nothing but its own files. Plain HTTPS calls to the Drive v3 API; no Google client library.
+- **When:** once a day when the app opens or comes back (signed in, not yet today, at least one expense, never with Google's screens), plus "Back up now". The newest 10 are kept.
+- **Restore:** download, check (refuses damaged files and backups from a newer app), upgrade an older backup's schema, then copy every table into the live database in one transaction. Settings starting with `backup.` stay as they are on this phone.
+- **Sign-in:** google_sign_in 7 (Credential Manager) for the account, and authorization tokens for `drive.file` by email, so the daily backup needs no UI. Any Google account works; Change account and Sign out are on the backup screen.
+- **Google Cloud:** project `spill-the-bills`; an Android OAuth client (package name + the release key's SHA-1) and a Web client used as the server client. Only builds signed with the permanent key can sign in.
 
 ## Import
 - **First build:** CSV, Excel and JSON. User maps columns once (date, amount, category, note), sees a preview, then imports.
@@ -49,7 +53,7 @@ Decisions for the Expense Tracker app. The app is called "Spill the Bills". Scop
 ## Internals
 - **State management:** Riverpod. Totals and charts update instantly across screens.
 - **Navigation:** go_router.
-- **Receipt photos:** stored compressed in the app's private folder on the phone. Included in backups later.
-- **Analytics / tracking / crash services:** none. Nothing leaves the phone.
-- **Internet:** not required. Fully offline (Google Drive backup is the only online part, later).
+- **Receipt photos:** stored compressed in the app's private folder on the phone. Included in Drive backups.
+- **Analytics / tracking / crash services:** none. Nothing leaves the phone except the user's own Drive backup.
+- **Internet:** not required. The app works fully offline; the optional Google Drive backup is the only online part.
 - **Testing:** automated unit tests for totals, date grouping and type-to-add parsing; widget tests for key screens. Bug fixes start with a failing test.

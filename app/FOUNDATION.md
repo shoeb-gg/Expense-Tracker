@@ -48,7 +48,10 @@ lib/
   router.dart          every route (Routes.*), shell with the bottom bar
   core/                pure Dart: days, format, calculator, type_to_add
   data/                db.dart (+ db.g.dart), repositories, PhotoStore, maintenance
-  state/               providers.dart (all providers), settings.dart
+  backup/              Google Drive backup: zip format + restore, Drive HTTPS client,
+                       Google sign-in wrapper, BackupService
+  state/               providers.dart (all providers), settings.dart, budgets.dart,
+                       backup.dart (BackupController)
   theme/               tokens.dart (AppColors), text.dart (AppText), app_theme.dart,
                        symbols.dart (Symbols: every icon the app uses)
   widgets/             shared UI kit; import 'widgets/kit.dart' for all of it
@@ -239,7 +242,9 @@ sortOrder, isMisc, createdAt. `Expenses` [`Expense`]: id, pocketId, categoryId,
 amount, note ('' = no title), day, createdAt, updatedAt, photoPath (file name
 or null); index (pocketId, day). `LearnedWords` [`LearnedWord`]: word (PK,
 lower-case), categoryId, updatedAt. `SettingsEntries` [`SettingsEntry`]: key,
-value. Seed: "Personal" 👛 (default) and the 15 `defaultCategories`
+value (keys starting with `backup.` belong to this phone: a restore keeps them).
+`CategoryBudgets` [`CategoryBudget`]: (pocketId, categoryId) PK, amount
+(minor units per month; schema 3). Seed: "Personal" 👛 (default) and the 15 `defaultCategories`
 (Miscellaneous last, `isMisc`). Foreign keys are on.
 
 **ExpensesRepo** (`expensesRepoProvider`): `add({pocketId, categoryId, amount,
@@ -377,6 +382,7 @@ phone's own scale (`MediaQuery.textScaler`), so layouts see 0.87x to 1.27x.
 | `/settings/import` | `Routes.importStart` | `features/data/import_screen.dart` `ImportScreen()` |
 | `/settings/import/columns` | `Routes.importColumns` | `features/data/import_columns_screen.dart` `ImportColumnsScreen()` |
 | `/settings/import/review` | `Routes.importReview` | `features/data/import_review_screen.dart` `ImportReviewScreen()` |
+| `/settings/backup` | `Routes.backup` | `features/backup/backup_screen.dart` `BackupScreen()` |
 
 - Tabs: `context.go(Routes.charts)`. Everything else: `context.push(...)`
   (opens above the shell, no bottom bar; Back and the system back gesture

@@ -2,7 +2,7 @@
 
 **A simple, private expense tracker for Android.**
 
-Write down what you spend. See where your money goes. Everything stays on your own phone. No account, no ads, no internet.
+Write down what you spend. See where your money goes. Everything stays on your own phone, with an optional backup to your own Google Drive. No sign-up, no ads.
 
 <p align="center">
   <img src="docs/screenshots/home.png" width="200" alt="Home: this month's expenses, day by day">
@@ -16,6 +16,10 @@ Write down what you spend. See where your money goes. Everything stays on your o
   <img src="docs/screenshots/themes.png" width="200" alt="Settings: choose Dark, Light or System, a colour theme and a text size">
   <img src="docs/screenshots/light.png" width="200" alt="Light mode: Home in the light theme">
 </p>
+<p align="center">
+  <img src="docs/screenshots/budgets.png" width="200" alt="Budgets: a ring around each category shows how much of its monthly budget is used">
+  <img src="docs/screenshots/backup.png" width="200" alt="Google Drive backup: the last backup, restore, and Back up now">
+</p>
 
 ## ✨ What you can do
 
@@ -25,27 +29,29 @@ Write down what you spend. See where your money goes. Everything stays on your o
 - 📅 **Calendar.** See the whole month with the total for each day. Tap a day to see what you spent.
 - 📊 **Charts.** Look at a week, a month, a year, or any dates you choose. See your spending by category, your biggest days, or how it changes over time.
 - 🧾 **Reports.** See your all-time total, your average month, and a table of every month. Pick a year to see it at a glance.
+- 🎯 **Monthly budgets.** Give a category a budget, like Snacks 5,000 a month. When you add an expense, a ring around each category shows how much is used: green, then yellow from 90%, then red once you go over. A short message tells you when you pass 90% and when you go over, and by how much.
 - 👛 **Pockets.** Keep money apart, for example Home, Trip and Work. Each pocket has its own expenses. You can move an expense to another pocket later.
 - 📷 **Receipt photos.** Add a photo to an expense, from the camera or from your gallery.
 - 📤 **Export and import.** Save your expenses as an Excel or CSV file. Bring expenses in from a CSV, Excel or JSON file.
 - 🎭 **Three colour themes,** each in dark and light. In Settings, choose Dark, Light or System (System follows your phone).
 - 🔠 **Text size you can change,** so it is easy to read.
 - 🙈 **Hide the total.** Turn on Privacy hide to cover the big number until you tap the eye.
-- 🔢 **Numbers your way.** Choose how numbers look, like 1,234.50 or 1.234,50.
+- 🔢 **Numbers your way.** Choose how numbers look, like 1,234,567.89, 12,34,567.89 or 1234567.89, with or without decimals.
+- ☁️ **Google Drive backup.** Sign in once and the app backs up everything to your own Google Drive every day, photos included. Restore it on any phone.
 
 ## 🔒 Private by design
 
-- 🚫 **No account.** You never sign up or log in.
+- 🚫 **No sign-up.** There is no account to make. Google sign-in is only for the backup, and only if you turn it on.
 - 🧼 **No ads and no tracking.**
-- 📴 **Works fully offline.** The app never connects to the internet. It does not even have permission to.
-- 📱 **Your data stays on your phone.** Nobody else can see it.
+- 📴 **Works offline.** The only thing that ever goes online is the Google Drive backup, if you turn it on.
+- 🔐 **Your backups are yours.** They go to your own Google Drive. The app can only see the backup files it made, nothing else in your Drive, and nobody else gets a copy.
 
 ## 📲 How to install
 
 You do not need the Play Store. You download one file and open it.
 
 1. 🌐 On your phone, open the **[Releases page](https://github.com/shoeb-gg/Expense-Tracker/releases/latest)**.
-2. ⬇️ Under **Assets**, tap `Spill-the-Bills-<version>.apk` to download it. It is about 24 MB and works on most phones. (`<version>` is a number like 1.0.0.)
+2. ⬇️ Under **Assets**, tap `Spill-the-Bills-<version>.apk` to download it. It is about 25 MB and works on most phones. (`<version>` is a number like 1.0.0.)
 3. 🔁 If your phone says the app can't be installed, download `Spill-the-Bills-<version>-all-phones.apk` instead. It is about 60 MB and works on every Android phone.
 4. 📂 Open the file you downloaded. Your phone may find it in the notification, in your browser's downloads, or in the Files app.
 5. ✅ When Android asks, allow installs from this source (this is usually your browser or Files app). Then tap **Install**.
@@ -61,12 +67,14 @@ Download the newer file from the [Releases page](https://github.com/shoeb-gg/Exp
 
 ## 💾 Keeping your data safe
 
-Your expenses live only on your phone. That is great for privacy, but it also means you are the one who keeps them safe.
+Your expenses live on your phone. Turn on the backup so you don't lose them with the phone.
 
-- 🕒 **Automatic backup is not here yet.** It is coming later.
-- 📤 **For now, export now and then.** Go to **Settings → Export** and save the file somewhere safe, like your email or a cloud drive.
-- 📥 **To get your data back,** go to **Settings → Import** and pick that file.
-- ⚠️ **Uninstalling the app deletes its data.** Export first if you want to keep your expenses.
+- ☁️ **Turn on Google Drive backup.** Go to **Settings → Google Drive backup** and tap **Sign in with Google**. Any Google account works.
+- 🕒 **It runs by itself.** Once a day, when you open the app. You can also tap **Back up now**. The newest 10 backups are kept.
+- 📁 **Where it goes.** A folder called **Spill the Bills backups** in your Google Drive. It uses your Drive's free space; photos make backups bigger.
+- 📲 **On a new phone,** install the app, go to **Settings → Google Drive backup**, sign in with the same account and pick a backup. Restoring replaces everything in the app.
+- 📤 **Export still works too.** **Settings → Export** saves your expenses as an Excel or CSV file, and **Settings → Import** brings them back.
+- ⚠️ **Uninstalling the app deletes its data on the phone.** Your Drive backups stay.
 
 ## ❓ Questions
 
@@ -74,7 +82,7 @@ Your expenses live only on your phone. That is great for privacy, but it also me
 Yes. There are no ads and nothing to buy.
 
 **📴 Does it need the internet?**
-No. It works fully offline.
+No. It works fully offline. Only the optional Google Drive backup goes online.
 
 **🍎 Is there an iPhone version?**
 Not yet. It is Android only for now.
@@ -101,6 +109,8 @@ pwsh tool/release.ps1
 ```
 
 This needs the `android/key.properties` file, which is kept out of git. Without it, release builds are signed with the debug key, and such a build can't update an app that was signed with the real key.
+
+**Google Drive backup** signs in through the `spill-the-bills` Google Cloud project. Its Android OAuth client is tied to the package name and the permanent key's SHA-1, so sign-in only works in builds signed with that key. A fork needs its own Google Cloud project: enable the Drive API, add the `drive.file` scope, create an Android client (package name + your key's SHA-1) and a Web client, and put the Web client ID in `lib/backup/drive_auth.dart`.
 
 **Check a download is genuine.** Releases are signed with one permanent key. The SHA-256 fingerprint of its certificate is:
 

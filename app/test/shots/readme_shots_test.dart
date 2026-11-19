@@ -23,9 +23,16 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
+import 'package:flutter_riverpod/misc.dart' show Override;
+import 'package:spill_the_bills/core/days.dart';
+import 'package:spill_the_bills/data/budgets_repo.dart';
+import 'package:spill_the_bills/data/categories_repo.dart';
 import 'package:spill_the_bills/data/db.dart';
+import 'package:spill_the_bills/data/expenses_repo.dart';
+import 'package:spill_the_bills/data/pockets_repo.dart';
 import 'package:spill_the_bills/features/home/pocket_button.dart';
 import 'package:spill_the_bills/router.dart';
+import 'package:spill_the_bills/state/backup.dart';
 import 'package:spill_the_bills/state/providers.dart';
 
 import '../support/add_support.dart';
@@ -64,8 +71,9 @@ Future<void> _open(
   AppDatabase db, {
   String location = Routes.home,
   AppSettings settings = const AppSettings(),
+  List<Override> overrides = const [],
 }) async {
-  await pumpApp(tester, db: db, location: location, settings: settings);
+  await pumpApp(tester, db: db, location: location, settings: settings, overrides: overrides);
   tester.view
     ..physicalSize = _phone * _ratio
     ..devicePixelRatio = _ratio
@@ -168,7 +176,46 @@ final List<Shot> _scenes = <Shot>[
       expect(find.text('Doctor visit'), findsOneWidget);
     },
   ),
+  (
+    name: 'budgets',
+    scene: (tester, db) async {
+      await tester.runAsync(() => _addSampleBudgets(db));
+      await _open(tester, db, location: Routes.add());
+    },
+  ),
+  (
+    name: 'backup',
+    scene: (tester, db) async {
+      await _open(
+        tester,
+        db,
+        location: Routes.backup,
+        overrides: [
+          initialBackupStateProvider.overrideWithValue(
+            BackupState(email: 'you@gmail.com', lastBackupAt: DateTime(2026, 10, 18, 9, 2)),
+          ),
+        ],
+      );
+      expect(find.text('Backed up'), findsOneWidget);
+    },
+  ),
 ];
+
+/// October budgets for a few categories of the sample data, so the rings
+/// show every colour: Snacks 30% and Groceries 60% (green), Transportation
+/// 94% (yellow), House Rent over (red).
+Future<void> _addSampleBudgets(AppDatabase db) async {
+  final pocket = (await PocketsRepo(db).defaultPocket()).id;
+  final cats = await CategoriesRepo(db).all();
+  for (final (name, share) in [('Snacks', 0.30), ('Groceries', 0.60), ('Transportation', 0.94), ('House Rent', 1.15)]) {
+    final id = cats.firstWhere((c) => c.name == name).id;
+    final spent = await ExpensesRepo(db).categoryTotal(pocket, id, dayOf(2026, 10, 1), dayOf(2026, 10, 31));
+    if (spent == 0) continue;
+    // A round budget near spent / share.
+    final budget = ((spent / share) / 10000).round() * 10000;
+    await BudgetsRepo(db).set(pocket, id, budget);
+  }
+}
 
 /// Draws the phone and writes `<name>.png`, [_savedWidth] px wide.
 Future<File> _save(WidgetTester tester, String name) async {
