@@ -207,6 +207,12 @@ class BackupController extends Notifier<BackupState> {
     }
     await _store(BackupState.kEmail, email);
     await _store(BackupState.kNeedsSignIn, null);
+    if (email != state.email) {
+      // Another account: its Drive has none of this phone's backups yet.
+      await _store(BackupState.kLastAt, null);
+      await _store(BackupState.kError, null);
+      state = state.copyWith(lastBackupAt: () => null, lastError: () => null);
+    }
     state = state.copyWith(email: () => email, needsSignIn: false, task: () => null);
     if (await _expenseCount() > 0) {
       final error = await _backUp(interactive: true);
@@ -218,6 +224,19 @@ class BackupController extends Notifier<BackupState> {
     } on Object catch (e) {
       return SignInFailed(backupErrorText(e));
     }
+  }
+
+  /// Back up to another Google account. Google shows its account list again;
+  /// closing it keeps the current account. The old account's backups stay
+  /// in its Drive.
+  Future<SignInOutcome> changeAccount() async {
+    if (state.busy) return const SignInCancelled();
+    try {
+      await _auth.signOut();
+    } on Object {
+      // The account list still opens.
+    }
+    return signIn();
   }
 
   /// "Back up now". Returns null when it worked, else why not.

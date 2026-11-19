@@ -26,6 +26,7 @@ class FakeAuth implements DriveAuth {
 
   final FakeDrive drive;
   Object? signInError;
+  String account = 'me@example.com';
   bool silentWorks = true;
   int signIns = 0;
   bool signedOut = false;
@@ -35,7 +36,7 @@ class FakeAuth implements DriveAuth {
     signIns++;
     final e = signInError;
     if (e != null) throw e;
-    return 'me@example.com';
+    return account;
   }
 
   @override
@@ -225,6 +226,42 @@ void main() {
     expect(c.read(settingsProvider).mood, Mood.iris);
     expect(c.read(backupProvider).email, 'me@example.com');
     expect((await SettingsStore(db).load())[BackupState.kEmail], 'me@example.com');
+  });
+
+  group('changing the account', () {
+    test('switches to the new account and backs up there', () async {
+      await addExpense();
+      await SettingsStore(db).write(BackupState.kEmail, 'me@example.com');
+      final c = container(
+        initial: BackupState(email: 'me@example.com', lastBackupAt: now.subtract(const Duration(days: 3)), lastError: 'No internet connection.'),
+      );
+      auth.account = 'other@example.com';
+      final outcome = await c.read(backupProvider.notifier).changeAccount();
+      expect(outcome, isA<SignedInAndBackedUp>());
+      expect(auth.signedOut, isTrue, reason: 'Google shows the account list again');
+      final s = c.read(backupProvider);
+      expect(s.email, 'other@example.com');
+      expect(s.lastBackupAt, now);
+      expect(s.lastError, isNull);
+      expect((await SettingsStore(db).load())[BackupState.kEmail], 'other@example.com');
+    });
+
+    test("a new account starts without the old one's last backup time", () async {
+      final c = container(initial: BackupState(email: 'me@example.com', lastBackupAt: now.subtract(const Duration(days: 3))));
+      auth.account = 'other@example.com';
+      expect(await c.read(backupProvider.notifier).changeAccount(), isA<SignedInEmpty>());
+      expect(c.read(backupProvider).lastBackupAt, isNull);
+    });
+
+    test("closing Google's screen keeps the current account", () async {
+      await SettingsStore(db).write(BackupState.kEmail, 'me@example.com');
+      final before = BackupState(email: 'me@example.com', lastBackupAt: now);
+      final c = container(initial: before);
+      auth.signInError = const BackupCancelled();
+      expect(await c.read(backupProvider.notifier).changeAccount(), isA<SignInCancelled>());
+      expect(c.read(backupProvider), before);
+      expect((await SettingsStore(db).load())[BackupState.kEmail], 'me@example.com');
+    });
   });
 
   test('sign out forgets the account; the backups stay in Drive', () async {

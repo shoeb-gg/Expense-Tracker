@@ -189,8 +189,14 @@ class _SignedIn extends ConsumerWidget {
               ),
               ListRow(
                 title: 'Restore from a backup',
-                subtitle: 'Replaces everything in the app',
-                trailing: const ValueChevron(),
+                subtitle: switch (state.task) {
+                  BackupTask.loading => 'Loading your backups…',
+                  BackupTask.restoring => 'Restoring. Keep the app open.',
+                  _ => 'Replaces everything in the app',
+                },
+                trailing: state.task == BackupTask.loading || state.task == BackupTask.restoring
+                    ? const _Spinner()
+                    : const ValueChevron(),
                 divider: false,
                 wrap: true,
                 onTap: state.busy ? null : () => unawaited(chooseBackupToRestore(context, ref)),
@@ -200,12 +206,28 @@ class _SignedIn extends ConsumerWidget {
         ),
         BandCard(
           title: 'Account',
-          child: ListRow(
-            title: 'Sign out',
-            subtitle: 'Stops the daily backup. Your backups stay in Google Drive.',
-            divider: false,
-            wrap: true,
-            onTap: state.busy ? null : () => unawaited(_signOut(context, ref)),
+          child: Column(
+            children: [
+              BottomHairline(
+                child: ListRow(
+                  title: 'Change account',
+                  subtitle: state.task == BackupTask.signingIn
+                      ? 'Signing in…'
+                      : 'Back up to another Google account',
+                  trailing: state.task == BackupTask.signingIn ? const _Spinner() : const ValueChevron(),
+                  divider: false,
+                  wrap: true,
+                  onTap: state.busy ? null : () => unawaited(signInToBackup(context, ref, change: true)),
+                ),
+              ),
+              ListRow(
+                title: 'Sign out',
+                subtitle: 'Stops the daily backup. Your backups stay in Google Drive.',
+                divider: false,
+                wrap: true,
+                onTap: state.busy ? null : () => unawaited(_signOut(context, ref)),
+              ),
+            ],
           ),
         ),
       ],
@@ -268,14 +290,16 @@ class _Intro extends StatelessWidget {
   }
 }
 
-/// Signs in, then says what happened: backed up, backups found (offering a
-/// restore), or why it did not work.
-Future<void> signInToBackup(BuildContext context, WidgetRef ref) async {
-  final outcome = await ref.read(backupProvider.notifier).signIn();
+/// Signs in ([change]: to another account), then says what happened: backed
+/// up, backups found (offering a restore), or why it did not work.
+Future<void> signInToBackup(BuildContext context, WidgetRef ref, {bool change = false}) async {
+  final controller = ref.read(backupProvider.notifier);
+  final outcome = change ? await controller.changeAccount() : await controller.signIn();
   if (!context.mounted) return;
   switch (outcome) {
     case SignedInAndBackedUp():
-      showToast(context, 'Backed up to Google Drive');
+      final email = ref.read(backupProvider).email;
+      showToast(context, change && email != null ? 'Now backing up to $email' : 'Backed up to Google Drive');
     case SignedInWithBackups(:final backups):
       final pick = await showAppDialog(
         context,
@@ -370,6 +394,19 @@ Future<void> chooseBackupToRestore(BuildContext context, WidgetRef ref, {List<Ba
     if (context.mounted) showToast(context, 'Restored ${expenseCount(manifest.expenses, fmt)}');
   } on Object catch (e) {
     if (context.mounted) showToast(context, 'Not restored: ${backupErrorText(e)}');
+  }
+}
+
+/// A small accent spinner in a row's trailing spot.
+class _Spinner extends StatelessWidget {
+  const _Spinner();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.square(
+      dimension: 20,
+      child: CircularProgressIndicator(strokeWidth: 2.4, color: context.colors.accent),
+    );
   }
 }
 
