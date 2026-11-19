@@ -29,7 +29,7 @@ Write down what you spend. See where your money goes. Everything stays on your o
 - 📅 **Calendar.** See the whole month with the total for each day. Tap a day to see what you spent.
 - 📊 **Charts.** Look at a week, a month, a year, or any dates you choose. See your spending by category, your biggest days, or how it changes over time.
 - 🧾 **Reports.** See your all-time total, your average month, and a table of every month. Pick a year to see it at a glance.
-- 🎯 **Monthly budgets.** Give a category a budget, like Snacks 5,000 a month. When you add an expense, a ring around each category shows how much is used: green, then yellow from 90%, then red once you go over. A short message tells you when you pass 90% and when you go over, and by how much.
+- 🎯 **Monthly budgets.** Give a category a budget, like Snacks 5,000 a month. When you add an expense, and next to each expense on Home, a ring around the category shows how much is used: green, then yellow from 90%, then red once you go over. A short message tells you when you pass 90% and when you go over, and by how much.
 - 👛 **Pockets.** Keep money apart, for example Home, Trip and Work. Each pocket has its own expenses. You can move an expense to another pocket later.
 - 📷 **Receipt photos.** Add a photo to an expense, from the camera or from your gallery.
 - 📤 **Export and import.** Save your expenses as an Excel or CSV file. Bring expenses in from a CSV, Excel or JSON file.
