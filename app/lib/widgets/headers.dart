@@ -222,7 +222,8 @@ class SubHeader extends StatelessWidget {
 
   /// Width of the two side columns: 88 px, or 48 px with a [subtitle]. A
   /// screen that draws something over one side of the header (the back-to-now
-  /// pill) sets it so the centred text stays clear of that.
+  /// pill) sets it so the centred text stays clear of that; one with only a
+  /// back button may set 48 to give a long title room (Google Drive backup).
   final double? sideWidth;
 
   /// Replaces the back button.

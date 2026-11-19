@@ -43,6 +43,11 @@ String backupSizeLabel(int bytes) {
   return '${(bytes / 1024).ceil()} KB';
 }
 
+/// The header: only a back button, so the long title has 48 px sides (not
+/// the 88 px kept for Cancel and Save pills) and shows whole, at its full size,
+/// at every text size.
+const SubHeader _header = SubHeader(title: 'Google Drive backup', sideWidth: 48);
+
 /// Google Drive backup: sign in, the last backup, back up now, restore, and
 /// sign out.
 class BackupScreen extends ConsumerWidget {
@@ -66,7 +71,7 @@ class _SignedOut extends ConsumerWidget {
     final c = context.colors;
     final busy = state.task == BackupTask.signingIn;
     return DataPage(
-      header: const SubHeader(title: 'Google Drive backup'),
+      header: _header,
       dock: DataDock(
         label: busy ? 'Signing in…' : 'Sign in with Google',
         hint: 'You choose the Google account next.',
@@ -132,7 +137,7 @@ class _SignedIn extends ConsumerWidget {
       _ => state.needsSignIn ? 'Sign in again' : 'Back up now',
     };
     return DataPage(
-      header: const SubHeader(title: 'Google Drive backup'),
+      header: _header,
       dock: DataDock(
         label: dockLabel,
         hint: 'It also backs up by itself once a day.',
