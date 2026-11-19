@@ -247,52 +247,54 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final row = SizedBox(
-      height: data.height,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(width: 16),
-          Center(
-            child: IconTile(icon: data.icon, iconColor: c.text2),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.only(right: 16),
-              foregroundDecoration: divider
-                  ? BoxDecoration(
-                      border: Border(bottom: BorderSide(color: c.line)),
-                    )
-                  : null,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(data.label, style: AppText.sub.copyWith(color: c.text3)),
-                        const SizedBox(height: 2),
-                        Text(
-                          data.value,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppText.rowTitle,
+    // [data.height] at the least; a long title (or large text) wraps and the
+    // row grows with it instead of cutting the text with "...".
+    final row = ConstrainedBox(
+      constraints: BoxConstraints(minHeight: data.height),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(width: 16),
+            Center(
+              child: IconTile(icon: data.icon, iconColor: c.text2),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.only(right: 16),
+                foregroundDecoration: divider
+                    ? BoxDecoration(
+                        border: Border(bottom: BorderSide(color: c.line)),
+                      )
+                    : null,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(data.label, style: AppText.sub.copyWith(color: c.text3)),
+                            const SizedBox(height: 2),
+                            Text(data.value, style: AppText.rowTitle),
+                            if (data.extra != null) ...[
+                              const SizedBox(height: 2),
+                              Text(data.extra!, style: AppText.sub.copyWith(color: c.text3)),
+                            ],
+                          ],
                         ),
-                        if (data.extra != null) ...[
-                          const SizedBox(height: 2),
-                          Text(data.extra!, style: AppText.sub.copyWith(color: c.text3)),
-                        ],
-                      ],
+                      ),
                     ),
-                  ),
-                  if (data.trailing != null) ...[const SizedBox(width: 12), data.trailing!],
-                ],
+                    if (data.trailing != null) ...[const SizedBox(width: 12), data.trailing!],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
     if (data.onTap == null) return row;
@@ -315,9 +317,7 @@ class _MonthLink extends ConsumerWidget {
     final fmt = ref.watch(amountFormatProvider);
     final from = monthStartOfDay(expense.day);
     final to = monthEndOfDay(expense.day);
-    final totals = ref.watch(
-      categoryTotalsProvider((pocketId: expense.pocketId, from: from, to: to)),
-    );
+    final totals = ref.watch(categoryTotalsProvider((pocketId: expense.pocketId, from: from, to: to)));
     var count = 0;
     for (final t in totals.value ?? const <CategoryTotal>[]) {
       if (t.categoryId == expense.categoryId) count = t.count;
@@ -335,14 +335,7 @@ class _MonthLink extends ConsumerWidget {
       border: edgeBorder(c),
       shadows: liftShadows(c),
       semanticLabel: 'See all $categoryName in $month',
-      onTap: () => context.push(
-        Routes.category(
-          expense.categoryId,
-          from: from,
-          to: to,
-          pocket: expense.pocketId,
-        ),
-      ),
+      onTap: () => context.push(Routes.category(expense.categoryId, from: from, to: to, pocket: expense.pocketId)),
       child: ConstrainedBox(
         // 76 px; a long category name wraps to a second line instead of
         // being cut off.

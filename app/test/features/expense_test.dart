@@ -50,6 +50,26 @@ void main() {
     await closeAppWithFiles(tester, db);
   });
 
+  testWidgets('Details: a long title wraps and is shown in full', (tester) async {
+    final db = await sampleDatabase(tester);
+    // The longest a title can be (120 letters).
+    final title = ('Dinner with the whole family at the new place by the river, '
+            'with dessert and drinks for everyone, and a tip for the staff')
+        .substring(0, 120);
+    await tester.runAsync(() async {
+      final repo = ExpensesRepo(db);
+      final expense = await repo.get(doctorVisitId);
+      await repo.update(expense!.copyWith(note: title));
+    });
+    await pumpApp(tester, db: db);
+    await pushRoute(tester, Routes.expense(doctorVisitId));
+    expect(isCut(tester, find.text(title)), isFalse);
+    // The date row is still whole under it.
+    expect(isCut(tester, find.text('Sunday, October 18, 2026')), isFalse);
+    expect(tester.takeException(), isNull);
+    await closeApp(tester, db);
+  });
+
   testWidgets('Details: "See all" opens the pocket the expense is in', (
     tester,
   ) async {
