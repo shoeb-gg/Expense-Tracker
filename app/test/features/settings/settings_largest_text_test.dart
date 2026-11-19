@@ -111,8 +111,8 @@ void main() {
       expect(tester.getRect(find.text('Manage categories')).top, 1087);
       expect(tester.getRect(noteText('Add, edit, delete, reorder')).top, 1109);
       expect(tester.getRect(find.text('Export')).top, 1443);
-      expect(tester.getRect(find.text('Automatic backup')).top, 1579);
-      expect(tester.getRect(noteText('Phone and Google Drive')).top, 1601);
+      expect(tester.getRect(find.text('Google Drive backup')).top, 1579);
+      expect(tester.getRect(noteText('Off. Keeps your expenses safe in your Drive.')).top, 1601);
       expect(tester.getRect(find.text('Delete all data')).top, 1715);
       expect(tester.getRect(noteText('This can’t be undone')).top, 1737);
       expect(cutTexts(tester, find.byType(Scaffold)), isEmpty);
@@ -169,17 +169,17 @@ void main() {
       await closeApp(tester, db);
     });
 
-    testWidgets('Manage categories and Automatic backup show in full', (tester) async {
+    testWidgets('Manage categories and Google Drive backup show in full', (tester) async {
       final db = await openSettings(tester, settings: largest);
       for (final text in [
         'Manage categories',
         'Add, edit, delete, reorder',
-        'Phone and Google Drive',
+        'Google Drive backup',
+        'Off. Keeps your expenses safe in your Drive.',
       ]) {
         expect(isCut(paragraphOf(tester, noteText(text))), isFalse, reason: text);
       }
-      // The tiles and the "Coming later" pill keep to the right edge.
-      expect(tester.getRect(find.text('Coming later')).right, lessThanOrEqualTo(328));
+      // The tiles keep to the right edge.
       expect(tester.getRect(find.text('+13')).right, lessThanOrEqualTo(328));
       await closeApp(tester, db);
     });

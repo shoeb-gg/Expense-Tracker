@@ -50,7 +50,7 @@ void main() {
       'Mask the total until you tap the eye',
       'Shortcut to the calendar on Home',
       'Add, edit, delete, reorder',
-      'Phone and Google Drive',
+      'Off. Keeps your expenses safe in your Drive.',
       'Preview. The whole app uses this size.',
     ]);
     await closeApp(tester, db);

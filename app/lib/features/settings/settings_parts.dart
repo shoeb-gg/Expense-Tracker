@@ -118,33 +118,6 @@ class PeekTiles extends StatelessWidget {
   }
 }
 
-/// The "Coming later" pill of Automatic backup.
-class ComingLaterPill extends StatelessWidget {
-  const ComingLaterPill({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return Container(
-      height: 24,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: c.surface2,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        'Coming later',
-        maxLines: 1,
-        style: AppText.caption.copyWith(
-          fontWeight: FontWeight.w600,
-          color: c.text2,
-        ),
-      ),
-    );
-  }
-}
-
 /// Title on the left and a 13/16 note on the right, on one baseline
 /// ("Color theme ... Aqua", "Text size ... Default").
 class BlockHeader extends StatelessWidget {

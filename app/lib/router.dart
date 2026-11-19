@@ -16,6 +16,7 @@ import 'package:go_router/go_router.dart';
 
 import 'features/add/add_screen.dart';
 import 'features/calendar/calendar_screen.dart';
+import 'features/backup/backup_screen.dart';
 import 'features/categories/categories_screen.dart';
 import 'features/categories/category_form_screen.dart';
 import 'features/charts/category_screen.dart';
@@ -78,6 +79,7 @@ abstract final class Routes {
 
   static const String export = '/settings/export';
   static const String importStart = '/settings/import';
+  static const String backup = '/settings/backup';
   static const String importColumns = '/settings/import/columns';
   static const String importReview = '/settings/import/review';
 }
@@ -166,6 +168,7 @@ GoRouter buildRouter({String initialLocation = Routes.home}) {
       top('/pockets/:id', (_, s) => PocketFormScreen(pocketId: _id(s))),
       top(Routes.export, (_, _) => const ExportScreen()),
       top(Routes.importStart, (_, _) => const ImportScreen()),
+      top(Routes.backup, (_, _) => const BackupScreen()),
       top(Routes.importColumns, (_, _) => const ImportColumnsScreen()),
       top(Routes.importReview, (_, _) => const ImportReviewScreen()),
     ],

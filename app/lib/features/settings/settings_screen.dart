@@ -4,11 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/days.dart';
 import '../../router.dart';
+import '../../state/backup.dart';
 import '../../state/providers.dart';
 import '../../theme/symbols.dart';
 import '../../theme/text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/kit.dart';
+import '../backup/backup_screen.dart';
 import '../data/data_parts.dart';
 import 'settings_parts.dart';
 import 'settings_sheets.dart';
@@ -385,12 +387,13 @@ class _DataCard extends ConsumerWidget {
           ),
           BottomHairline(
             child: ListRow(
-              title: 'Automatic backup',
-              subtitle: 'Phone and Google Drive',
+              title: 'Google Drive backup',
+              subtitle: backupSubtitle(ref.watch(backupProvider), ref.watch(todayProvider)),
+              subtitleColor: ref.watch(backupProvider.select((b) => b.lastError != null)) ? c.bad : null,
               divider: false,
               wrap: true,
-              titleColor: c.text3,
-              trailing: const ComingLaterPill(),
+              trailing: const ValueChevron(),
+              onTap: () => context.push(Routes.backup),
             ),
           ),
           BottomHairline(
