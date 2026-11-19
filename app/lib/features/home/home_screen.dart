@@ -8,6 +8,7 @@ import '../../core/days.dart';
 import '../../core/format.dart';
 import '../../data/db.dart';
 import '../../router.dart';
+import '../../state/budgets.dart';
 import '../../state/providers.dart';
 import '../../theme/symbols.dart';
 import '../../theme/tokens.dart';
@@ -100,12 +101,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (rect == null) return;
     final category = ref.read(categoriesByIdProvider)[expense.categoryId];
     final fmt = ref.read(amountFormatProvider);
+    // The lifted copy wears the row's budget ring too.
+    final month = (pocketId: expense.pocketId, monthStart: monthStartOfDay(expense.day));
+    final budget = ref.read(budgetUsesProvider(month))[expense.categoryId];
     final action = await showQuickMenu(
       context,
       rowRect: rect,
       row: HomeExpenseRow(
         expense: expense,
         category: category,
+        budget: budget,
         format: fmt,
         divider: false,
       ),

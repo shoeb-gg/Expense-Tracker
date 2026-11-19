@@ -4,10 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/days.dart';
 import '../../core/format.dart';
 import '../../data/db.dart';
+import '../../state/budgets.dart';
 import '../../state/providers.dart';
 import '../../theme/symbols.dart';
 import '../../theme/text.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/budget_ring.dart';
 import '../../widgets/kit.dart';
 import 'home_state.dart';
 
@@ -51,6 +53,10 @@ class HomeMonthList extends ConsumerWidget {
         first != null && first < monthStart(month.year, month.month);
     final groups = groupByDay(list);
     final previous = stepMonth(month, -1);
+    // The rings of the categories with a budget, for the month shown.
+    final budgets = ref.watch(
+      budgetUsesProvider((pocketId: pocket.id, monthStart: monthStart(month.year, month.month))),
+    );
 
     return ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
@@ -74,6 +80,7 @@ class HomeMonthList extends ConsumerWidget {
               today: today,
               format: fmt,
               categories: categories,
+              budgets: budgets,
               onRow: onRow,
             ),
           if (hasEarlier)
@@ -98,6 +105,7 @@ class DayCard extends StatelessWidget {
     required this.today,
     required this.format,
     required this.categories,
+    this.budgets = const <int, BudgetUse>{},
     required this.onRow,
   });
 
@@ -105,6 +113,9 @@ class DayCard extends StatelessWidget {
   final int today;
   final AmountFormat format;
   final Map<int, ExpenseCategory> categories;
+
+  /// Budget use by category id, for the categories that have a budget.
+  final Map<int, BudgetUse> budgets;
   final ExpenseRowAction onRow;
 
   @override
@@ -196,6 +207,7 @@ class DayCard extends StatelessWidget {
                           return HomeExpenseRow(
                             expense: e,
                             category: categories[e.categoryId],
+                            budget: budgets[e.categoryId],
                             format: format,
                             divider: i < group.expenses.length - 1,
                             onTap: () => onRow(e, rowContext, held: false),
@@ -243,12 +255,14 @@ class _StripTexts extends StatelessWidget {
 }
 
 /// An expense on Home: the category's emoji tile, the title (or the category
-/// when there is no title) with the category under it, and the amount.
+/// when there is no title) with the category under it, and the amount. A
+/// category with a budget wears the budget ring of Add expense on its tile.
 class HomeExpenseRow extends StatelessWidget {
   const HomeExpenseRow({
     super.key,
     required this.expense,
     required this.category,
+    this.budget,
     required this.format,
     this.divider = true,
     this.onTap,
@@ -257,6 +271,9 @@ class HomeExpenseRow extends StatelessWidget {
 
   final Expense expense;
   final ExpenseCategory? category;
+
+  /// The month's use of the category's budget; null when it has none.
+  final BudgetUse? budget;
   final AmountFormat format;
   final bool divider;
   final VoidCallback? onTap;
@@ -272,10 +289,23 @@ class HomeExpenseRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final note = expense.note.trim();
     final categoryName = category?.name ?? '';
+    final tile = EmojiTile(emoji: category?.emoji ?? '');
+    final budget = this.budget;
     return ListRow(
       title: note.isNotEmpty ? note : categoryName,
       subtitle: note.isNotEmpty ? categoryName : null,
-      leading: EmojiTile(emoji: category?.emoji ?? ''),
+      leading: budget == null
+          ? tile
+          : CustomPaint(
+              foregroundPainter: BudgetRingPainter(
+                progress: budget.progress,
+                color: budgetColor(context.colors, budget.level),
+                track: context.colors.budgetTrack,
+                // The tile's own corners (44 px, 14 px radius).
+                radius: 14,
+              ),
+              child: tile,
+            ),
       trailingText: format.format(expense.amount),
       divider: divider,
       onTap: onTap,
